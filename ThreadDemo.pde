@@ -44,14 +44,23 @@ VerletPhysics2D physics;
 VerletParticle2D head,tail;
 ParticleString2D pString;
 
-boolean isTailLocked;
+int X_LIMIT = 500; // px;
+boolean headTouchedLimit = false;
+boolean tailTouchedLimit = false;
+
+int stage () {
+  if (headTouchedLimit && tailTouchedLimit) {
+    return 1;
+  }
+  return 0;
+}
 
 void setup() {
   size(1500,800);
   smooth();
   physics = new VerletPhysics2D();
-  Vec2D headPos = new Vec2D(width / 10, height / 6);
-  Vec2D tailPos = new Vec2D(width / 10, 5 * height / 6);
+  Vec2D headPos = new Vec2D(- width / 10, height / 6);
+  Vec2D tailPos = new Vec2D(- width / 10, 5 * height / 6);
   Vec2D stepVec = new Vec2D(0,1).normalizeTo(headPos.distanceTo(tailPos) / NUM_PARTICLES);
   pString = new ParticleString2D(physics, headPos, stepVec, NUM_PARTICLES, 1, 0.00001);
   head = pString.getHead();
@@ -64,17 +73,33 @@ void setup() {
 
 void draw() {
   physics.update();
-  float speed = 0.2;
-  Vec2D headVelocity = new Vec2D(speed * 5, speed * 1);
-  Vec2D tailVelocity = new Vec2D(speed * 6, speed * - 1);
-  if (head.x < 700) {
+  float speedA = 0.4;
+  float speedB = 0.1;
+
+  if (stage() == 0 && !headTouchedLimit) {
+    Vec2D headVelocity = new Vec2D(speedA * 5, speedA * .5);
+    head.set(head.x + headVelocity.x, head.y + headVelocity.y);
+    if (head.x > X_LIMIT) {
+      headTouchedLimit = true;
+    }
+  } else if (stage() == 1) {
+    Vec2D headVelocity = new Vec2D(speedB * - 5, speedB * .5);
     head.set(head.x + headVelocity.x, head.y + headVelocity.y);
   }
-  if (tail.x < 700) {
+
+  if (stage() == 0 && !tailTouchedLimit) {
+    Vec2D tailVelocity = new Vec2D(speedA * 6, speedA * - .5);
+    tail.set(tail.x + tailVelocity.x, tail.y + tailVelocity.y);
+    if (tail.x > X_LIMIT) {
+      tailTouchedLimit = true;
+    }
+
+  } else if (stage() == 1) {
+    Vec2D tailVelocity = new Vec2D(speedB * - 6, speedB * - .5);
     tail.set(tail.x + tailVelocity.x, tail.y + tailVelocity.y);
   }
 
-  // DEBUG
+  // // DEBUG
   // background(0);
   // stroke(255,100);
   // noFill();
@@ -84,7 +109,7 @@ void draw() {
   //   vertex(p.x,p.y);
   // }
   // endShape();
-  // DEBUG
+  // // DEBUG
 
   Iterator particleIterator = pString.particles.iterator();
   for(; particleIterator.hasNext();) {
@@ -105,6 +130,7 @@ void draw() {
       ellipse(p.x,p.y,2*diam,2*diam);
     }
   }
+  saveFrame();
 }
 
 // void mousePressed() {
