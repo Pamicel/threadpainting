@@ -47,24 +47,45 @@ ParticleString2D pString;
 boolean isTailLocked;
 
 void setup() {
-  size(1024,768);
+  size(1500,800);
   smooth();
   physics = new VerletPhysics2D();
-  // physics.addBehavior(new GravityBehavior2D(new Vec2D(1, 0)));
   Vec2D headPos = new Vec2D(width / 10, height / 6);
   Vec2D tailPos = new Vec2D(width / 10, 5 * height / 6);
   Vec2D stepVec = new Vec2D(0,1).normalizeTo(headPos.distanceTo(tailPos) / NUM_PARTICLES);
-  pString = new ParticleString2D(physics, headPos, stepVec, NUM_PARTICLES, 1, 0.0001);
+  pString = new ParticleString2D(physics, headPos, stepVec, NUM_PARTICLES, 1, 0.00001);
   head = pString.getHead();
   tail = pString.getTail();
-  head.addForce(new Vec2D(4.5, 1));
-  tail.addForce(new Vec2D(4, 1));
+  head.lock();
+  tail.lock();
   background(0);
   noStroke();
 }
 
 void draw() {
   physics.update();
+  float speed = 0.2;
+  Vec2D headVelocity = new Vec2D(speed * 5, speed * 1);
+  Vec2D tailVelocity = new Vec2D(speed * 6, speed * - 1);
+  if (head.x < 700) {
+    head.set(head.x + headVelocity.x, head.y + headVelocity.y);
+  }
+  if (tail.x < 700) {
+    tail.set(tail.x + tailVelocity.x, tail.y + tailVelocity.y);
+  }
+
+  // DEBUG
+  // background(0);
+  // stroke(255,100);
+  // noFill();
+  // beginShape();
+  // for(Iterator i=physics.particles.iterator(); i.hasNext();) {
+  //   VerletParticle2D p=(VerletParticle2D)i.next();
+  //   vertex(p.x,p.y);
+  // }
+  // endShape();
+  // DEBUG
+
   Iterator particleIterator = pString.particles.iterator();
   for(; particleIterator.hasNext();) {
     VerletParticle2D p1 = (VerletParticle2D)particleIterator.next();
@@ -72,11 +93,16 @@ void draw() {
       VerletParticle2D p2 = (VerletParticle2D)particleIterator.next();
       Vec2D p = p1.interpolateTo(p2, 0.5);
       float diam = p1.distanceTo(p2);
-      float k = .1;
-      float omega = 12;
-      float alph = 50 * cos(k * diam - omega) + 50;
-      fill(255,alph);
-      ellipse(p.x,p.y,diam,diam);
+      float k = .01;
+      float omega = 1;
+      // float alph = (1 + cos(k * diam - omega)) * 50;
+      float alph = 100.0;
+      float r = abs(255 * cos(k * diam - 1));
+      float g = abs(255 * cos(k * diam - 2));
+      float b = abs(255 * cos(k * diam - 3));
+      // float alph = 100.0;
+      fill(r,g,b,alph);
+      ellipse(p.x,p.y,2*diam,2*diam);
     }
   }
 }
