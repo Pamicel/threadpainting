@@ -99,9 +99,9 @@ void draw() {
     float omega = 1;
     // float alph = (1 + cos(k * diam - omega)) * 50;
     float alph = 100.0;
-    float r = abs(255 * cos(k * diam - 1));
-    float g = abs(255 * cos(k * diam - 2));
-    float b = abs(255 * cos(k * diam - 3));
+    float r = abs(255 * cos(k * diam - (omega + 1)));
+    float g = abs(255 * cos(k * diam - (omega + 2)));
+    float b = abs(255 * cos(k * diam - (omega + 3)));
     // float alph = 100.0;
     fill(r,g,b,alph);
     ellipse(p.x,p.y,diam,diam);
