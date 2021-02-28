@@ -121,7 +121,7 @@ void draw() {
     ellipse(p.x,p.y,diam,diam);
     p1 = p2;
   }
-   saveFrame("out/screen-####.tif");
+  //  saveFrame("out/screen-####.tif");
 }
 
 void keyPressed() {
