@@ -116,7 +116,6 @@ void draw() {
   if (
     headOvershoot(currentStage, head)
   ) {
-    noLoop();
     headCurrentStage = currentStage + 1;
   }
 
@@ -136,10 +135,6 @@ void draw() {
   //   vertex(p.x,p.y);
   // }
   // endShape();
-  fill(255, 0, 0);
-  noStroke();
-  ellipse(headPositions[1].x, headPositions[1].y, tailSpeeds[0], tailSpeeds[0]);
-  ellipse(head.x, head.y, 5, 5);
   // // DEBUG
 
   Vec2D step = stepVec(head, tail, NUM_PARTICLES);
