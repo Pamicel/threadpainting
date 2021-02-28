@@ -97,10 +97,10 @@ void draw() {
   for(; particleIterator.hasNext();) {
     VerletParticle2D p2 = (VerletParticle2D)particleIterator.next();
 
-    // Vec2D p = p1.interpolateTo(p2, 0.5);
+    Vec2D p = p1.interpolateTo(p2, 0.5);
 
-    Vec2D p = centerPos.copy();
-    centerPos = centerPos.add(step);
+    // Vec2D p = centerPos.copy();
+    // centerPos = centerPos.add(step);
 
     float diam = p1.distanceTo(p2);
     float k = .05;
