@@ -12,9 +12,14 @@ VerletPhysics2D physics;
 VerletParticle2D head,tail;
 ParticleString2D pString;
 
-int X_LIMIT = 800; // px;
+int X_LIMIT_A = 1200; // px;
+int X_LIMIT_B = 800; // px;
+float STRENGTH = 0.01;
 boolean headTouchedLimit = false;
 boolean tailTouchedLimit = false;
+
+Vec2D headStartPos;
+Vec2D tailStartPos;
 
 int stage () {
   if (headTouchedLimit && tailTouchedLimit) {
@@ -23,14 +28,19 @@ int stage () {
   return 0;
 }
 
+Vec2D stepVec(Vec2D head, Vec2D tail, int numParticles) {
+  return tail.sub(head).normalizeTo(head.distanceTo(tail) / numParticles);
+}
+
 void setup() {
   size(1500,800);
   smooth();
   physics = new VerletPhysics2D();
-  Vec2D headPos = new Vec2D(- width / 10, height / 6);
-  Vec2D tailPos = new Vec2D(- width / 10, 5 * height / 6);
-  Vec2D stepVec = new Vec2D(0,1).normalizeTo(headPos.distanceTo(tailPos) / NUM_PARTICLES);
-  pString = new ParticleString2D(physics, headPos, stepVec, NUM_PARTICLES, 1, 0.00001);
+
+  headStartPos = new Vec2D(width / 2, height / 6);
+  tailStartPos = new Vec2D(width / 2, 5 * height / 6);
+
+  pString = new ParticleString2D(physics, headStartPos, stepVec(headStartPos, tailStartPos, NUM_PARTICLES), NUM_PARTICLES, 1, STRENGTH);
   head = pString.getHead();
   tail = pString.getTail();
   head.lock();
