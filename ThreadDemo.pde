@@ -42,14 +42,14 @@ float[] tailSpeeds = new float[] {
 };
 
 Vec2D[] headPositions = new Vec2D[] {
-  new Vec2D(50, 300),
-  new Vec2D(1200, 100),
+  new Vec2D(-10, 300),
+  new Vec2D(1000, 100),
   new Vec2D(1000, 1000)
 };
 
 Vec2D[] tailPositions = new Vec2D[] {
-  new Vec2D(50, 600),
-  new Vec2D(1200, 800),
+  new Vec2D(-10, 600),
+  new Vec2D(1000, 800),
   new Vec2D(1500, 1000)
 };
 
@@ -152,7 +152,7 @@ void draw() {
     // centerPos = centerPos.add(step);
 
     float diam = p1.distanceTo(p2);
-    float k = .05;
+    float k = .02;
     float omega = .5 * TWO_PI;
 
     Vec3D rgbOffset = new Vec3D(
