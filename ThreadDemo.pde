@@ -12,8 +12,7 @@ VerletPhysics2D physics;
 VerletParticle2D head,tail;
 ParticleString2D pString;
 
-int X_LIMIT_A = 1200; // px;
-int X_LIMIT_B = 800; // px;
+int X_LIMIT = 1200; // px;
 float STRENGTH = 0.01;
 boolean headTouchedLimit = false;
 boolean tailTouchedLimit = false;
