@@ -1,35 +1,3 @@
-/**
- * Thread demo showing the following:
- * - construction of a 2D string made from particles and springs/sticks using the ParticleString2D class
- * - dynamic locking & unlocking of particles
- *
- * Click the mouse to lock/unlock the end of the string at its current position.
- * The head of the string is always linked to the current mouse position
- *
- * @author Karsten Schmidt <info at postspectacular dot com>
- */
-
-/*
- * Copyright (c) 2008-2009 Karsten Schmidt
- *
- * This demo & library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * http://creativecommons.org/licenses/LGPL/2.1/
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
-
 import toxi.physics2d.constraints.*;
 import toxi.physics2d.behaviors.*;
 import toxi.physics2d.*;
@@ -38,13 +6,13 @@ import toxi.math.*;
 
 import java.util.Iterator;
 
-int NUM_PARTICLES = 20;
+int NUM_PARTICLES = 6;
 
 VerletPhysics2D physics;
 VerletParticle2D head,tail;
 ParticleString2D pString;
 
-int X_LIMIT = 500; // px;
+int X_LIMIT = 800; // px;
 boolean headTouchedLimit = false;
 boolean tailTouchedLimit = false;
 
@@ -112,33 +80,28 @@ void draw() {
   // // DEBUG
 
   Iterator particleIterator = pString.particles.iterator();
+  VerletParticle2D p1 = (VerletParticle2D)particleIterator.next();
   for(; particleIterator.hasNext();) {
-    VerletParticle2D p1 = (VerletParticle2D)particleIterator.next();
-    if (particleIterator.hasNext()) {
-      VerletParticle2D p2 = (VerletParticle2D)particleIterator.next();
-      Vec2D p = p1.interpolateTo(p2, 0.5);
-      float diam = p1.distanceTo(p2);
-      float k = .01;
-      float omega = 1;
-      // float alph = (1 + cos(k * diam - omega)) * 50;
-      float alph = 100.0;
-      float r = abs(255 * cos(k * diam - 1));
-      float g = abs(255 * cos(k * diam - 2));
-      float b = abs(255 * cos(k * diam - 3));
-      // float alph = 100.0;
-      fill(r,g,b,alph);
-      ellipse(p.x,p.y,2*diam,2*diam);
-    }
+    VerletParticle2D p2 = (VerletParticle2D)particleIterator.next();
+    Vec2D p = p1.interpolateTo(p2, 0.5);
+    float diam = p1.distanceTo(p2);
+    float k = .01;
+    float omega = 1;
+    // float alph = (1 + cos(k * diam - omega)) * 50;
+    float alph = 100.0;
+    float r = abs(255 * cos(k * diam - 1));
+    float g = abs(255 * cos(k * diam - 2));
+    float b = abs(255 * cos(k * diam - 3));
+    // float alph = 100.0;
+    fill(r,g,b,alph);
+    ellipse(p.x,p.y,diam,diam);
+    p1 = p2;
   }
-  saveFrame();
+  // saveFrame("screen-####.tif");
 }
 
-// void mousePressed() {
-//   isTailLocked = !isTailLocked;
-//   if (isTailLocked) {
-//     tail.lock();
-//   }
-//   else {
-//     tail.unlock();
-//   }
-// }
+void keyPressed() {
+  if (key == ' ') {
+    saveFrame();
+  }
+}
