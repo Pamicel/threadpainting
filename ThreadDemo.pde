@@ -25,7 +25,7 @@ int stage () {
 }
 
 Vec2D stepVec(Vec2D head, Vec2D tail, int numParticles) {
-  return tail.sub(head).normalizeTo(head.distanceTo(tail) / numParticles);
+  return tail.sub(head).normalizeTo(head.distanceTo(tail) / (numParticles - 1));
 }
 
 float speedA = 4;
