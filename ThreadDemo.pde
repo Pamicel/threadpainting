@@ -14,30 +14,82 @@ ParticleString2D pString;
 
 int X_LIMIT = 1200; // px;
 float STRENGTH = .0001;
-boolean headTouchedLimit = false;
-boolean tailTouchedLimit = false;
+int headCurrentStage = 0;
+int tailCurrentStage = 0;
 
 Vec2D headStartPos;
 Vec2D tailStartPos;
 
 int stage () {
-  if (headTouchedLimit && tailTouchedLimit) {
-    return 1;
-  }
-  return 0;
+  return min(headCurrentStage, tailCurrentStage);
 }
 
 Vec2D stepVec(Vec2D head, Vec2D tail, int numParticles) {
   return tail.sub(head).normalizeTo(head.distanceTo(tail) / numParticles);
 }
 
+float speedA = 4;
+float speedB = 3;
+
+float[] headSpeeds = new float[] {
+  speedA,
+  speedB
+};
+
+float[] tailSpeeds = new float[] {
+  speedA,
+  speedB
+};
+
+Vec2D[] headPositions = new Vec2D[] {
+  new Vec2D(50, 300),
+  new Vec2D(1200, 100),
+  new Vec2D(1000, 1000)
+};
+
+Vec2D[] tailPositions = new Vec2D[] {
+  new Vec2D(50, 600),
+  new Vec2D(1200, 800),
+  new Vec2D(1500, 1000)
+};
+
+Vec2D headVelocity(int stage) {
+  return headPositions[stage + 1].sub(headPositions[stage]).normalizeTo(headSpeeds[stage]);
+}
+
+Vec2D tailVelocity(int stage) {
+  return tailPositions[stage + 1].sub(tailPositions[stage]).normalizeTo(tailSpeeds[stage]);
+}
+
+Vec2D[] headVelocities = new Vec2D[] {
+  // new Vec2D(speedA * 5, speedA * - .5),
+  // new Vec2D(speedB * - 3, speedB * 5)
+  headVelocity(0),
+  headVelocity(1)
+};
+
+Vec2D[] tailVelocities = new Vec2D[] {
+  // new Vec2D(speedA * 6, speedA * .5),
+  // new Vec2D(speedB * - .6, speedB * 6)
+  tailVelocity(0),
+  tailVelocity(1)
+};
+
+boolean tailOvershoot(int stage, Vec2D tail) {
+  return tail.isInCircle(tailPositions[stage + 1], 2 * tailSpeeds[stage]);
+}
+
+boolean headOvershoot(int stage, Vec2D head) {
+  return head.isInCircle(headPositions[stage + 1], 2 * headSpeeds[stage]);
+}
+
 void setup() {
-  size(1500,800);
+  size(1600,900);
   smooth();
   physics = new VerletPhysics2D();
 
-  headStartPos = new Vec2D(- width / 10, height / 3);
-  tailStartPos = new Vec2D(- width / 10, 2 * height / 3);
+  headStartPos = headPositions[0];
+  tailStartPos = tailPositions[0];
 
   pString = new ParticleString2D(physics, headStartPos, stepVec(headStartPos, tailStartPos, NUM_PARTICLES), NUM_PARTICLES, 1, STRENGTH);
   head = pString.getHead();
@@ -50,30 +102,28 @@ void setup() {
 
 void draw() {
   physics.update();
-  float speedA = 0.4;
-  float speedB = 0.3;
+  int currentStage = stage();
+  Vec2D currentHeadVelocity = headVelocities[currentStage];
+  Vec2D currentTailVelocity = tailVelocities[currentStage];
 
-  if (stage() == 0 && !headTouchedLimit) {
-    Vec2D headVelocity = new Vec2D(speedA * 5, speedA * - .5);
-    head.set(head.x + headVelocity.x, head.y + headVelocity.y);
-    if (head.x > X_LIMIT) {
-      headTouchedLimit = true;
-    }
-  } else if (stage() == 1) {
-    Vec2D headVelocity = new Vec2D(speedB * - 3, speedB * 5);
-    head.set(head.x + headVelocity.x, head.y + headVelocity.y);
+  if (headCurrentStage == currentStage) {
+    head.set(head.x + currentHeadVelocity.x, head.y + currentHeadVelocity.y);
+  }
+  if (tailCurrentStage == currentStage) {
+    tail.set(tail.x + currentTailVelocity.x, tail.y + currentTailVelocity.y);
   }
 
-  if (stage() == 0 && !tailTouchedLimit) {
-    Vec2D tailVelocity = new Vec2D(speedA * 6, speedA * .5);
-    tail.set(tail.x + tailVelocity.x, tail.y + tailVelocity.y);
-    if (tail.x > X_LIMIT) {
-      tailTouchedLimit = true;
-    }
+  if (
+    headOvershoot(currentStage, head)
+  ) {
+    noLoop();
+    headCurrentStage = currentStage + 1;
+  }
 
-  } else if (stage() == 1) {
-    Vec2D tailVelocity = new Vec2D(speedB * - .6, speedB * 6);
-    tail.set(tail.x + tailVelocity.x, tail.y + tailVelocity.y);
+  if (
+    tailOvershoot(currentStage, tail)
+  ) {
+    tailCurrentStage = currentStage + 1;
   }
 
   // // DEBUG
@@ -86,6 +136,10 @@ void draw() {
   //   vertex(p.x,p.y);
   // }
   // endShape();
+  fill(255, 0, 0);
+  noStroke();
+  ellipse(headPositions[1].x, headPositions[1].y, tailSpeeds[0], tailSpeeds[0]);
+  ellipse(head.x, head.y, 5, 5);
   // // DEBUG
 
   Vec2D step = stepVec(head, tail, NUM_PARTICLES);
