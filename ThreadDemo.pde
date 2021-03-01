@@ -272,14 +272,15 @@ Stage[] stages = new Stage[] {
 };
 
 ToxiColorString colorString;
+VerletParticle2D head, tail;
 
 void setup() {
   size(1600,900);
   smooth();
   physics = new VerletPhysics2D();
 
-  headStartPos = stages[0].headPosOrigin;
-  tailStartPos = stages[0].tailPosOrigin;
+  Vec2D headStartPos = stages[0].headPosOrigin;
+  Vec2D tailStartPos = stages[0].tailPosOrigin;
 
   colorString = new ToxiColorString(physics, headStartPos, tailStartPos, NUM_PARTICLES - 1, 1, STRENGTH);
   head = colorString.head;
