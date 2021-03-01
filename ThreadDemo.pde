@@ -6,201 +6,6 @@ import toxi.math.*;
 
 import java.util.Iterator;
 
-class ToxiColorString {
-  public VerletParticle2D head, tail;
-  public ParticleString2D pString;
-  public int numParticles;
-  public int numLinks;
-
-  ToxiColorString (
-    VerletPhysics2D physics,
-    Vec2D headStartPos,
-    Vec2D tailStartPos,
-    int numLinks,
-    float mass,
-    float strength
-  ) {
-    this.numLinks = numLinks;
-    numParticles = numLinks + 1;
-
-    Vec2D stepVector = this.stepVec(headStartPos, tailStartPos, numLinks);
-
-    this.pString = new ParticleString2D(
-      physics,
-      headStartPos,
-      stepVector,
-      numParticles,
-      mass,
-      strength
-    );
-
-    this.head = pString.getHead();
-    this.tail = pString.getTail();
-
-    head.lock();
-    tail.lock();
-  }
-
-  private Vec2D stepVec(Vec2D headPos, Vec2D tailPos, int numLinks) {
-    return tailPos.sub(headPos).normalizeTo(headPos.distanceTo(tailPos) / numLinks);
-  }
-
-  public void display (float colorSpectrumWidth, float colorSpectrumOffset) {
-    Iterator particleIterator = this.pString.particles.iterator();
-
-    // Initialize
-    VerletParticle2D p1 = (VerletParticle2D)particleIterator.next();
-    //
-    for(; particleIterator.hasNext();) {
-      VerletParticle2D p2 = (VerletParticle2D)particleIterator.next();
-
-      Vec2D p = p1.interpolateTo(p2, 0.5);
-
-      float diam = p1.distanceTo(p2);
-      float k = colorSpectrumWidth;
-      float omega = colorSpectrumOffset;
-
-      Vec3D rgbOffset = new Vec3D(
-        .1 * TWO_PI,
-        .2 * TWO_PI,
-        .3 * TWO_PI
-      );
-      // float alph = (1 + cos(k * diam - omega)) * 50;
-      float alph = 100.0;
-      float r = abs(255 * cos(k * diam - omega + rgbOffset.x));
-      float g = abs(255 * cos(k * diam - omega + rgbOffset.y));
-      float b = abs(255 * cos(k * diam - omega + rgbOffset.z));
-      // float alph = 100.0;
-      fill(r,g,b,alph);
-      ellipse(p.x,p.y,diam,diam);
-      p1 = p2;
-    }
-  }
-
-  public void displayStraight (float colorSpectrumWidth, float colorSpectrumOffset) {
-    Vec2D step = stepVec(this.head, this.tail, this.numLinks);
-    Vec2D centerPos = this.head.copy().add(step.copy().normalizeTo(step.magnitude() / 2));
-
-    Iterator particleIterator = pString.particles.iterator();
-    VerletParticle2D p1 = (VerletParticle2D)particleIterator.next();
-
-    for(; particleIterator.hasNext();) {
-      VerletParticle2D p2 = (VerletParticle2D)particleIterator.next();
-
-      Vec2D p = centerPos.copy();
-      centerPos = centerPos.add(step);
-
-      float diam = p1.distanceTo(p2);
-      float k = colorSpectrumWidth;
-      float omega = colorSpectrumOffset;
-
-      Vec3D rgbOffset = new Vec3D(
-        .1 * TWO_PI,
-        .2 * TWO_PI,
-        .3 * TWO_PI
-      );
-      // float alph = (1 + cos(k * diam - omega)) * 50;
-      float alph = 100.0;
-      float r = abs(255 * cos(k * diam - omega + rgbOffset.x));
-      float g = abs(255 * cos(k * diam - omega + rgbOffset.y));
-      float b = abs(255 * cos(k * diam - omega + rgbOffset.z));
-      // float alph = 100.0;
-      fill(r,g,b,alph);
-      ellipse(p.x,p.y,diam,diam);
-      p1 = p2;
-    }
-  }
-
-  public void displaySkeleton() {
-    stroke(255,100);
-    noFill();
-    beginShape();
-    for(Iterator i=physics.particles.iterator(); i.hasNext();) {
-      VerletParticle2D p=(VerletParticle2D)i.next();
-      vertex(p.x,p.y);
-    }
-    endShape();
-  }
-
-  public void debugHead() {
-    push();
-    noStroke();
-    fill(255, 0, 0);
-    ellipse(this.head.x, this.head.y, 5, 5);
-    pop();
-  }
-
-  public void debugTail() {
-    push();
-    noStroke();
-    fill(255, 0, 0);
-    ellipse(this.tail.x, this.tail.y, 5, 5);
-    pop();
-  }
-}
-
-class Stage {
-  public Vec2D headPosOrigin, tailPosOrigin;
-  public Vec2D headPosTarget, tailPosTarget;
-
-  public float headSpeed, tailSpeed;
-  public Vec2D headVelocity, tailVelocity;
-
-  Stage(
-    Vec2D[] origins,
-    Vec2D[] targets,
-    float[] speeds
-  ) {
-    this.headSpeed = speeds[0];
-    this.tailSpeed = speeds[1];
-
-    this.headPosOrigin = origins[0];
-    this.tailPosOrigin = origins[1];
-
-    this.headPosTarget = targets[0];
-    this.tailPosTarget = targets[1];
-
-    this.headVelocity = this.velocity(origins[0], targets[0], speeds[0]);
-    this.tailVelocity = this.velocity(origins[1], targets[1], speeds[1]);
-  }
-
-  private Vec2D velocity(Vec2D origin, Vec2D target, float speed) {
-    return target.sub(origin).normalizeTo(speed);
-  }
-  private boolean overshoot (Vec2D currentPos, Vec2D target, float speed) {
-    return currentPos.isInCircle(target, 2 * speed);
-  }
-
-  boolean tailOvershoot(Vec2D tailCurrentPos) {
-    return this.overshoot(tailCurrentPos, this.tailPosTarget, this.tailSpeed);
-  }
-  boolean headOvershoot(Vec2D headCurrentPos) {
-    return this.overshoot(headCurrentPos, this.headPosTarget, this.headSpeed);
-  }
-
-  public void displayDebug() {
-    push();
-    noStroke();
-    fill(255, 0, 0);
-    ellipse(this.tailPosOrigin.x, this.tailPosOrigin.y, 5, 5);
-    ellipse(this.tailPosTarget.x, this.tailPosTarget.y, 5, 5);
-    ellipse(this.headPosOrigin.x, this.headPosOrigin.y, 5, 5);
-    ellipse(this.headPosTarget.x, this.headPosTarget.y, 5, 5);
-    noFill();
-    stroke(255,0,0);
-    strokeWeight(2);
-    line(
-      this.tailPosOrigin.x, this.tailPosOrigin.y,
-      this.tailPosTarget.x, this.tailPosTarget.y
-    );
-    line(
-      this.headPosOrigin.x, this.headPosOrigin.y,
-      this.headPosTarget.x, this.headPosTarget.y
-    );
-    pop();
-  }
-}
-
 VerletPhysics2D physics;
 
 
@@ -213,86 +18,48 @@ int stage () {
   return min(headCurrentStage, tailCurrentStage);
 }
 
-float speedA = 3;
-float speedB = 6;
-float speedC = 2;
+float[] speeds = new float[] { 3, 6, 2 };
 
 Vec2D[] headPositions = new Vec2D[] {
-  new Vec2D(200, 300),
-  new Vec2D(1300, 150),
-  new Vec2D(900, 500),
-  new Vec2D(0, 900)
+  new Vec2D(200, 300), // stage one start
+  new Vec2D(1300, 150), // stage two start
+  new Vec2D(900, 500), // stage three start
+  new Vec2D(0, 900) // end
 };
 
 Vec2D[] tailPositions = new Vec2D[] {
-  new Vec2D(200, 700),
-  new Vec2D(1400, 450),
-  new Vec2D(1250, 500),
-  new Vec2D(0, 900)
+  new Vec2D(200, 700), // stage one start
+  new Vec2D(1400, 450), // stage two start
+  new Vec2D(1250, 500), // stage three start
+  new Vec2D(0, 900) // end
 };
 
-Stage stage1 =
-  new Stage(
-    // Origins
-    new Vec2D[] {
-      headPositions[0],
-      tailPositions[0]
-    },
-    // Targets
-    new Vec2D[] {
-      headPositions[1],
-      tailPositions[1]
-    },
-    // Speeds
-    new float[] {
-      speedA,
-      speedA
-    }
-);
+Stage[] createStages() {
+  int numberOfStages = speeds.length;
+  Stage[] stages = new Stage[numberOfStages];
+  for (int i = 0; i < numberOfStages; i++) {
+    stages[i] = new Stage(
+      // Origins
+      new Vec2D[] {
+        headPositions[i],
+        tailPositions[i]
+      },
+      // Targets
+      new Vec2D[] {
+        headPositions[i + 1],
+        tailPositions[i + 1]
+      },
+      // Speeds
+      new float[] {
+        speeds[i],
+        speeds[i]
+      }
+    );
+  }
+  return stages;
+}
 
-Stage stage2 =
-  new Stage(
-    // Origins
-    new Vec2D[] {
-      headPositions[1],
-      tailPositions[1]
-    },
-    // Targets
-    new Vec2D[] {
-      headPositions[2],
-      tailPositions[2]
-    },
-    // Speeds
-    new float[] {
-      speedB,
-      speedB
-    }
-);
-
-Stage stage3 =
-  new Stage(
-    // Origins
-    new Vec2D[] {
-      headPositions[2],
-      tailPositions[2]
-    },
-    // Targets
-    new Vec2D[] {
-      headPositions[3],
-      tailPositions[3]
-    },
-    // Speeds
-    new float[] {
-      speedC,
-      speedC
-    }
-);
-
-Stage[] stages = new Stage[] {
-  stage1,
-  stage2,
-  stage3
-};
+Stage[] stages = createStages();
 
 ToxiColorString colorString;
 VerletParticle2D head, tail;
@@ -346,7 +113,8 @@ void draw() {
   }
 
   float omega = .8 * TWO_PI;
-  colorString.displayStraight(0.002, omega);
+  // colorString.displayStraight(0.002, omega);
+  colorString.displayOneInTwo(0.04, .1 * TWO_PI);
   colorString.display(0.02, omega);
   // background(0);
   // colorString.displaySkeleton();
