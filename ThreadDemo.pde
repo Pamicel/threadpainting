@@ -45,7 +45,7 @@ class ToxiColorString {
     return tailPos.sub(headPos).normalizeTo(headPos.distanceTo(tailPos) / numLinks);
   }
 
-  public void display () {
+  public void display (float colorSpectrumWidth, float colorSpectrumOffset) {
     Iterator particleIterator = this.pString.particles.iterator();
 
     // Initialize
@@ -57,8 +57,8 @@ class ToxiColorString {
       Vec2D p = p1.interpolateTo(p2, 0.5);
 
       float diam = p1.distanceTo(p2);
-      float k = .02;
-      float omega = .5 * TWO_PI;
+      float k = colorSpectrumWidth;
+      float omega = colorSpectrumOffset;
 
       Vec3D rgbOffset = new Vec3D(
         .1 * TWO_PI,
@@ -77,7 +77,7 @@ class ToxiColorString {
     }
   }
 
-  public void displayStraight () {
+  public void displayStraight (float colorSpectrumWidth, float colorSpectrumOffset) {
     Vec2D step = stepVec(this.head, this.tail, this.numLinks);
     Vec2D centerPos = this.head.copy().add(step.copy().normalizeTo(step.magnitude() / 2));
 
@@ -91,8 +91,8 @@ class ToxiColorString {
       centerPos = centerPos.add(step);
 
       float diam = p1.distanceTo(p2);
-      float k = .02;
-      float omega = .5 * TWO_PI;
+      float k = colorSpectrumWidth;
+      float omega = colorSpectrumOffset;
 
       Vec3D rgbOffset = new Vec3D(
         .1 * TWO_PI,
@@ -205,7 +205,7 @@ VerletPhysics2D physics;
 
 
 int NUM_PARTICLES = 10;
-float STRENGTH = .0001;
+float STRENGTH = .002;
 int headCurrentStage = 0;
 int tailCurrentStage = 0;
 
@@ -213,19 +213,22 @@ int stage () {
   return min(headCurrentStage, tailCurrentStage);
 }
 
-float speedA = 4;
-float speedB = 3;
+float speedA = 3;
+float speedB = 6;
+float speedC = 2;
 
 Vec2D[] headPositions = new Vec2D[] {
-  new Vec2D(-10, 300),
-  new Vec2D(1000, 100),
-  new Vec2D(1000, 1200)
+  new Vec2D(200, 300),
+  new Vec2D(1300, 150),
+  new Vec2D(900, 500),
+  new Vec2D(0, 900)
 };
 
 Vec2D[] tailPositions = new Vec2D[] {
-  new Vec2D(-10, 700),
-  new Vec2D(1000, 800),
-  new Vec2D(1500, 1000)
+  new Vec2D(200, 700),
+  new Vec2D(1400, 450),
+  new Vec2D(1250, 500),
+  new Vec2D(0, 900)
 };
 
 Stage stage1 =
@@ -261,14 +264,34 @@ Stage stage2 =
     },
     // Speeds
     new float[] {
-      speedA,
-      speedA
+      speedB,
+      speedB
+    }
+);
+
+Stage stage3 =
+  new Stage(
+    // Origins
+    new Vec2D[] {
+      headPositions[2],
+      tailPositions[2]
+    },
+    // Targets
+    new Vec2D[] {
+      headPositions[3],
+      tailPositions[3]
+    },
+    // Speeds
+    new float[] {
+      speedC,
+      speedC
     }
 );
 
 Stage[] stages = new Stage[] {
   stage1,
-  stage2
+  stage2,
+  stage3
 };
 
 ToxiColorString colorString;
@@ -306,16 +329,28 @@ void draw() {
     stages[currentStage].headOvershoot(head)
   ) {
     headCurrentStage = min(stages.length - 1, currentStage + 1);
+    if (stages.length - 1 != headCurrentStage) {
+      // Fix error cripping
+      head.set(stages[headCurrentStage].headPosOrigin);
+    }
   }
 
   if (
     stages[currentStage].tailOvershoot(tail)
   ) {
     tailCurrentStage = min(stages.length - 1, currentStage + 1);
+    if (stages.length - 1 != tailCurrentStage) {
+      // Fix error cripping
+      tail.set(stages[tailCurrentStage].tailPosOrigin);
+    }
   }
 
-  colorString.displayStraight();
-  colorString.display();
+  float omega = .8 * TWO_PI;
+  colorString.displayStraight(0.002, omega);
+  colorString.display(0.02, omega);
+  // background(0);
+  // colorString.displaySkeleton();
+  // stages[currentStage].displayDebug();
 
   //  saveFrame("out/screen-####.tif");
 }
