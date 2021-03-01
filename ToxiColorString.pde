@@ -3,6 +3,7 @@ class ToxiColorString {
   public ParticleString2D pString;
   public int numParticles;
   public int numLinks;
+  Vec3D rgbOffset;
 
   ToxiColorString (
     VerletPhysics2D physics,
@@ -10,10 +11,12 @@ class ToxiColorString {
     Vec2D tailStartPos,
     int numLinks,
     float mass,
-    float strength
+    float strength,
+    Vec3D rgbOffset
   ) {
     this.numLinks = numLinks;
     numParticles = numLinks + 1;
+    this.rgbOffset = rgbOffset;
 
     Vec2D stepVector = this.stepVec(headStartPos, tailStartPos, numLinks);
 
@@ -52,16 +55,11 @@ class ToxiColorString {
       float k = colorSpectrumWidth;
       float omega = colorSpectrumOffset;
 
-      Vec3D rgbOffset = new Vec3D(
-        .1 * TWO_PI,
-        .2 * TWO_PI,
-        .3 * TWO_PI
-      );
       // float alph = (1 + cos(k * diam - omega)) * 50;
       float alph = 100.0;
-      float r = abs(255 * cos(k * diam - omega + rgbOffset.x));
-      float g = abs(255 * cos(k * diam - omega + rgbOffset.y));
-      float b = abs(255 * cos(k * diam - omega + rgbOffset.z));
+      float r = abs(255 * cos(k * diam - omega + this.rgbOffset.x));
+      float g = abs(255 * cos(k * diam - omega + this.rgbOffset.y));
+      float b = abs(255 * cos(k * diam - omega + this.rgbOffset.z));
       // float alph = 100.0;
       fill(r,g,b,alph);
       ellipse(p.x,p.y,diam,diam);
@@ -89,16 +87,11 @@ class ToxiColorString {
       float k = colorSpectrumWidth;
       float omega = colorSpectrumOffset;
 
-      Vec3D rgbOffset = new Vec3D(
-        .1 * TWO_PI,
-        .2 * TWO_PI,
-        .3 * TWO_PI
-      );
       // float alph = (1 + cos(k * diam - omega)) * 50;
       float alph = 100.0;
-      float r = abs(255 * cos(k * diam - omega + rgbOffset.x));
-      float g = abs(255 * cos(k * diam - omega + rgbOffset.y));
-      float b = abs(255 * cos(k * diam - omega + rgbOffset.z));
+      float r = abs(255 * cos(k * diam - omega + this.rgbOffset.x));
+      float g = abs(255 * cos(k * diam - omega + this.rgbOffset.y));
+      float b = abs(255 * cos(k * diam - omega + this.rgbOffset.z));
       // float alph = 100.0;
       fill(r,g,b,alph);
       ellipse(p.x,p.y,2*diam,2*diam);
@@ -122,16 +115,11 @@ class ToxiColorString {
       float k = colorSpectrumWidth;
       float omega = colorSpectrumOffset;
 
-      Vec3D rgbOffset = new Vec3D(
-        .1 * TWO_PI,
-        .2 * TWO_PI,
-        .3 * TWO_PI
-      );
       // float alph = (1 + cos(k * diam - omega)) * 50;
       float alph = 100.0;
-      float r = abs(255 * cos(k * diam - omega + rgbOffset.x));
-      float g = abs(255 * cos(k * diam - omega + rgbOffset.y));
-      float b = abs(255 * cos(k * diam - omega + rgbOffset.z));
+      float r = abs(255 * cos(k * diam - omega + this.rgbOffset.x));
+      float g = abs(255 * cos(k * diam - omega + this.rgbOffset.y));
+      float b = abs(255 * cos(k * diam - omega + this.rgbOffset.z));
       // float alph = 100.0;
       fill(r,g,b,alph);
       ellipse(p.x,p.y,diam,diam);

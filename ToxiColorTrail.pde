@@ -13,38 +13,22 @@ class ToxiColorTrail {
     Vec2D[] tailPositions,
     int numLinks,
     float mass,
-    float strength
+    float strength,
+    Vec3D rgbOffset
   ) {
     this.createStages(
       speeds,
       headPositions,
       tailPositions
     );
-    this.createColorString(
-      physics,
-      headPositions[0],
-      tailPositions[0],
-      numLinks,
-      mass,
-      strength
-    );
+
+    this.colorString = new ToxiColorString(physics, headPositions[0], tailPositions[0], numLinks, mass, strength, rgbOffset);
+    this.head = colorString.head;
+    this.tail = colorString.tail;
   }
 
   int getCurrentStage () {
     return min(this.headCurrentStage, this.tailCurrentStage);
-  }
-
-  private void createColorString (
-    VerletPhysics2D physics,
-    Vec2D headStartPos,
-    Vec2D tailStartPos,
-    int numLinks,
-    float mass,
-    float strength
-  ) {
-    this.colorString = new ToxiColorString(physics, headStartPos, tailStartPos, numLinks, mass, strength);
-    this.head = colorString.head;
-    this.tail = colorString.tail;
   }
 
   public void update () {
