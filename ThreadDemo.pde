@@ -10,152 +10,81 @@ VerletPhysics2D physics;
 
 int NUM_PARTICLES = 10;
 float STRENGTH = .004;
+int SEED = 8;
 
-float[] speeds = new float[] { 1, 2, .6 };
+int NUM_COLOR_TRAILS = 5;
 
-Vec2D[] headPositions = new Vec2D[] {
-  new Vec2D(450, 250), // stage one start
-  new Vec2D(700, 200), // stage two start
-  new Vec2D(900, 400), // stage three start
-  new Vec2D(1150, 400) // end
-};
+ToxiColorTrail[] colorTrails = new ToxiColorTrail[NUM_COLOR_TRAILS];
 
-Vec2D[] tailPositions = new Vec2D[] {
-  new Vec2D(450, 350), // stage one start
-  new Vec2D(700, 350), // stage two start
-  new Vec2D(750, 500), // stage three start
-  new Vec2D(1150, 500) // end
-};
+Vec2D randomPosition(int wid, int hei) {
+  return new Vec2D(floor(random(0, wid + 1)), floor(random(0, hei + 1)));
+}
 
-ToxiColorTrail[] colorTrails = new ToxiColorTrail[4];
+ToxiColorTrail RandomToxiColorTrail(
+  VerletPhysics2D physics,
+  int wid,
+  int hei
+) {
+  int numStages = floor(random(2, 5));
+  float[] speeds = new float[numStages];
+  Vec2D[] headPositions = new Vec2D[numStages + 1];
+  Vec2D[] tailPositions = new Vec2D[numStages + 1];
+
+  for (int i = 0; i < numStages; i++) {
+    if (i < numStages) {
+      speeds[i] = random(1, 6);
+    }
+    headPositions[i] = randomPosition(wid, hei);
+    tailPositions[i] = randomPosition(wid, hei);
+  }
+
+  headPositions[numStages] = new Vec2D(floor(random(-100, 0)), floor(random(0, hei + 1)));
+  tailPositions[numStages] = new Vec2D(floor(random(-100, 0)), floor(random(0, hei + 1)));
+
+
+  return new ToxiColorTrail(
+    physics,
+    speeds,
+    headPositions,
+    tailPositions,
+    floor(random(4, 21)), // Links
+    random(.5, 1), // Mass
+    random(.1), // Strength
+    new Vec3D(
+      .1 * TWO_PI,
+      .2 * TWO_PI,
+      .3 * TWO_PI
+    )
+  );
+}
 
 void setup() {
   size(1600, 900);
   smooth();
+  randomSeed(SEED);
   background(255);
   noStroke();
 
   physics = new VerletPhysics2D();
-  colorTrails[0] = new ToxiColorTrail(
-    physics,
-    new float[] { 1, 2, .6 },
-    new Vec2D[] {
-      new Vec2D(450, 250), // stage one start
-      new Vec2D(700, 200), // stage two start
-      new Vec2D(900, 400), // stage three start
-      new Vec2D(1150, 400) // end
-    },
-    tailPositions = new Vec2D[] {
-      new Vec2D(450, 350), // stage one start
-      new Vec2D(700, 350), // stage two start
-      new Vec2D(750, 500), // stage three start
-      new Vec2D(1150, 500) // end
-    },
-    9, // Links
-    1, // Mass
-    .004, // Strength
-    new Vec3D(
-      .1 * TWO_PI,
-      .2 * TWO_PI,
-      .3 * TWO_PI
-    )
-  );
-  colorTrails[1] = new ToxiColorTrail(
-    physics,
-    new float[] { 1, 2 },
-    new Vec2D[] {
-      new Vec2D(700, 200),
-      new Vec2D(1000, 200),
-      new Vec2D(1100, 0)
-    },
-    tailPositions = new Vec2D[] {
-      new Vec2D(900, 400),
-      new Vec2D(1100, 350),
-      new Vec2D(900, 0)
-    },
-    12, // Links
-    1, // Mass
-    .001, // Strength
-    new Vec3D(
-      .1 * TWO_PI,
-      .2 * TWO_PI,
-      .3 * TWO_PI
-    )
-  );
-  colorTrails[2] = new ToxiColorTrail(
-    physics,
-    new float[] { 1, 2, 4 },
-    new Vec2D[] {
-      new Vec2D(100, 200),
-      new Vec2D(250, 500),
-      new Vec2D(450, 350),
-      new Vec2D(600, 650)
-    },
-    tailPositions = new Vec2D[] {
-      new Vec2D(450, 150),
-      new Vec2D(450, 500),
-      new Vec2D(700, 350),
-      new Vec2D(700, 650)
-    },
-    20, // Links
-    1, // Mass
-    .01, // Strength
-    new Vec3D(
-      .1 * TWO_PI,
-      .2 * TWO_PI,
-      .3 * TWO_PI
-    )
-  );
-  colorTrails[3] = new ToxiColorTrail(
-    physics,
-    new float[] { 4, 4, 2 },
-    new Vec2D[] {
-      new Vec2D(850, 500),
-      new Vec2D(850, 550),
-      new Vec2D(850, 550),
-      new Vec2D(0, 700)
-    },
-    tailPositions = new Vec2D[] {
-      new Vec2D(1400, 500),
-      new Vec2D(1150, 550),
-      new Vec2D(850, 650),
-      new Vec2D(0, 900)
-    },
-    20, // Links
-    1, // Mass
-    .02, // Strength
-    new Vec3D(
-      .3 * TWO_PI,
-      .2 * TWO_PI,
-      .1 * TWO_PI
-    )
-  );
+
+  for( int i = 0; i < NUM_COLOR_TRAILS; i++) {
+    colorTrails[i] = RandomToxiColorTrail(physics, width, height);
+  }
 }
 
 void draw() {
   physics.update();
-  colorTrails[0].update();
-  colorTrails[1].update();
-  colorTrails[2].update();
-  colorTrails[3].update();
-
   float omega = .8 * TWO_PI;
-  colorTrails[0].colorString.display(0.02, omega);
-  colorTrails[0].colorString.displayOneInTwo(0.02, omega);
-  colorTrails[1].colorString.display(0.05, omega);
-  colorTrails[1].colorString.displayOneInTwo(0.05, omega + .2);
-  colorTrails[2].colorString.display(0.05, omega);
-  colorTrails[2].colorString.displayOneInTwo(0.05, omega + .2);
-  colorTrails[3].colorString.display(0.1, omega + 1);
-  colorTrails[3].colorString.displayOneInTwo(0.1, omega + 1);
-  // colorTrail.colorString.displaySkeleton();
-  // colorTrail.stages[colorTrail.getCurrentStage()].displayDebug();
-
-  //  saveFrame("out/screen-####.tif");
+  for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
+    colorTrails[i].update();
+    colorTrails[i].colorString.display(0.02, omega);
+    colorTrails[i].colorString.displayOneInTwo(0.02, omega);
+  }
+  //  saveFrame("out/screen-####-seed-" + SEED + ".tif");
 }
 
 void keyPressed() {
   if (key == ' ') {
-    saveFrame();
+    saveFrame("out/screen-####-seed-" + SEED + ".tif");
   }
 }
