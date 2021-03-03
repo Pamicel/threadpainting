@@ -131,7 +131,7 @@ class ToxiColorString {
     stroke(255,100);
     noFill();
     beginShape();
-    for(Iterator i=physics.particles.iterator(); i.hasNext();) {
+    for(Iterator i=this.pString.particles.iterator(); i.hasNext();) {
       VerletParticle2D p=(VerletParticle2D)i.next();
       vertex(p.x,p.y);
     }

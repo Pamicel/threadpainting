@@ -16,6 +16,57 @@ class ToxiColorTrail {
     float strength,
     Vec3D rgbOffset
   ) {
+    this.createColorTrail(
+      physics,
+      speeds,
+      headPositions,
+      tailPositions,
+      numLinks,
+      mass,
+      strength,
+      rgbOffset
+    );
+  }
+
+  ToxiColorTrail(
+    VerletPhysics2D physics,
+    float[] speeds,
+    ColorTrailTarget[] targets,
+    int numLinks,
+    float mass,
+    float strength,
+    Vec3D rgbOffset
+  ) {
+    Vec2D[] headPositions = new Vec2D[targets.length];
+    Vec2D[] tailPositions = new Vec2D[targets.length];
+
+    for (int i = 0; i < targets.length; i++) {
+      headPositions[i] = targets[i].headPosition;
+      tailPositions[i] = targets[i].tailPosition;
+    }
+
+    this.createColorTrail(
+      physics,
+      speeds,
+      headPositions,
+      tailPositions,
+      numLinks,
+      mass,
+      strength,
+      rgbOffset
+    );
+  }
+
+  private void createColorTrail(
+    VerletPhysics2D physics,
+    float[] speeds,
+    Vec2D[] headPositions,
+    Vec2D[] tailPositions,
+    int numLinks,
+    float mass,
+    float strength,
+    Vec3D rgbOffset
+  ) {
     this.createStages(
       speeds,
       headPositions,
@@ -27,40 +78,52 @@ class ToxiColorTrail {
     this.tail = colorString.tail;
   }
 
-  int getCurrentStage () {
+  public int getCurrentStage () {
     return min(this.headCurrentStage, this.tailCurrentStage);
   }
 
-  public void update () {
-    int currentStage = this.getCurrentStage();
+  public boolean headFinished() {
+    return this.headCurrentStage == this.stages.length;
+  }
 
+  public boolean tailFinished() {
+    return this.tailCurrentStage == this.stages.length;
+  }
+
+  public boolean finished() {
+    return this.getCurrentStage() == this.stages.length;
+  }
+
+  public void update () {
+    if (this.finished()) {
+      println("finished");
+      return;
+    }
+
+    int currentStage = this.getCurrentStage();
     Vec2D currentHeadVelocity = this.stages[currentStage].headVelocity;
     Vec2D currentTailVelocity = this.stages[currentStage].tailVelocity;
 
+    // Move head as long as it is in the current stage
     if (this.headCurrentStage == currentStage) {
       this.head.set(this.head.x + currentHeadVelocity.x, this.head.y + currentHeadVelocity.y);
-    }
-    if (this.tailCurrentStage == currentStage) {
-      this.tail.set(this.tail.x + currentTailVelocity.x, this.tail.y + currentTailVelocity.y);
-    }
-
-    if (
-      this.stages[currentStage].headOvershoot(this.head)
-    ) {
-      this.headCurrentStage = min(this.stages.length - 1, currentStage + 1);
-      if (this.stages.length - 1 != this.headCurrentStage) {
+      if (
+        this.stages[currentStage].headOvershoot(this.head)
+      ) {
+        this.headCurrentStage = currentStage + 1;
         // Fix error cripping
-        this.head.set(this.stages[this.headCurrentStage].headPosOrigin);
+        this.head.set(this.stages[currentStage].headPosTarget);
       }
     }
-
-    if (
-      this.stages[currentStage].tailOvershoot(this.tail)
-    ) {
-      this.tailCurrentStage = min(this.stages.length - 1, currentStage + 1);
-      if (this.stages.length - 1 != this.tailCurrentStage) {
+    // Move tail as long as it is in the current stage
+    if (this.tailCurrentStage == currentStage) {
+      this.tail.set(this.tail.x + currentTailVelocity.x, this.tail.y + currentTailVelocity.y);
+      if (
+        this.stages[currentStage].tailOvershoot(this.tail)
+      ) {
+        this.tailCurrentStage = currentStage + 1;
         // Fix error cripping
-        this.tail.set(this.stages[this.tailCurrentStage].tailPosOrigin);
+        this.tail.set(this.stages[currentStage].tailPosTarget);
       }
     }
   }

@@ -8,48 +8,60 @@ import java.util.Iterator;
 
 VerletPhysics2D physics;
 
-int NUM_PARTICLES = 10;
-float STRENGTH = .004;
-int SEED = 8;
-
+int SEED = 1;
 int NUM_COLOR_TRAILS = 5;
 
 ToxiColorTrail[] colorTrails = new ToxiColorTrail[NUM_COLOR_TRAILS];
 
-Vec2D randomPosition(int wid, int hei) {
-  return new Vec2D(floor(random(0, wid + 1)), floor(random(0, hei + 1)));
+Vec2D randomPosition(int xmin, int xmax, int ymin, int ymax) {
+  return new Vec2D(floor(random(xmin, xmax + 1)), floor(random(ymin, ymax + 1)));
 }
 
-ToxiColorTrail RandomToxiColorTrail(
+class ColorTrailTarget {
+  public Vec2D headPosition;
+  public Vec2D tailPosition;
+
+  ColorTrailTarget(
+    Vec2D position,
+    int radius,
+    float angle
+  ) {
+    Vec2D radiusVector = new Vec2D(radius * cos(angle), radius * sin(angle));
+    this.headPosition = position.copy().add(radiusVector);
+    this.tailPosition = position.copy().sub(radiusVector);
+  }
+}
+
+ToxiColorTrail randomToxiColorTrail(
   VerletPhysics2D physics,
   int wid,
   int hei
 ) {
   int numStages = floor(random(2, 5));
   float[] speeds = new float[numStages];
-  Vec2D[] headPositions = new Vec2D[numStages + 1];
-  Vec2D[] tailPositions = new Vec2D[numStages + 1];
+  ColorTrailTarget[] targets = new ColorTrailTarget[numStages + 1];
 
-  for (int i = 0; i < numStages; i++) {
+  for (int i = 0; i < numStages + 1; i++) {
     if (i < numStages) {
-      speeds[i] = random(1, 6);
+      // speeds[i] = random(1, 3);
+      speeds[i] = 2;
     }
-    headPositions[i] = randomPosition(wid, hei);
-    tailPositions[i] = randomPosition(wid, hei);
-  }
 
-  headPositions[numStages] = new Vec2D(floor(random(-100, 0)), floor(random(0, hei + 1)));
-  tailPositions[numStages] = new Vec2D(floor(random(-100, 0)), floor(random(0, hei + 1)));
+    targets[i] = new ColorTrailTarget(
+      randomPosition(300, wid - 300, 200, hei - 200),
+      floor(random(20, 100)),
+      random(0, TWO_PI)
+    );
+  }
 
 
   return new ToxiColorTrail(
     physics,
     speeds,
-    headPositions,
-    tailPositions,
-    floor(random(4, 21)), // Links
-    random(.5, 1), // Mass
-    random(.1), // Strength
+    targets,
+    floor(random(20, 40)), // Links
+    1, // Mass
+    .001, // Strength
     new Vec3D(
       .1 * TWO_PI,
       .2 * TWO_PI,
@@ -59,6 +71,7 @@ ToxiColorTrail RandomToxiColorTrail(
 }
 
 void setup() {
+  frameRate(120);
   size(1600, 900);
   smooth();
   randomSeed(SEED);
@@ -68,23 +81,32 @@ void setup() {
   physics = new VerletPhysics2D();
 
   for( int i = 0; i < NUM_COLOR_TRAILS; i++) {
-    colorTrails[i] = RandomToxiColorTrail(physics, width, height);
+    colorTrails[i] = randomToxiColorTrail(physics, width, height);
   }
 }
 
 void draw() {
   physics.update();
-  float omega = .8 * TWO_PI;
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
+    if (colorTrails[i].finished()) {
+      continue;
+    }
     colorTrails[i].update();
-    colorTrails[i].colorString.display(0.02, omega);
-    colorTrails[i].colorString.displayOneInTwo(0.02, omega);
+    // colorTrails[i].colorString.display(0.1, omega);
+    colorTrails[i].colorString.displayOneInTwo(0.01 - 0.01 * i, .1 * TWO_PI);
   }
-  //  saveFrame("out/screen-####-seed-" + SEED + ".tif");
+  // colorTrails[4].update();
+  // colorTrails[4].colorString.displaySkeleton();
+  // colorTrails[4].colorString.debugHead();
+  // colorTrails[4].colorString.debugTail();
+  // if (!colorTrails[4].finished()) {
+  //   colorTrails[4].stages[colorTrails[4].getCurrentStage()].displayDebug();
+  // }
+   saveFrame("out/screen-####.tif");
 }
 
 void keyPressed() {
   if (key == ' ') {
-    saveFrame("out/screen-####-seed-" + SEED + ".tif");
+    saveFrame("out/screen-####.tif");
   }
 }
