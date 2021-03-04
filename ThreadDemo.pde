@@ -9,7 +9,7 @@ import java.util.Iterator;
 VerletPhysics2D physics;
 
 int SEED = 1;
-int NUM_COLOR_TRAILS = 20;
+int NUM_COLOR_TRAILS = 100;
 
 ToxiColorTrail[] colorTrails = new ToxiColorTrail[NUM_COLOR_TRAILS];
 
@@ -37,7 +37,7 @@ ToxiColorTrail randomToxiColorTrail(
   int wid,
   int hei
 ) {
-  int numStages = 5;
+  int numStages = 20;
   float[] speeds = new float[numStages];
   ColorTrailTarget[] targets = new ColorTrailTarget[numStages + 1];
 
@@ -48,8 +48,9 @@ ToxiColorTrail randomToxiColorTrail(
     }
 
     targets[i] = new ColorTrailTarget(
-      randomPosition(200, wid - 200, 300, hei - 300),
-      floor(random(20, 100)),
+      randomPosition(100, wid - 100, 100, hei - 100),
+      floor(random(20, 30)),
+      // 20,
       HALF_PI
     );
   }
@@ -59,7 +60,7 @@ ToxiColorTrail randomToxiColorTrail(
     physics,
     speeds,
     targets,
-    6, // Links
+    4, // Links
     1, // Mass
     .001, // Strength
     new Vec3D(
@@ -71,7 +72,7 @@ ToxiColorTrail randomToxiColorTrail(
 }
 
 void setup() {
-  size(1600, 900);
+  size(900, 900);
   smooth();
   randomSeed(SEED);
   background(255);
@@ -108,12 +109,12 @@ void draw() {
     colorTrails[i].colorString.displayStraight(
       rgbK,
       rgbIntensity,
-      omega + i
+      omega + (HALF_PI * i / (2 * NUM_COLOR_TRAILS))
     );
     colorTrails[i].colorString.displayOneInTwo(
       rgbK,
       rgbIntensity,
-      omega + i
+      omega + (HALF_PI * i / (2 * NUM_COLOR_TRAILS))
     );
   }
   // colorTrails[4].update();
@@ -123,7 +124,7 @@ void draw() {
   // if (!colorTrails[4].finished()) {
   //   colorTrails[4].stages[colorTrails[4].getCurrentStage()].displayDebug();
   // }
-  //  saveFrame("out/screen-####.tif");
+  // saveFrame("out/screen-####.tif");
 }
 
 void keyPressed() {
