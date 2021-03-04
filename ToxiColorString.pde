@@ -40,7 +40,24 @@ class ToxiColorString {
     return tailPos.sub(headPos).normalizeTo(headPos.distanceTo(tailPos) / numLinks);
   }
 
-  public void display (float colorSpectrumWidth, float colorSpectrumOffset) {
+  private void displayParticle (
+    Vec2D position,
+    float diam,
+    float[] rgbK,
+    float[] rgbIntensity,
+    float omega
+  ) {
+    // float alph = (1 + cos(k * diam - omega)) * 50;
+    float alph = 100.0;
+    float r = rgbIntensity[0] * 255 * ((1 + cos(rgbK[0] * diam - omega + this.rgbOffset.x)) / 2);
+    float g = rgbIntensity[1] * 255 * ((1 + cos(rgbK[1] * diam - omega + this.rgbOffset.y)) / 2);
+    float b = rgbIntensity[2] * 255 * ((1 + cos(rgbK[2] * diam - omega + this.rgbOffset.z)) / 2);
+    // float alph = 100.0;
+    fill(r,g,b,alph);
+    ellipse(position.x,position.y,diam,diam);
+  }
+
+  public void display (float[] rgbK, float[] rgbIntensity, float omega) {
     Iterator particleIterator = this.pString.particles.iterator();
 
     // Initialize
@@ -48,26 +65,22 @@ class ToxiColorString {
     //
     for(; particleIterator.hasNext();) {
       VerletParticle2D p2 = (VerletParticle2D)particleIterator.next();
-
       Vec2D p = p1.interpolateTo(p2, 0.5);
-
       float diam = p1.distanceTo(p2);
-      float k = colorSpectrumWidth;
-      float omega = colorSpectrumOffset;
 
-      // float alph = (1 + cos(k * diam - omega)) * 50;
-      float alph = 100.0;
-      float r = abs(255 * cos(k * diam - omega + this.rgbOffset.x));
-      float g = abs(255 * cos(k * diam - omega + this.rgbOffset.y));
-      float b = abs(255 * cos(k * diam - omega + this.rgbOffset.z));
-      // float alph = 100.0;
-      fill(r,g,b,alph);
-      ellipse(p.x,p.y,diam,diam);
+      this.displayParticle(
+        p,
+        diam,
+        rgbK,
+        rgbIntensity,
+        omega
+      );
+
       p1 = p2;
     }
   }
 
-  public void displayOneInTwo (float colorSpectrumWidth, float colorSpectrumOffset) {
+  public void displayOneInTwo (float[] rgbK, float[] rgbIntensity, float omega) {
     Iterator particleIterator = this.pString.particles.iterator();
 
     // Initialize
@@ -84,21 +97,18 @@ class ToxiColorString {
       Vec2D p = p1.interpolateTo(p2, 0.5);
 
       float diam = p1.distanceTo(p2);
-      float k = colorSpectrumWidth;
-      float omega = colorSpectrumOffset;
 
-      // float alph = (1 + cos(k * diam - omega)) * 50;
-      float alph = 100.0;
-      float r = abs(255 * cos(k * diam - omega + this.rgbOffset.x));
-      float g = abs(255 * cos(k * diam - omega + this.rgbOffset.y));
-      float b = abs(255 * cos(k * diam - omega + this.rgbOffset.z));
-      // float alph = 100.0;
-      fill(r,g,b,alph);
-      ellipse(p.x,p.y,2*diam,2*diam);
+      this.displayParticle(
+        p,
+        diam,
+        rgbK,
+        rgbIntensity,
+        omega
+      );
     }
   }
 
-  public void displayStraight (float colorSpectrumWidth, float colorSpectrumOffset) {
+  public void displayStraight (float[] rgbK, float[] rgbIntensity, float omega) {
     Vec2D step = stepVec(this.head, this.tail, this.numLinks);
     Vec2D centerPos = this.head.copy().add(step.copy().normalizeTo(step.magnitude() / 2));
 
@@ -112,17 +122,15 @@ class ToxiColorString {
       centerPos = centerPos.add(step);
 
       float diam = p1.distanceTo(p2);
-      float k = colorSpectrumWidth;
-      float omega = colorSpectrumOffset;
 
-      // float alph = (1 + cos(k * diam - omega)) * 50;
-      float alph = 100.0;
-      float r = abs(255 * cos(k * diam - omega + this.rgbOffset.x));
-      float g = abs(255 * cos(k * diam - omega + this.rgbOffset.y));
-      float b = abs(255 * cos(k * diam - omega + this.rgbOffset.z));
-      // float alph = 100.0;
-      fill(r,g,b,alph);
-      ellipse(p.x,p.y,diam,diam);
+      this.displayParticle(
+        p,
+        diam,
+        rgbK,
+        rgbIntensity,
+        omega
+      );
+
       p1 = p2;
     }
   }

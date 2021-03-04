@@ -8,8 +8,8 @@ import java.util.Iterator;
 
 VerletPhysics2D physics;
 
-int SEED = 1;
-int NUM_COLOR_TRAILS = 5;
+int SEED = 8;
+int NUM_COLOR_TRAILS = 6;
 
 ToxiColorTrail[] colorTrails = new ToxiColorTrail[NUM_COLOR_TRAILS];
 
@@ -37,7 +37,7 @@ ToxiColorTrail randomToxiColorTrail(
   int wid,
   int hei
 ) {
-  int numStages = floor(random(2, 5));
+  int numStages = 4;
   float[] speeds = new float[numStages];
   ColorTrailTarget[] targets = new ColorTrailTarget[numStages + 1];
 
@@ -48,9 +48,9 @@ ToxiColorTrail randomToxiColorTrail(
     }
 
     targets[i] = new ColorTrailTarget(
-      randomPosition(300, wid - 300, 200, hei - 200),
-      floor(random(20, 100)),
-      random(0, TWO_PI)
+      randomPosition(400, wid - 400, 200, hei - 200),
+      floor(random(100, 300)),
+      PI
     );
   }
 
@@ -59,20 +59,19 @@ ToxiColorTrail randomToxiColorTrail(
     physics,
     speeds,
     targets,
-    floor(random(20, 40)), // Links
+    6, // Links
     1, // Mass
     .001, // Strength
     new Vec3D(
-      .1 * TWO_PI,
-      .2 * TWO_PI,
-      .3 * TWO_PI
+      .1,
+      -3.2,
+      1.5
     )
   );
 }
 
 void setup() {
-  frameRate(120);
-  size(1600, 900);
+  size(1000, 1000);
   smooth();
   randomSeed(SEED);
   background(255);
@@ -85,6 +84,20 @@ void setup() {
   }
 }
 
+float[] rgbK = new float[] {
+  0,
+  0.04,
+  0.04
+};
+
+float[] rgbIntensity = new float[] {
+  1,
+  1,
+  1
+};
+
+float omega = .1;
+
 void draw() {
   physics.update();
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
@@ -92,8 +105,16 @@ void draw() {
       continue;
     }
     colorTrails[i].update();
-    // colorTrails[i].colorString.display(0.1, omega);
-    colorTrails[i].colorString.displayOneInTwo(0.01 - 0.01 * i, .1 * TWO_PI);
+    colorTrails[i].colorString.displayStraight(
+      rgbK,
+      rgbIntensity,
+      omega + i
+    );
+    colorTrails[i].colorString.displayOneInTwo(
+      rgbK,
+      rgbIntensity,
+      omega + i
+    );
   }
   // colorTrails[4].update();
   // colorTrails[4].colorString.displaySkeleton();
