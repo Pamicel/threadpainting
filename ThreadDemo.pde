@@ -8,8 +8,8 @@ import java.util.Iterator;
 
 VerletPhysics2D physics;
 
-int SEED = 8;
-int NUM_COLOR_TRAILS = 6;
+int SEED = 1;
+int NUM_COLOR_TRAILS = 20;
 
 ToxiColorTrail[] colorTrails = new ToxiColorTrail[NUM_COLOR_TRAILS];
 
@@ -37,7 +37,7 @@ ToxiColorTrail randomToxiColorTrail(
   int wid,
   int hei
 ) {
-  int numStages = 4;
+  int numStages = 5;
   float[] speeds = new float[numStages];
   ColorTrailTarget[] targets = new ColorTrailTarget[numStages + 1];
 
@@ -48,9 +48,9 @@ ToxiColorTrail randomToxiColorTrail(
     }
 
     targets[i] = new ColorTrailTarget(
-      randomPosition(400, wid - 400, 200, hei - 200),
-      floor(random(100, 300)),
-      PI
+      randomPosition(200, wid - 200, 300, hei - 300),
+      floor(random(20, 100)),
+      HALF_PI
     );
   }
 
@@ -71,7 +71,7 @@ ToxiColorTrail randomToxiColorTrail(
 }
 
 void setup() {
-  size(1000, 1000);
+  size(1600, 900);
   smooth();
   randomSeed(SEED);
   background(255);
@@ -86,8 +86,8 @@ void setup() {
 
 float[] rgbK = new float[] {
   0,
-  0.04,
-  0.04
+  0.1,
+  0.1
 };
 
 float[] rgbIntensity = new float[] {
@@ -123,7 +123,7 @@ void draw() {
   // if (!colorTrails[4].finished()) {
   //   colorTrails[4].stages[colorTrails[4].getCurrentStage()].displayDebug();
   // }
-   saveFrame("out/screen-####.tif");
+  //  saveFrame("out/screen-####.tif");
 }
 
 void keyPressed() {
