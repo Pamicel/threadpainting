@@ -8,12 +8,19 @@ import java.util.Iterator;
 
 VerletPhysics2D physics;
 
+PGraphics layer1, layer2;
+
 int SEED = 1;
 int NUM_COLOR_TRAILS = 10;
 
 ToxiColorTrail[] colorTrails = new ToxiColorTrail[NUM_COLOR_TRAILS];
 
-Vec2D randomPosition(int xmin, int xmax, int ymin, int ymax) {
+Vec2D randomPosition(Rect rectangle) {
+  int xmin = (int)rectangle.x;
+  int xmax = (int)(rectangle.x + rectangle.width);
+  int ymin = (int)rectangle.y;
+  int ymax = (int)(rectangle.y + rectangle.height);
+
   return new Vec2D(floor(random(xmin, xmax + 1)), floor(random(ymin, ymax + 1)));
 }
 
@@ -34,22 +41,24 @@ class ColorTrailTarget {
 
 ToxiColorTrail randomToxiColorTrail(
   VerletPhysics2D physics,
-  int wid,
-  int hei
+  Rect rectangle,
+  int numStages,
+  int minSpeed,
+  int maxSpeed,
+  int minRadius,
+  int maxRadius
 ) {
-  int numStages = 20;
   float[] speeds = new float[numStages];
   ColorTrailTarget[] targets = new ColorTrailTarget[numStages + 1];
 
   for (int i = 0; i < numStages + 1; i++) {
     if (i < numStages) {
-      // speeds[i] = random(1, 3);
-      speeds[i] = 2;
+      speeds[i] = random(minSpeed, maxSpeed);
     }
 
     targets[i] = new ColorTrailTarget(
-      randomPosition(200, wid - 200, 100, hei - 100),
-      floor(random(20, 100)),
+      randomPosition(rectangle),
+      floor(random(minRadius, maxRadius)),
       // 20,
       PI
     );
@@ -62,12 +71,7 @@ ToxiColorTrail randomToxiColorTrail(
     targets,
     4, // Links
     1, // Mass
-    .001, // Strength
-    new Vec3D(
-      .1,
-      -3.2,
-      1.5
-    )
+    .001 // Strength
   );
 }
 
@@ -76,12 +80,21 @@ void setup() {
   smooth();
   randomSeed(SEED);
   background(255);
-  noStroke();
+
+  layer1 = createGraphics(width, height);
+  layer2 = createGraphics(width, height);
 
   physics = new VerletPhysics2D();
 
   for( int i = 0; i < NUM_COLOR_TRAILS; i++) {
-    colorTrails[i] = randomToxiColorTrail(physics, width, height);
+    int[] pad = new int[] {200, 100};
+    colorTrails[i] = randomToxiColorTrail(
+      physics,
+      new Rect(pad[0], pad[1], width - (2 * pad[0]), height - (2 * pad[1])),
+      20,
+      2, 2,
+      30, 100
+    );
   }
 }
 
@@ -97,26 +110,50 @@ float[] rgbIntensity = new float[] {
   1
 };
 
+float[] rgbOffset = new float[]{
+  .1,
+  -3.2,
+  1.5
+};
+
 float omega = .1;
 
 void draw() {
   physics.update();
+
+  background(255);
+
+  layer2.beginDraw();
+  layer2.clear();
+  layer2.fill(0);
+  layer2.ellipse(width / 2, height / 2, 20, 20);
+  layer2.endDraw();
+
+  layer1.beginDraw();
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
     if (colorTrails[i].finished()) {
       continue;
     }
     colorTrails[i].update();
     colorTrails[i].colorString.displayStraight(
+      layer1,
       rgbK,
       rgbIntensity,
+      rgbOffset,
       omega + (HALF_PI * i / (2 * NUM_COLOR_TRAILS))
     );
     colorTrails[i].colorString.displayOneInTwo(
+      layer1,
       rgbK,
       rgbIntensity,
+      rgbOffset,
       omega + (HALF_PI * i / (2 * NUM_COLOR_TRAILS))
     );
   }
+  layer1.endDraw();
+
+  image(layer1, 0, 0);
+  image(layer2, 0, 0);
   // colorTrails[4].update();
   // colorTrails[4].colorString.displaySkeleton();
   // colorTrails[4].colorString.debugHead();

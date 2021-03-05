@@ -13,8 +13,7 @@ class ToxiColorTrail {
     Vec2D[] tailPositions,
     int numLinks,
     float mass,
-    float strength,
-    Vec3D rgbOffset
+    float strength
   ) {
     this.createColorTrail(
       physics,
@@ -23,8 +22,7 @@ class ToxiColorTrail {
       tailPositions,
       numLinks,
       mass,
-      strength,
-      rgbOffset
+      strength
     );
   }
 
@@ -34,8 +32,7 @@ class ToxiColorTrail {
     ColorTrailTarget[] targets,
     int numLinks,
     float mass,
-    float strength,
-    Vec3D rgbOffset
+    float strength
   ) {
     Vec2D[] headPositions = new Vec2D[targets.length];
     Vec2D[] tailPositions = new Vec2D[targets.length];
@@ -52,8 +49,7 @@ class ToxiColorTrail {
       tailPositions,
       numLinks,
       mass,
-      strength,
-      rgbOffset
+      strength
     );
   }
 
@@ -64,8 +60,7 @@ class ToxiColorTrail {
     Vec2D[] tailPositions,
     int numLinks,
     float mass,
-    float strength,
-    Vec3D rgbOffset
+    float strength
   ) {
     this.createStages(
       speeds,
@@ -73,7 +68,7 @@ class ToxiColorTrail {
       tailPositions
     );
 
-    this.colorString = new ToxiColorString(physics, headPositions[0], tailPositions[0], numLinks, mass, strength, rgbOffset);
+    this.colorString = new ToxiColorString(physics, headPositions[0], tailPositions[0], numLinks, mass, strength);
     this.head = colorString.head;
     this.tail = colorString.tail;
   }
