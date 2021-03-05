@@ -9,7 +9,7 @@ import java.util.Iterator;
 VerletPhysics2D physics;
 
 int SEED = 1;
-int NUM_COLOR_TRAILS = 100;
+int NUM_COLOR_TRAILS = 10;
 
 ToxiColorTrail[] colorTrails = new ToxiColorTrail[NUM_COLOR_TRAILS];
 
@@ -48,10 +48,10 @@ ToxiColorTrail randomToxiColorTrail(
     }
 
     targets[i] = new ColorTrailTarget(
-      randomPosition(100, wid - 100, 100, hei - 100),
-      floor(random(20, 30)),
+      randomPosition(200, wid - 200, 100, hei - 100),
+      floor(random(20, 100)),
       // 20,
-      HALF_PI
+      PI
     );
   }
 
@@ -87,8 +87,8 @@ void setup() {
 
 float[] rgbK = new float[] {
   0,
-  0.1,
-  0.1
+  0.15,
+  0.15
 };
 
 float[] rgbIntensity = new float[] {
