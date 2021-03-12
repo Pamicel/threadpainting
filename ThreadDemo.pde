@@ -11,9 +11,9 @@ VerletPhysics2D physics;
 PGraphics layer1;
 
 int SEED = 1;
-int NUM_COLOR_TRAILS = 1;
+int NUM_COLOR_TRAILS = 5;
 int NUM_STEPS = 50;
-Vec2D[] pointsAlongBezier = new Vec2D[NUM_STEPS + 1];
+Bezier5Path[] beziers = new Bezier5Path[NUM_COLOR_TRAILS];
 
 ToxiColorTrail[] colorTrailsLayer1 = new ToxiColorTrail[NUM_COLOR_TRAILS];
 
@@ -51,21 +51,31 @@ class ColorTrailTarget {
   }
 }
 
-class BezierDegree5 {
-  Vec2D[] points;
+class Bezier5Path {
+  public Vec2D[] path;
+  private Vec2D[] controlPoints;
+  private int numSteps;
 
-  BezierDegree5(Vec2D[] points) {
-    if (points.length != 6) {
-      throw new Error("Bezier of degree 5 requires 6 points");
+  Bezier5Path(Vec2D[] controlPoints, int numSteps) {
+    if (controlPoints.length != 6) {
+      throw new Error("Bezier of degree 5 requires 2 end points and 4 control points");
     }
-    this.points = points;
+    this.controlPoints = controlPoints;
+    this.numSteps = numSteps;
+    this.path = new Vec2D[numSteps + 1];
+
+    Vec2D position;
+    for (int i = 0; i < numSteps + 1; i++) {
+      position = this.getPosition((float)i / numSteps);
+      this.path[i] = position;
+    }
   }
 
   Vec2D getPosition (float t) {
     if (t <= 0) {
-      return this.points[0];
+      return this.controlPoints[0];
     } if (t >= 1) {
-      return this.points[5];
+      return this.controlPoints[5];
     }
 
     float factor0 = pow((1 - t), 5);
@@ -76,28 +86,41 @@ class BezierDegree5 {
     float factor5 = pow(t, 5);
 
     float x =
-      factor0 * this.points[0].x
-      + factor1 * this.points[1].x
-      + factor2 * this.points[2].x
-      + factor3 * this.points[3].x
-      + factor4 * this.points[4].x
-      + factor5 * this.points[5].x;
+      factor0 * this.controlPoints[0].x
+      + factor1 * this.controlPoints[1].x
+      + factor2 * this.controlPoints[2].x
+      + factor3 * this.controlPoints[3].x
+      + factor4 * this.controlPoints[4].x
+      + factor5 * this.controlPoints[5].x;
 
     float y =
-      factor0 * this.points[0].y
-      + factor1 * this.points[1].y
-      + factor2 * this.points[2].y
-      + factor3 * this.points[3].y
-      + factor4 * this.points[4].y
-      + factor5 * this.points[5].y;
+      factor0 * this.controlPoints[0].y
+      + factor1 * this.controlPoints[1].y
+      + factor2 * this.controlPoints[2].y
+      + factor3 * this.controlPoints[3].y
+      + factor4 * this.controlPoints[4].y
+      + factor5 * this.controlPoints[5].y;
 
     return new Vec2D(x, y);
+  }
+
+  void display() {
+    push();
+    fill(255);
+    noStroke();
+    for (int i = 0; i < this.numSteps + 1; i++) {
+      push();
+      translate(this.path[i].x, this.path[i].y);
+      ellipse(0, 0, 8, 8);
+      pop();
+    }
+    pop();
   }
 }
 
 ToxiColorTrail ToxiColorTrailFromBezier(
   VerletPhysics2D physics,
-  BezierDegree5 bezier,
+  Bezier5Path bezier,
   int numSteps,
   float minSpeed,
   float maxSpeed,
@@ -115,12 +138,10 @@ ToxiColorTrail ToxiColorTrailFromBezier(
       speeds[i] = random(minSpeed, maxSpeed);
     }
 
-    pointsAlongBezier[i] = bezier.getPosition((float)i / numSteps);
-
     targets[i] = new ColorTrailTarget(
-      pointsAlongBezier[i],
+      bezier.path[i],
       floor(random(minRadius, maxRadius)),
-      random(0, TWO_PI)
+      PI
     );
   }
 
@@ -134,8 +155,6 @@ ToxiColorTrail ToxiColorTrailFromBezier(
     strength // Strength
   );
 }
-
-
 
 ToxiColorTrail randomToxiColorTrail(
   VerletPhysics2D physics,
@@ -165,7 +184,6 @@ ToxiColorTrail randomToxiColorTrail(
     );
   }
 
-
   return new ToxiColorTrail(
     physics,
     speeds,
@@ -182,7 +200,7 @@ void setup() {
   randomSeed(SEED);
 
   layer1Vars.rgbK = new float[] { 0, 0, -0.05 };
-  layer1Vars.rgbIntensity = new float[] { 0, 0.2, 1 };
+  layer1Vars.rgbIntensity = new float[] { 1, 0.2, 1 };
   layer1Vars.rgbOffset = new float[]{ 0, 0, 8.5 };
   layer1Vars.omega = .1;
 
@@ -190,28 +208,28 @@ void setup() {
 
   physics = new VerletPhysics2D();
 
-  Vec2D startingPoint = new Vec2D(width / 4, height / 4);
-  Vec2D sidePoint = new Vec2D(random(0, 100), random(0, 100));
+  Vec2D startingPoint = new Vec2D(width / 5, height / 5);
+  Vec2D sidePoint = new Vec2D(random(0, 400), random(0, 400));
   Vec2D point2 = startingPoint.copy().add(sidePoint);
   Vec2D point4 = startingPoint.copy().sub(sidePoint);
 
-  BezierDegree5 bezier = new BezierDegree5(
-    new Vec2D[] {
-      startingPoint,
-      point2,
-      new Vec2D(random(width, width * 2), random(0, height)),
-      new Vec2D(random(0, width), random(height, height * 2)),
-      point4,
-      startingPoint
-    }
-  );
-
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
+    beziers[i] = new Bezier5Path(
+      new Vec2D[] {
+        startingPoint,
+        point2,
+        new Vec2D(random(width, width * 1.5), random(0, height)),
+        new Vec2D(random(0, width), random(height, height * 1.5)),
+        point4,
+        startingPoint
+      },
+      NUM_STEPS
+    );
     colorTrailsLayer1[i] = ToxiColorTrailFromBezier(
       physics,
-      bezier,
+      beziers[i],
       50,
-      2, 2,
+      2, 5,
       100, 150,
       4,
       1,
@@ -223,15 +241,11 @@ void setup() {
 void draw() {
   background(255);
   image(layer1, 0, 0);
-  push();
-  stroke(255);
-  noFill();
-  for (int i = 0; i < NUM_STEPS; i++) {
-    point(pointsAlongBezier[i].x, pointsAlongBezier[i].y);
-  }
-  pop();
   // noLoop();
   newStep();
+  for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
+    beziers[i].display();
+  }
 }
 
 void keyPressed() {
