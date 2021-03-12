@@ -114,16 +114,15 @@ class Bezier5Path {
   }
 
   void display() {
-    push();
-    fill(255);
-    noStroke();
     for (int i = 0; i < this.numSteps + 1; i++) {
-      push();
-      translate(this.path[i].x, this.path[i].y);
-      ellipse(0, 0, 8, 8);
-      pop();
+      ellipse(this.path[i].x, this.path[i].y, 8, 8);
     }
-    pop();
+  }
+
+  void displayControlPoints() {
+    for (int i = 0; i < this.controlPoints.length; i++) {
+      ellipse(this.controlPoints[i].x, this.controlPoints[i].y, 30, 30);
+    }
   }
 }
 
