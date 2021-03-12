@@ -1,11 +1,11 @@
-class Stage {
+class Step {
   public Vec2D headPosOrigin, tailPosOrigin;
   public Vec2D headPosTarget, tailPosTarget;
 
   public float headSpeed, tailSpeed;
   public Vec2D headVelocity, tailVelocity;
 
-  Stage(
+  Step(
     Vec2D[] origins,
     Vec2D[] targets,
     float[] speeds

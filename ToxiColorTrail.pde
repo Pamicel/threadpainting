@@ -1,7 +1,7 @@
 class ToxiColorTrail {
-  public Stage[] stages;
-  private int headCurrentStage = 0;
-  private int tailCurrentStage = 0;
+  public Step[] steps;
+  private int headCurrentStep = 0;
+  private int tailCurrentStep = 0;
 
   ToxiColorString colorString;
   VerletParticle2D head, tail;
@@ -62,7 +62,7 @@ class ToxiColorTrail {
     float mass,
     float strength
   ) {
-    this.createStages(
+    this.createSteps(
       speeds,
       headPositions,
       tailPositions
@@ -73,20 +73,20 @@ class ToxiColorTrail {
     this.tail = colorString.tail;
   }
 
-  public int getCurrentStage () {
-    return min(this.headCurrentStage, this.tailCurrentStage);
+  public int getCurrentStep () {
+    return min(this.headCurrentStep, this.tailCurrentStep);
   }
 
   public boolean headFinished() {
-    return this.headCurrentStage == this.stages.length;
+    return this.headCurrentStep == this.steps.length;
   }
 
   public boolean tailFinished() {
-    return this.tailCurrentStage == this.stages.length;
+    return this.tailCurrentStep == this.steps.length;
   }
 
   public boolean finished() {
-    return this.getCurrentStage() == this.stages.length;
+    return this.getCurrentStep() == this.steps.length;
   }
 
   public void update () {
@@ -95,35 +95,35 @@ class ToxiColorTrail {
       return;
     }
 
-    int currentStage = this.getCurrentStage();
-    Vec2D currentHeadVelocity = this.stages[currentStage].headVelocity;
-    Vec2D currentTailVelocity = this.stages[currentStage].tailVelocity;
+    int currentStep = this.getCurrentStep();
+    Vec2D currentHeadVelocity = this.steps[currentStep].headVelocity;
+    Vec2D currentTailVelocity = this.steps[currentStep].tailVelocity;
 
-    // Move head as long as it is in the current stage
-    if (this.headCurrentStage == currentStage) {
+    // Move head as long as it is in the current step
+    if (this.headCurrentStep == currentStep) {
       this.head.set(this.head.x + currentHeadVelocity.x, this.head.y + currentHeadVelocity.y);
       if (
-        this.stages[currentStage].headOvershoot(this.head)
+        this.steps[currentStep].headOvershoot(this.head)
       ) {
-        this.headCurrentStage = currentStage + 1;
+        this.headCurrentStep = currentStep + 1;
         // Fix error cripping
-        this.head.set(this.stages[currentStage].headPosTarget);
+        this.head.set(this.steps[currentStep].headPosTarget);
       }
     }
-    // Move tail as long as it is in the current stage
-    if (this.tailCurrentStage == currentStage) {
+    // Move tail as long as it is in the current step
+    if (this.tailCurrentStep == currentStep) {
       this.tail.set(this.tail.x + currentTailVelocity.x, this.tail.y + currentTailVelocity.y);
       if (
-        this.stages[currentStage].tailOvershoot(this.tail)
+        this.steps[currentStep].tailOvershoot(this.tail)
       ) {
-        this.tailCurrentStage = currentStage + 1;
+        this.tailCurrentStep = currentStep + 1;
         // Fix error cripping
-        this.tail.set(this.stages[currentStage].tailPosTarget);
+        this.tail.set(this.steps[currentStep].tailPosTarget);
       }
     }
   }
 
-  private void createStages(
+  private void createSteps(
     float[] speeds,
     Vec2D[] headPositions,
     Vec2D[] tailPositions
@@ -135,10 +135,10 @@ class ToxiColorTrail {
       throw new Error("Must have exactly one speed per section (3 positions -> 2 speeds, speed1 between point 1 and point 2 and speed 2 between point 2 and point 3)");
     }
 
-    int numberOfStages = speeds.length;
-    this.stages = new Stage[numberOfStages];
-    for (int i = 0; i < numberOfStages; i++) {
-      this.stages[i] = new Stage(
+    int numberOfSteps = speeds.length;
+    this.steps = new Step[numberOfSteps];
+    for (int i = 0; i < numberOfSteps; i++) {
+      this.steps[i] = new Step(
         // Origins
         new Vec2D[] {
           headPositions[i],
