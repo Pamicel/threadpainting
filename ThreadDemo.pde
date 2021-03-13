@@ -19,8 +19,8 @@ int randomInt (int max) {
   return randomInt(0, max);
 }
 
-int SEED = 1;
-int NUM_COLOR_TRAILS = 5;
+int SEED = 10;
+int NUM_COLOR_TRAILS = 20;
 int NUM_STEPS = 50;
 Bezier5Path[] beziers = new Bezier5Path[NUM_COLOR_TRAILS];
 
@@ -149,7 +149,7 @@ ToxiColorTrail ToxiColorTrailFromBezier(
     targets[i] = new ColorTrailTarget(
       bezier.path[i],
       randomInt(minRadius, maxRadius),
-      PI
+      random(0, TWO_PI)
     );
   }
 
@@ -187,8 +187,7 @@ ToxiColorTrail randomToxiColorTrail(
     targets[i] = new ColorTrailTarget(
       randomPosition(rectangle),
       randomInt(minRadius, maxRadius),
-      // 20,
-      PI
+      random(0, TWO_PI)
     );
   }
 
@@ -202,33 +201,39 @@ ToxiColorTrail randomToxiColorTrail(
   );
 }
 
+PImage backgroundImage;
+
 void setup() {
   size(900, 900);
   smooth();
   randomSeed(SEED);
 
-  layer1Vars.rgbK = new float[] { 0, 0, -0.05 };
-  layer1Vars.rgbIntensity = new float[] { 1, 0.2, 1 };
-  layer1Vars.rgbOffset = new float[]{ 0, 0, 8.5 };
+  layer1Vars.rgbK = new float[] { 0.05, 0.1, 0.1 };
+  layer1Vars.rgbOffset = new float[]{ 0.2, 0.1, 5.6 };
+  layer1Vars.rgbIntensity = new float[] { 1, 0.4, 1 };
   layer1Vars.omega = .1;
 
   layer1 = createGraphics(width, height);
 
   physics = new VerletPhysics2D();
 
-  Vec2D startingPoint = new Vec2D(width / 5, height / 5);
-  Vec2D sidePoint = new Vec2D(random(0, 400), random(0, 400));
-  Vec2D point2 = startingPoint.copy().add(sidePoint);
-  Vec2D point4 = startingPoint.copy().sub(sidePoint);
+  Vec2D startingPoint;
+  Vec2D sidePoint;
+  Vec2D point2, point3, point4, point5;
 
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
+    startingPoint = randomPosition(new Rect(0, 0, width, height));
+    sidePoint = randomPosition(new Rect(0, 0, randomInt(100, 400), 0));
+    point2 = startingPoint.copy().add(sidePoint);
+    point5 = startingPoint.copy().sub(sidePoint);
+
     beziers[i] = new Bezier5Path(
       new Vec2D[] {
         startingPoint,
         point2,
-        new Vec2D(random(width, width * 1.5), random(0, height)),
-        new Vec2D(random(0, width), random(height, height * 1.5)),
-        point4,
+        randomPosition(new Rect(0, 0, width, height)),
+        randomPosition(new Rect(0, 0, width, height)),
+        point5,
         startingPoint
       },
       NUM_STEPS
@@ -238,7 +243,7 @@ void setup() {
       beziers[i],
       50,
       2, 5,
-      100, 150,
+      30, 50,
       4,
       1,
       .001
@@ -249,22 +254,24 @@ void setup() {
 void draw() {
   background(255);
   image(layer1, 0, 0);
-  // noLoop();
   newStep();
-  for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
-    beziers[i].display();
-  }
+  // noLoop();
 }
 
 void keyPressed() {
+  int number = randomInt(0, 100);
   if (key == ' ') {
     saveFrame("out/screen-####.tif");
+    // layer1.save("out/screen-####.png");
   }
 }
 
 void newStep() {
   physics.update();
   layer1.beginDraw();
+  float scale = 1;
+  layer1.translate(width * (1 - scale) / 2, height * (1 - scale) / 2);
+  layer1.scale(scale);
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
     if (colorTrailsLayer1[i].finished()) {
       continue;
@@ -288,10 +295,10 @@ void newStep() {
   layer1.endDraw();
 }
 
-void mousePressed() {
-  int iterations = 1000;
-  for (; iterations > 0; iterations--) {
-    newStep();
-  }
-  loop();
-}
+// void mousePressed() {
+//   int iterations = 1000;
+//   for (; iterations > 0; iterations--) {
+//     newStep();
+//   }
+//   loop();
+// }
