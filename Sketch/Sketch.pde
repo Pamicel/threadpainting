@@ -9,6 +9,7 @@ import java.util.Iterator;
 VerletPhysics2D physics;
 
 PGraphics layer1;
+PGraphics layer2;
 
 int randomInt (int min, int max) {
   // Random int with evenly distributed probabilities
@@ -19,12 +20,13 @@ int randomInt (int max) {
   return randomInt(0, max);
 }
 
-int SEED = 10;
+int SEED = 1;
 int NUM_COLOR_TRAILS = 20;
-int NUM_STEPS = 50;
+int NUM_STEP_SEGMENTS = 50;
 Bezier5Path[] beziers = new Bezier5Path[NUM_COLOR_TRAILS];
 
 ToxiColorTrail[] colorTrailsLayer1 = new ToxiColorTrail[NUM_COLOR_TRAILS];
+ToxiColorTrail[] colorTrailsLayer2 = new ToxiColorTrail[NUM_COLOR_TRAILS];
 
 class LayerVariables {
   LayerVariables() {}
@@ -35,6 +37,7 @@ class LayerVariables {
 }
 
 LayerVariables layer1Vars = new LayerVariables();
+LayerVariables layer2Vars = new LayerVariables();
 
 Vec2D randomPosition(Rect rectangle) {
   int xmin = (int)rectangle.x;
@@ -129,7 +132,7 @@ class Bezier5Path {
 ToxiColorTrail ToxiColorTrailFromBezier(
   VerletPhysics2D physics,
   Bezier5Path bezier,
-  int numSteps,
+  float[] angles,
   float minSpeed,
   float maxSpeed,
   int minRadius,
@@ -138,6 +141,7 @@ ToxiColorTrail ToxiColorTrailFromBezier(
   float mass,
   float strength
 ) {
+  int numSteps = bezier.path.length - 1;
   float[] speeds = new float[numSteps];
   ColorTrailTarget[] targets = new ColorTrailTarget[numSteps + 1];
 
@@ -149,7 +153,7 @@ ToxiColorTrail ToxiColorTrailFromBezier(
     targets[i] = new ColorTrailTarget(
       bezier.path[i],
       randomInt(minRadius, maxRadius),
-      random(0, TWO_PI)
+      angles[i]
     );
   }
 
@@ -208,12 +212,18 @@ void setup() {
   smooth();
   randomSeed(SEED);
 
-  layer1Vars.rgbK = new float[] { 0.05, 0.1, 0.1 };
-  layer1Vars.rgbOffset = new float[]{ 0.2, 0.1, 5.6 };
-  layer1Vars.rgbIntensity = new float[] { 1, 0.4, 1 };
-  layer1Vars.omega = .1;
+  layer1Vars.rgbK =           new float[] {   0.06  , 0.12  , 0.12  };
+  layer1Vars.rgbOffset =      new float[] {   0.2   , 0.1   , 5.6   };
+  layer1Vars.rgbIntensity =   new float[] {   1     , 0.4   , 1     };
+  layer1Vars.omega =          .1;
+
+  layer2Vars.rgbK =           new float[] {   0.02  , 0.02  , 0.02  };
+  layer2Vars.rgbOffset =      new float[] {   0     , 0     , 0     };
+  layer2Vars.rgbIntensity =   new float[] {   1     , 1     , 1     };
+  layer2Vars.omega =          .1;
 
   layer1 = createGraphics(width, height);
+  layer2 = createGraphics(width, height);
 
   physics = new VerletPhysics2D();
 
@@ -236,23 +246,49 @@ void setup() {
         point5,
         startingPoint
       },
-      NUM_STEPS
+      NUM_STEP_SEGMENTS
     );
+
+    float[] anglesLayer1 = new float[NUM_STEP_SEGMENTS + 1];
+    for (int stepN = 0; stepN < NUM_STEP_SEGMENTS + 1; stepN++) {
+      anglesLayer1[stepN] = random(0, TWO_PI);
+    }
+
     colorTrailsLayer1[i] = ToxiColorTrailFromBezier(
       physics,
       beziers[i],
-      50,
+      anglesLayer1,
       2, 5,
       30, 50,
       4,
       1,
       .001
     );
+
+    float[] anglesLayer2 = new float[NUM_STEP_SEGMENTS + 1];
+    for (int stepN = 0; stepN < NUM_STEP_SEGMENTS + 1; stepN++) {
+      if (stepN < NUM_STEP_SEGMENTS) {
+        anglesLayer2[stepN] = beziers[i].path[stepN + 1].sub(beziers[i].path[stepN]).angleBetween(new Vec2D(0, 1), true);
+      } else {
+        anglesLayer2[stepN] = beziers[i].path[stepN].sub(beziers[i].path[stepN - 1]).angleBetween(new Vec2D(0, 1), true);
+      }
+    }
+    colorTrailsLayer2[i] = ToxiColorTrailFromBezier(
+      physics,
+      beziers[i],
+      anglesLayer2,
+      2, 5,
+      100, 150,
+      10,
+      .1,
+      .1
+    );
   }
 }
 
 void draw() {
-  background(255);
+  background(220);
+  image(layer2, 0, 0);
   image(layer1, 0, 0);
   newStep();
   // noLoop();
@@ -269,11 +305,12 @@ void keyPressed() {
 void newStep() {
   physics.update();
   layer1.beginDraw();
-  float scale = 1;
+  float scale = .8;
   layer1.translate(width * (1 - scale) / 2, height * (1 - scale) / 2);
   layer1.scale(scale);
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
     if (colorTrailsLayer1[i].finished()) {
+      colorTrailsLayer1[i].backToOrigin();
       continue;
     }
     colorTrailsLayer1[i].update();
@@ -293,6 +330,31 @@ void newStep() {
     );
   }
   layer1.endDraw();
+  layer2.beginDraw();
+  layer2.translate(width * (1 - scale) / 2, height * (1 - scale) / 2);
+  layer2.scale(scale);
+  for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
+    if (colorTrailsLayer2[i].finished()) {
+      colorTrailsLayer2[i].backToOrigin();
+      continue;
+    }
+    colorTrailsLayer2[i].update();
+    colorTrailsLayer2[i].colorString.displayStraight(
+      layer2,
+      layer2Vars.rgbK,
+      layer2Vars.rgbIntensity,
+      layer2Vars.rgbOffset,
+      layer2Vars.omega
+    );
+    colorTrailsLayer2[i].colorString.displayOneInTwo(
+      layer2,
+      layer2Vars.rgbK,
+      layer2Vars.rgbIntensity,
+      layer2Vars.rgbOffset,
+      layer2Vars.omega
+    );
+  }
+  layer2.endDraw();
 }
 
 // void mousePressed() {
