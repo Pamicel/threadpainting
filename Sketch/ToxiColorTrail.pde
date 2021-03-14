@@ -1,3 +1,18 @@
+class ColorTrailTarget {
+  public Vec2D headPosition;
+  public Vec2D tailPosition;
+
+  ColorTrailTarget(
+    Vec2D position,
+    int radius,
+    float angle
+  ) {
+    Vec2D radiusVector = new Vec2D(radius * cos(angle), radius * sin(angle));
+    this.headPosition = position.copy().add(radiusVector);
+    this.tailPosition = position.copy().sub(radiusVector);
+  }
+}
+
 class ToxiColorTrail {
   public Step[] steps;
   private int headCurrentStep = 0;
@@ -164,4 +179,80 @@ class ToxiColorTrail {
       );
     }
   }
+}
+
+ToxiColorTrail ToxiColorTrailFromBezier(
+  VerletPhysics2D physics,
+  Bezier5Path bezier,
+  float[] angles,
+  float minSpeed,
+  float maxSpeed,
+  int minRadius,
+  int maxRadius,
+  int links,
+  float mass,
+  float strength
+) {
+  int numSteps = bezier.path.length - 1;
+  float[] speeds = new float[numSteps];
+  ColorTrailTarget[] targets = new ColorTrailTarget[numSteps + 1];
+
+  for (int i = 0; i < numSteps + 1; i++) {
+    if (i < numSteps) {
+      speeds[i] = random(minSpeed, maxSpeed);
+    }
+
+    targets[i] = new ColorTrailTarget(
+      bezier.path[i],
+      randomInt(minRadius, maxRadius),
+      angles[i]
+    );
+  }
+
+
+  return new ToxiColorTrail(
+    physics,
+    speeds,
+    targets,
+    links, // Links
+    mass, // Mass
+    strength // Strength
+  );
+}
+
+ToxiColorTrail randomToxiColorTrail(
+  VerletPhysics2D physics,
+  Rect rectangle,
+  int numSteps,
+  float minSpeed,
+  float maxSpeed,
+  int minRadius,
+  int maxRadius,
+  int links,
+  float mass,
+  float strength
+) {
+  float[] speeds = new float[numSteps];
+  ColorTrailTarget[] targets = new ColorTrailTarget[numSteps + 1];
+
+  for (int i = 0; i < numSteps + 1; i++) {
+    if (i < numSteps) {
+      speeds[i] = random(minSpeed, maxSpeed);
+    }
+
+    targets[i] = new ColorTrailTarget(
+      randomPosition(rectangle),
+      randomInt(minRadius, maxRadius),
+      random(0, TWO_PI)
+    );
+  }
+
+  return new ToxiColorTrail(
+    physics,
+    speeds,
+    targets,
+    links, // Links
+    mass, // Mass
+    strength // Strength
+  );
 }
