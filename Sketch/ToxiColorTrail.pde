@@ -223,7 +223,7 @@ ToxiColorTrail ToxiColorTrailFromBezier(
 ToxiColorTrail randomToxiColorTrail(
   VerletPhysics2D physics,
   Rect rectangle,
-  int numSteps,
+  float[] angles,
   float minSpeed,
   float maxSpeed,
   int minRadius,
@@ -232,6 +232,7 @@ ToxiColorTrail randomToxiColorTrail(
   float mass,
   float strength
 ) {
+  int numSteps = angles.length - 1;
   float[] speeds = new float[numSteps];
   ColorTrailTarget[] targets = new ColorTrailTarget[numSteps + 1];
 
@@ -243,7 +244,7 @@ ToxiColorTrail randomToxiColorTrail(
     targets[i] = new ColorTrailTarget(
       randomPosition(rectangle),
       randomInt(minRadius, maxRadius),
-      random(0, TWO_PI)
+      angles[i]
     );
   }
 

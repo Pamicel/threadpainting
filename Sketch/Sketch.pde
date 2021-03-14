@@ -46,7 +46,7 @@ PGraphics layer3;
 
 boolean video = false;
 
-int SEED = 1;
+int SEED = 2;
 int NUM_COLOR_TRAILS = 20;
 int NUM_STEP_SEGMENTS = 50;
 Bezier5Path[] beziers = new Bezier5Path[NUM_COLOR_TRAILS];
@@ -63,22 +63,22 @@ LayerVariables layer3Vars = new LayerVariables();
 
 
 void setup() {
-  size(900, 900);
+  size(1000, 1000);
   smooth();
   randomSeed(SEED);
 
-  layer1Vars.rgbK =           new float[] {     0.06  ,   0.06  ,   0.06  };
+  layer1Vars.rgbK =           new float[] {     0.02  ,   0.02  ,   0.02  };
   layer1Vars.rgbOffset =      new float[] {     0     ,   0     ,   0     };
-  layer1Vars.baseColor =      new int[]   {    83     , 126     ,  77     };
-  layer1Vars.omega =          .1;
+  layer1Vars.baseColor =      new int[]   {   250     , 250     , 250     };
+  layer1Vars.omega =          .5;
 
   layer2Vars.rgbK =           new float[] {     0.02  ,   0.02  ,   0.02  };
   layer2Vars.rgbOffset =      new float[] {     0     ,   0     ,   0     };
   layer2Vars.baseColor =      new int[]   {   255     , 255     , 255     };
   layer2Vars.omega =          .1;
 
-  layer3Vars.rgbK =           new float[] {     0.005 ,   0.005 ,   0.005 };
-  layer3Vars.rgbOffset =      new float[] {     0     ,   0     ,   0     };
+  layer3Vars.rgbK =           new float[] {     0     ,   0.06  ,   0.06  };
+  layer3Vars.rgbOffset =      new float[] {     0.1   ,  -3.2   ,   1.5   };
   layer3Vars.baseColor =      new int[]   {   255     , 255     , 255     };
   layer3Vars.omega =          .1;
 
@@ -96,18 +96,36 @@ void setup() {
   Vec2D sidePointLayer3;
   Vec2D point2Layer3, point3Layer3, point4Layer3, point5Layer3;
 
+  int curveWidth = 800;
+
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
-    startingPoint = randomPosition(new Rect(0, 0, width, height));
-    sidePoint = randomPosition(new Rect(0, 0, randomInt(100, 400), 0));
+    // startingPoint = randomPosition(new Rect(0, 0, width, height));
+    startingPoint = new Vec2D(0, 0);
+    // sidePoint = randomPosition(new Rect(0, 0, randomInt(100, 400), 0));
+    sidePoint = new Vec2D(curveWidth / 2, 0);
     point2 = startingPoint.copy().add(sidePoint);
     point5 = startingPoint.copy().sub(sidePoint);
+
+    point3 = startingPoint.copy().add(0, curveWidth).add(new Vec2D(randomInt(curveWidth / 2, curveWidth), 0));
+    point4 = startingPoint.copy().add(0, curveWidth).sub(new Vec2D(randomInt(curveWidth / 2, curveWidth), 0));
+
+    float angle = i * TWO_PI / NUM_COLOR_TRAILS;
+    point2 = point2.rotate(angle);
+    point5 = point5.rotate(angle);
+    point3 = point3.rotate(angle);
+    point4 = point4.rotate(angle);
+    startingPoint = startingPoint.add(width / 2, height / 2);
+    point2 = point2.add(width / 2, height / 2);
+    point5 = point5.add(width / 2, height / 2);
+    point3 = point3.add(width / 2, height / 2);
+    point4 = point4.add(width / 2, height / 2);
 
     beziers[i] = new Bezier5Path(
       new Vec2D[] {
         startingPoint,
         point2,
-        randomPosition(new Rect(0, 0, width, height)),
-        randomPosition(new Rect(0, 0, width, height)),
+        point3,
+        point4,
         point5,
         startingPoint
       },
@@ -116,7 +134,7 @@ void setup() {
 
     float[] anglesLayer1 = new float[NUM_STEP_SEGMENTS + 1];
     for (int stepN = 0; stepN < NUM_STEP_SEGMENTS + 1; stepN++) {
-      anglesLayer1[stepN] = random(0, TWO_PI);
+      anglesLayer1[stepN] = PI;
     }
 
     colorTrailsLayer1[i] = ToxiColorTrailFromBezier(
@@ -145,7 +163,7 @@ void setup() {
       2, 5,
       100, 150,
       10,
-      .1,
+      1,
       .1
     );
 
@@ -154,45 +172,36 @@ void setup() {
     point2Layer3 = startingPointLayer3.copy().add(sidePointLayer3);
     point5Layer3 = startingPointLayer3.copy().sub(sidePointLayer3);
 
-    beziers[i] = new Bezier5Path(
-      new Vec2D[] {
-        startingPointLayer3,
-        point2Layer3,
-        randomPosition(new Rect(0, 0, width, height)),
-        randomPosition(new Rect(0, 0, width, height)),
-        point5Layer3,
-        startingPointLayer3
-      },
-      NUM_STEP_SEGMENTS
-    );
-
-    float[] anglesLayer3 = new float[NUM_STEP_SEGMENTS + 1];
-    for (int stepN = 0; stepN < NUM_STEP_SEGMENTS + 1; stepN++) {
-      anglesLayer1[stepN] = random(0, TWO_PI);
+    int STEPS_LAYER_3 = 4;
+    float[] anglesLayer3 = new float[STEPS_LAYER_3 + 1];
+    for (int stepN = 0; stepN < STEPS_LAYER_3 + 1; stepN++) {
+      anglesLayer1[stepN] = PI;
     }
-    colorTrailsLayer3[i] = ToxiColorTrailFromBezier(
+    int paddingX = 300;
+    int paddingY = 200;
+    colorTrailsLayer3[i] = randomToxiColorTrail(
       physics,
-      beziers[i],
+      new Rect(paddingX, paddingY, width - (2 * paddingX), height - 2 * paddingY),
       anglesLayer3,
-      2, 5,
-      200, 300,
-      4,
-      .1,
-      .1
+      2, 2,
+      80, 120,
+      6,
+      1,
+      .001
     );
   }
 
-  int iterations = 1000;
-  for (; iterations > 0; iterations--) {
-    newStep();
-  }
+  // int iterations = 1000;
+  // for (; iterations > 0; iterations--) {
+  //   newStep();
+  // }
 }
 
 void draw() {
-  background(220);
-  image(layer3, 0, 0);
+  background(255);
   image(layer2, 0, 0);
   image(layer1, 0, 0);
+  image(layer3, 0, 0);
   if (video) {
     saveFrame("out/screen-####.tif");
     push();
@@ -235,14 +244,14 @@ void newStep() {
       layer1Vars.rgbK,
       layer1Vars.baseColor,
       layer1Vars.rgbOffset,
-      layer1Vars.omega + i
+      layer1Vars.omega
     );
     colorTrailsLayer1[i].colorString.displayOneInTwo(
       layer1,
       layer1Vars.rgbK,
       layer1Vars.baseColor,
       layer1Vars.rgbOffset,
-      layer1Vars.omega + i
+      layer1Vars.omega
     );
   }
   layer1.endDraw();
@@ -252,7 +261,7 @@ void newStep() {
   layer2.scale(scale);
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
     if (colorTrailsLayer2[i].finished()) {
-      colorTrailsLayer2[i].backToOrigin();
+      // colorTrailsLayer2[i].backToOrigin();
       continue;
     }
     colorTrailsLayer2[i].update();
@@ -274,8 +283,6 @@ void newStep() {
   layer2.endDraw();
 
   layer3.beginDraw();
-  layer3.translate(width * (1 - scale) / 2, height * (1 - scale) / 2);
-  layer3.scale(scale);
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
     if (colorTrailsLayer3[i].finished()) {
       continue;
@@ -286,14 +293,14 @@ void newStep() {
       layer3Vars.rgbK,
       layer3Vars.baseColor,
       layer3Vars.rgbOffset,
-      layer3Vars.omega
+      layer3Vars.omega + i
     );
     colorTrailsLayer3[i].colorString.displayOneInTwo(
       layer3,
       layer3Vars.rgbK,
       layer3Vars.baseColor,
       layer3Vars.rgbOffset,
-      layer3Vars.omega
+      layer3Vars.omega + i
     );
   }
   layer3.endDraw();
