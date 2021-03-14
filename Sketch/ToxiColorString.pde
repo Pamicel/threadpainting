@@ -42,22 +42,22 @@ class ToxiColorString {
     Vec2D position,
     float diam,
     float[] rgbK,
-    float[] rgbIntensity,
+    int[] baseColor,
     float[] rgbOffset,
     float omega
   ) {
     // float alph = (1 + cos(k * diam - omega)) * 50;
     float alph = 100.0;
-    float r = rgbIntensity[0] * 255 * ((1 + cos(rgbK[0] * diam - omega + rgbOffset[0])) / 2);
-    float g = rgbIntensity[1] * 255 * ((1 + cos(rgbK[1] * diam - omega + rgbOffset[1])) / 2);
-    float b = rgbIntensity[2] * 255 * ((1 + cos(rgbK[2] * diam - omega + rgbOffset[2])) / 2);
+    float r = baseColor[0] * ((1 + cos(rgbK[0] * diam - omega + rgbOffset[0])) / 2);
+    float g = baseColor[1] * ((1 + cos(rgbK[1] * diam - omega + rgbOffset[1])) / 2);
+    float b = baseColor[2] * ((1 + cos(rgbK[2] * diam - omega + rgbOffset[2])) / 2);
     // float alph = 100.0;
     layer.noStroke();
     layer.fill(r,g,b,alph);
     layer.ellipse(position.x,position.y,diam,diam);
   }
 
-  public void display (PGraphics layer, float[] rgbK, float[] rgbIntensity, float[] rgbOffset, float omega) {
+  public void display (PGraphics layer, float[] rgbK, int[] baseColor, float[] rgbOffset, float omega) {
     Iterator particleIterator = this.pString.particles.iterator();
 
     // Initialize
@@ -73,7 +73,7 @@ class ToxiColorString {
         p,
         diam,
         rgbK,
-        rgbIntensity,
+        baseColor,
         rgbOffset,
         omega
       );
@@ -82,7 +82,7 @@ class ToxiColorString {
     }
   }
 
-  public void displayOneInTwo (PGraphics layer, float[] rgbK, float[] rgbIntensity, float[] rgbOffset, float omega) {
+  public void displayOneInTwo (PGraphics layer, float[] rgbK, int[] baseColor, float[] rgbOffset, float omega) {
     Iterator particleIterator = this.pString.particles.iterator();
 
     // Initialize
@@ -105,14 +105,14 @@ class ToxiColorString {
         p,
         diam,
         rgbK,
-        rgbIntensity,
+        baseColor,
         rgbOffset,
         omega
       );
     }
   }
 
-  public void displayStraight (PGraphics layer, float[] rgbK, float[] rgbIntensity, float[] rgbOffset, float omega) {
+  public void displayStraight (PGraphics layer, float[] rgbK, int[] baseColor, float[] rgbOffset, float omega) {
     Vec2D step = stepVec(this.head, this.tail, this.numLinks);
     Vec2D centerPos = this.head.copy().add(step.copy().normalizeTo(step.magnitude() / 2));
 
@@ -132,7 +132,7 @@ class ToxiColorString {
         p,
         diam,
         rgbK,
-        rgbIntensity,
+        baseColor,
         rgbOffset,
         omega
       );

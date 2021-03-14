@@ -10,6 +10,9 @@ VerletPhysics2D physics;
 
 PGraphics layer1;
 PGraphics layer2;
+PGraphics layer3;
+
+boolean video = false;
 
 int randomInt (int min, int max) {
   // Random int with evenly distributed probabilities
@@ -27,17 +30,19 @@ Bezier5Path[] beziers = new Bezier5Path[NUM_COLOR_TRAILS];
 
 ToxiColorTrail[] colorTrailsLayer1 = new ToxiColorTrail[NUM_COLOR_TRAILS];
 ToxiColorTrail[] colorTrailsLayer2 = new ToxiColorTrail[NUM_COLOR_TRAILS];
+ToxiColorTrail[] colorTrailsLayer3 = new ToxiColorTrail[NUM_COLOR_TRAILS];
 
 class LayerVariables {
   LayerVariables() {}
   public float[] rgbK;
-  public float[] rgbIntensity;
+  public int[] baseColor;
   public float[] rgbOffset;
   public float omega;
 }
 
 LayerVariables layer1Vars = new LayerVariables();
 LayerVariables layer2Vars = new LayerVariables();
+LayerVariables layer3Vars = new LayerVariables();
 
 Vec2D randomPosition(Rect rectangle) {
   int xmin = (int)rectangle.x;
@@ -212,24 +217,34 @@ void setup() {
   smooth();
   randomSeed(SEED);
 
-  layer1Vars.rgbK =           new float[] {   0.06  , 0.12  , 0.12  };
-  layer1Vars.rgbOffset =      new float[] {   0.2   , 0.1   , 5.6   };
-  layer1Vars.rgbIntensity =   new float[] {   1     , 0.4   , 1     };
+  layer1Vars.rgbK =           new float[] {     0.06  ,   0.06  ,   0.06  };
+  layer1Vars.rgbOffset =      new float[] {     0     ,   0     ,   0     };
+  layer1Vars.baseColor =   new int[]   {    83     , 126     ,  77     };
   layer1Vars.omega =          .1;
 
-  layer2Vars.rgbK =           new float[] {   0.02  , 0.02  , 0.02  };
-  layer2Vars.rgbOffset =      new float[] {   0     , 0     , 0     };
-  layer2Vars.rgbIntensity =   new float[] {   1     , 1     , 1     };
+  layer2Vars.rgbK =           new float[] {     0.02  ,   0.02  ,   0.02  };
+  layer2Vars.rgbOffset =      new float[] {     0     ,   0     ,   0     };
+  layer2Vars.baseColor =   new int[]   {   255     , 255     , 255     };
   layer2Vars.omega =          .1;
+
+  layer3Vars.rgbK =           new float[] {     0.005 ,   0.005 ,   0.005 };
+  layer3Vars.rgbOffset =      new float[] {     0     ,   0     ,   0     };
+  layer3Vars.baseColor =   new int[]   {   255     , 255     , 255     };
+  layer3Vars.omega =          .1;
 
   layer1 = createGraphics(width, height);
   layer2 = createGraphics(width, height);
+  layer3 = createGraphics(width, height);
 
   physics = new VerletPhysics2D();
 
   Vec2D startingPoint;
   Vec2D sidePoint;
   Vec2D point2, point3, point4, point5;
+
+  Vec2D startingPointLayer3;
+  Vec2D sidePointLayer3;
+  Vec2D point2Layer3, point3Layer3, point4Layer3, point5Layer3;
 
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
     startingPoint = randomPosition(new Rect(0, 0, width, height));
@@ -283,14 +298,61 @@ void setup() {
       .1,
       .1
     );
+
+    startingPointLayer3 = randomPosition(new Rect(0, 0, width, height));
+    sidePointLayer3 = randomPosition(new Rect(0, 0, randomInt(100, 400), 0));
+    point2Layer3 = startingPointLayer3.copy().add(sidePointLayer3);
+    point5Layer3 = startingPointLayer3.copy().sub(sidePointLayer3);
+
+    beziers[i] = new Bezier5Path(
+      new Vec2D[] {
+        startingPointLayer3,
+        point2Layer3,
+        randomPosition(new Rect(0, 0, width, height)),
+        randomPosition(new Rect(0, 0, width, height)),
+        point5Layer3,
+        startingPointLayer3
+      },
+      NUM_STEP_SEGMENTS
+    );
+
+    float[] anglesLayer3 = new float[NUM_STEP_SEGMENTS + 1];
+    for (int stepN = 0; stepN < NUM_STEP_SEGMENTS + 1; stepN++) {
+      anglesLayer1[stepN] = random(0, TWO_PI);
+    }
+    colorTrailsLayer3[i] = ToxiColorTrailFromBezier(
+      physics,
+      beziers[i],
+      anglesLayer3,
+      2, 5,
+      200, 300,
+      4,
+      .1,
+      .1
+    );
+  }
+
+  int iterations = 1000;
+  for (; iterations > 0; iterations--) {
+    newStep();
   }
 }
 
 void draw() {
   background(220);
+  image(layer3, 0, 0);
   image(layer2, 0, 0);
   image(layer1, 0, 0);
+  if (video) {
+    saveFrame("out/screen-####.tif");
+    push();
+    fill(255, 0, 0);
+    noStroke();
+    ellipse(30, height - 30, 10, 10);
+    pop();
+  }
   newStep();
+
   // noLoop();
 }
 
@@ -300,12 +362,16 @@ void keyPressed() {
     saveFrame("out/screen-####.tif");
     // layer1.save("out/screen-####.png");
   }
+  if (key == 'v') {
+    video = !video;
+    // layer1.save("out/screen-####.png");
+  }
 }
 
 void newStep() {
   physics.update();
   layer1.beginDraw();
-  float scale = .8;
+  float scale = 1;
   layer1.translate(width * (1 - scale) / 2, height * (1 - scale) / 2);
   layer1.scale(scale);
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
@@ -317,19 +383,20 @@ void newStep() {
     colorTrailsLayer1[i].colorString.displayStraight(
       layer1,
       layer1Vars.rgbK,
-      layer1Vars.rgbIntensity,
+      layer1Vars.baseColor,
       layer1Vars.rgbOffset,
       layer1Vars.omega + i
     );
     colorTrailsLayer1[i].colorString.displayOneInTwo(
       layer1,
       layer1Vars.rgbK,
-      layer1Vars.rgbIntensity,
+      layer1Vars.baseColor,
       layer1Vars.rgbOffset,
       layer1Vars.omega + i
     );
   }
   layer1.endDraw();
+
   layer2.beginDraw();
   layer2.translate(width * (1 - scale) / 2, height * (1 - scale) / 2);
   layer2.scale(scale);
@@ -342,19 +409,44 @@ void newStep() {
     colorTrailsLayer2[i].colorString.displayStraight(
       layer2,
       layer2Vars.rgbK,
-      layer2Vars.rgbIntensity,
+      layer2Vars.baseColor,
       layer2Vars.rgbOffset,
       layer2Vars.omega
     );
     colorTrailsLayer2[i].colorString.displayOneInTwo(
       layer2,
       layer2Vars.rgbK,
-      layer2Vars.rgbIntensity,
+      layer2Vars.baseColor,
       layer2Vars.rgbOffset,
       layer2Vars.omega
     );
   }
   layer2.endDraw();
+
+  layer3.beginDraw();
+  layer3.translate(width * (1 - scale) / 2, height * (1 - scale) / 2);
+  layer3.scale(scale);
+  for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
+    if (colorTrailsLayer3[i].finished()) {
+      continue;
+    }
+    colorTrailsLayer3[i].update();
+    colorTrailsLayer3[i].colorString.displayStraight(
+      layer3,
+      layer3Vars.rgbK,
+      layer3Vars.baseColor,
+      layer3Vars.rgbOffset,
+      layer3Vars.omega
+    );
+    colorTrailsLayer3[i].colorString.displayOneInTwo(
+      layer3,
+      layer3Vars.rgbK,
+      layer3Vars.baseColor,
+      layer3Vars.rgbOffset,
+      layer3Vars.omega
+    );
+  }
+  layer3.endDraw();
 }
 
 // void mousePressed() {
