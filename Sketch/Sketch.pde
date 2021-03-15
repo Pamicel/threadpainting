@@ -46,9 +46,9 @@ PGraphics layer3;
 
 boolean video = false;
 
-int SEED = 2;
-int NUM_COLOR_TRAILS = 20;
-int NUM_STEP_SEGMENTS = 50;
+int SEED = 5;
+int NUM_COLOR_TRAILS = 3;
+int NUM_STEP_SEGMENTS = 10;
 Bezier5Path[] beziers = new Bezier5Path[NUM_COLOR_TRAILS];
 
 ToxiColorTrail[] colorTrailsLayer1 = new ToxiColorTrail[NUM_COLOR_TRAILS];
@@ -67,9 +67,9 @@ void setup() {
   smooth();
   randomSeed(SEED);
 
-  layer1Vars.rgbK =           new float[] {     0.02  ,   0.02  ,   0.02  };
-  layer1Vars.rgbOffset =      new float[] {     0     ,   0     ,   0     };
-  layer1Vars.baseColor =      new int[]   {   250     , 250     , 250     };
+  layer1Vars.rgbK =           new float[] {     0.2    ,   0.2   ,   0.2  };
+  layer1Vars.rgbOffset =      new float[] {     2.2    ,   1.0   ,   0.2   };
+  layer1Vars.baseColor =      new int[]   {   255     , 255     , 255     };
   layer1Vars.omega =          .5;
 
   layer2Vars.rgbK =           new float[] {     0.02  ,   0.02  ,   0.02  };
@@ -102,23 +102,24 @@ void setup() {
     // startingPoint = randomPosition(new Rect(0, 0, width, height));
     startingPoint = new Vec2D(0, 0);
     // sidePoint = randomPosition(new Rect(0, 0, randomInt(100, 400), 0));
-    sidePoint = new Vec2D(curveWidth / 2, 0);
+    sidePoint = new Vec2D(randomInt(curveWidth / 10, curveWidth / 2), 0);
     point2 = startingPoint.copy().add(sidePoint);
     point5 = startingPoint.copy().sub(sidePoint);
 
-    point3 = startingPoint.copy().add(0, curveWidth).add(new Vec2D(randomInt(curveWidth / 2, curveWidth), 0));
-    point4 = startingPoint.copy().add(0, curveWidth).sub(new Vec2D(randomInt(curveWidth / 2, curveWidth), 0));
+    point3 = startingPoint.copy().add(0, curveWidth).add(new Vec2D(randomInt(curveWidth / 10, curveWidth), 0));
+    point4 = startingPoint.copy().add(0, curveWidth).sub(new Vec2D(randomInt(curveWidth / 10, curveWidth), 0));
 
-    float angle = i * TWO_PI / NUM_COLOR_TRAILS;
+    float angle = random(0, TWO_PI);
     point2 = point2.rotate(angle);
     point5 = point5.rotate(angle);
     point3 = point3.rotate(angle);
     point4 = point4.rotate(angle);
-    startingPoint = startingPoint.add(width / 2, height / 2);
-    point2 = point2.add(width / 2, height / 2);
-    point5 = point5.add(width / 2, height / 2);
-    point3 = point3.add(width / 2, height / 2);
-    point4 = point4.add(width / 2, height / 2);
+    Vec2D translation = new Vec2D(randomInt(width / 4, 3 * width / 4), randomInt(height / 4, 3 * height / 4));
+    startingPoint = startingPoint.add(translation);
+    point2 = point2.add(translation);
+    point5 = point5.add(translation);
+    point3 = point3.add(translation);
+    point4 = point4.add(translation);
 
     beziers[i] = new Bezier5Path(
       new Vec2D[] {
@@ -141,8 +142,8 @@ void setup() {
       physics,
       beziers[i],
       anglesLayer1,
-      2, 5,
-      30, 50,
+      3, 6,
+      100, 150,
       4,
       1,
       .001
@@ -198,10 +199,10 @@ void setup() {
 }
 
 void draw() {
-  background(255);
-  image(layer2, 0, 0);
+  background(0);
+  // image(layer3, 0, 0);
+  // image(layer2, 0, 0);
   image(layer1, 0, 0);
-  image(layer3, 0, 0);
   if (video) {
     saveFrame("out/screen-####.tif");
     push();
@@ -235,17 +236,17 @@ void newStep() {
   layer1.scale(scale);
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
     if (colorTrailsLayer1[i].finished()) {
-      colorTrailsLayer1[i].backToOrigin();
+      // colorTrailsLayer1[i].backToOrigin();
       continue;
     }
     colorTrailsLayer1[i].update();
-    colorTrailsLayer1[i].colorString.displayStraight(
-      layer1,
-      layer1Vars.rgbK,
-      layer1Vars.baseColor,
-      layer1Vars.rgbOffset,
-      layer1Vars.omega
-    );
+    // colorTrailsLayer1[i].colorString.displayStraight(
+    //   layer1,
+    //   layer1Vars.rgbK,
+    //   layer1Vars.baseColor,
+    //   layer1Vars.rgbOffset,
+    //   layer1Vars.omega
+    // );
     colorTrailsLayer1[i].colorString.displayOneInTwo(
       layer1,
       layer1Vars.rgbK,
@@ -256,54 +257,54 @@ void newStep() {
   }
   layer1.endDraw();
 
-  layer2.beginDraw();
-  layer2.translate(width * (1 - scale) / 2, height * (1 - scale) / 2);
-  layer2.scale(scale);
-  for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
-    if (colorTrailsLayer2[i].finished()) {
-      // colorTrailsLayer2[i].backToOrigin();
-      continue;
-    }
-    colorTrailsLayer2[i].update();
-    colorTrailsLayer2[i].colorString.displayStraight(
-      layer2,
-      layer2Vars.rgbK,
-      layer2Vars.baseColor,
-      layer2Vars.rgbOffset,
-      layer2Vars.omega
-    );
-    colorTrailsLayer2[i].colorString.displayOneInTwo(
-      layer2,
-      layer2Vars.rgbK,
-      layer2Vars.baseColor,
-      layer2Vars.rgbOffset,
-      layer2Vars.omega
-    );
-  }
-  layer2.endDraw();
+//   layer2.beginDraw();
+//   layer2.translate(width * (1 - scale) / 2, height * (1 - scale) / 2);
+//   layer2.scale(scale);
+//   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
+//     if (colorTrailsLayer2[i].finished()) {
+//       // colorTrailsLayer2[i].backToOrigin();
+//       continue;
+//     }
+//     colorTrailsLayer2[i].update();
+//     colorTrailsLayer2[i].colorString.displayStraight(
+//       layer2,
+//       layer2Vars.rgbK,
+//       layer2Vars.baseColor,
+//       layer2Vars.rgbOffset,
+//       layer2Vars.omega
+//     );
+//     colorTrailsLayer2[i].colorString.displayOneInTwo(
+//       layer2,
+//       layer2Vars.rgbK,
+//       layer2Vars.baseColor,
+//       layer2Vars.rgbOffset,
+//       layer2Vars.omega
+//     );
+//   }
+//   layer2.endDraw();
 
-  layer3.beginDraw();
-  for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
-    if (colorTrailsLayer3[i].finished()) {
-      continue;
-    }
-    colorTrailsLayer3[i].update();
-    colorTrailsLayer3[i].colorString.displayStraight(
-      layer3,
-      layer3Vars.rgbK,
-      layer3Vars.baseColor,
-      layer3Vars.rgbOffset,
-      layer3Vars.omega + i
-    );
-    colorTrailsLayer3[i].colorString.displayOneInTwo(
-      layer3,
-      layer3Vars.rgbK,
-      layer3Vars.baseColor,
-      layer3Vars.rgbOffset,
-      layer3Vars.omega + i
-    );
-  }
-  layer3.endDraw();
+//   layer3.beginDraw();
+//   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
+//     if (colorTrailsLayer3[i].finished()) {
+//       continue;
+//     }
+//     colorTrailsLayer3[i].update();
+//     colorTrailsLayer3[i].colorString.displayStraight(
+//       layer3,
+//       layer3Vars.rgbK,
+//       layer3Vars.baseColor,
+//       layer3Vars.rgbOffset,
+//       layer3Vars.omega + i
+//     );
+//     colorTrailsLayer3[i].colorString.displayOneInTwo(
+//       layer3,
+//       layer3Vars.rgbK,
+//       layer3Vars.baseColor,
+//       layer3Vars.rgbOffset,
+//       layer3Vars.omega + i
+//     );
+//   }
+//   layer3.endDraw();
 }
 
 // void mousePressed() {
