@@ -46,9 +46,9 @@ PGraphics layer3;
 
 boolean video = false;
 
-int SEED = 5;
-int NUM_COLOR_TRAILS = 3;
-int NUM_STEP_SEGMENTS = 10;
+int SEED = 2;
+int NUM_COLOR_TRAILS = 15;
+int NUM_STEP_SEGMENTS = 50;
 Bezier5Path[] beziers = new Bezier5Path[NUM_COLOR_TRAILS];
 
 ToxiColorTrail[] colorTrailsLayer1 = new ToxiColorTrail[NUM_COLOR_TRAILS];
@@ -63,13 +63,13 @@ LayerVariables layer3Vars = new LayerVariables();
 
 
 void setup() {
-  size(1000, 1000);
+  size(4000, 4000);
   smooth();
   randomSeed(SEED);
 
   layer1Vars.rgbK =           new float[] {     0.2    ,   0.2   ,   0.2  };
-  layer1Vars.rgbOffset =      new float[] {     2.2    ,   1.0   ,   0.2   };
-  layer1Vars.baseColor =      new int[]   {   255     , 255     , 255     };
+  layer1Vars.rgbOffset =      new float[] {     0      ,   0     ,   0    };
+  layer1Vars.baseColor =      new int[]   {   232      , 232     , 228     };
   layer1Vars.omega =          .5;
 
   layer2Vars.rgbK =           new float[] {     0.02  ,   0.02  ,   0.02  };
@@ -96,7 +96,7 @@ void setup() {
   Vec2D sidePointLayer3;
   Vec2D point2Layer3, point3Layer3, point4Layer3, point5Layer3;
 
-  int curveWidth = 800;
+  int curveWidth = width / 2;
 
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
     // startingPoint = randomPosition(new Rect(0, 0, width, height));
@@ -142,9 +142,9 @@ void setup() {
       physics,
       beziers[i],
       anglesLayer1,
-      3, 6,
-      100, 150,
-      4,
+      2, 2,
+      10, 50,
+      10,
       1,
       .001
     );
@@ -186,41 +186,50 @@ void setup() {
       anglesLayer3,
       2, 2,
       80, 120,
-      6,
+      10,
       1,
       .001
     );
   }
 
-  // int iterations = 1000;
-  // for (; iterations > 0; iterations--) {
-  //   newStep();
-  // }
+  int iterations = 3000;
+  for (; iterations > 0; iterations--) {
+    newStep();
+  }
 }
 
 void draw() {
-  background(0);
+  background(233, 232, 228);
+
   // image(layer3, 0, 0);
   // image(layer2, 0, 0);
   image(layer1, 0, 0);
-  if (video) {
-    saveFrame("out/screen-####.tif");
-    push();
-    fill(255, 0, 0);
-    noStroke();
-    ellipse(30, height - 30, 10, 10);
-    pop();
-  }
-  newStep();
+  saveCurrentFrame();
+
+  // if (video) {
+  //   saveFrame("out/screen-####.tif");
+  //   push();
+  //   fill(255, 0, 0);
+  //   noStroke();
+  //   ellipse(30, height - 30, 10, 10);
+  //   pop();
+  // }
+  // newStep();
 
   // noLoop();
+  exit();
+}
+
+void saveCurrentFrame() {
+  int date = (year() % 100) * 10000 + month() * 100 + day();
+  int time = hour() * 10000 + minute() * 100 + second();
+  saveFrame("out/seed-"+SEED+"_date-"+ date + "_time-"+ time + ".tif");
 }
 
 void keyPressed() {
   int number = randomInt(0, 100);
   if (key == ' ') {
-    saveFrame("out/screen-####.tif");
-    // layer1.save("out/screen-####.png");
+    saveCurrentFrame();
   }
   if (key == 'v') {
     video = !video;
@@ -257,54 +266,54 @@ void newStep() {
   }
   layer1.endDraw();
 
-//   layer2.beginDraw();
-//   layer2.translate(width * (1 - scale) / 2, height * (1 - scale) / 2);
-//   layer2.scale(scale);
-//   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
-//     if (colorTrailsLayer2[i].finished()) {
-//       // colorTrailsLayer2[i].backToOrigin();
-//       continue;
-//     }
-//     colorTrailsLayer2[i].update();
-//     colorTrailsLayer2[i].colorString.displayStraight(
-//       layer2,
-//       layer2Vars.rgbK,
-//       layer2Vars.baseColor,
-//       layer2Vars.rgbOffset,
-//       layer2Vars.omega
-//     );
-//     colorTrailsLayer2[i].colorString.displayOneInTwo(
-//       layer2,
-//       layer2Vars.rgbK,
-//       layer2Vars.baseColor,
-//       layer2Vars.rgbOffset,
-//       layer2Vars.omega
-//     );
-//   }
-//   layer2.endDraw();
+  // layer2.beginDraw();
+  // layer2.translate(width * (1 - scale) / 2, height * (1 - scale) / 2);
+  // layer2.scale(scale);
+  // for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
+  //   if (colorTrailsLayer2[i].finished()) {
+  //     // colorTrailsLayer2[i].backToOrigin();
+  //     continue;
+  //   }
+  //   colorTrailsLayer2[i].update();
+  //   colorTrailsLayer2[i].colorString.displayStraight(
+  //     layer2,
+  //     layer2Vars.rgbK,
+  //     layer2Vars.baseColor,
+  //     layer2Vars.rgbOffset,
+  //     layer2Vars.omega
+  //   );
+  //   colorTrailsLayer2[i].colorString.displayOneInTwo(
+  //     layer2,
+  //     layer2Vars.rgbK,
+  //     layer2Vars.baseColor,
+  //     layer2Vars.rgbOffset,
+  //     layer2Vars.omega
+  //   );
+  // }
+  // layer2.endDraw();
 
-//   layer3.beginDraw();
-//   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
-//     if (colorTrailsLayer3[i].finished()) {
-//       continue;
-//     }
-//     colorTrailsLayer3[i].update();
-//     colorTrailsLayer3[i].colorString.displayStraight(
-//       layer3,
-//       layer3Vars.rgbK,
-//       layer3Vars.baseColor,
-//       layer3Vars.rgbOffset,
-//       layer3Vars.omega + i
-//     );
-//     colorTrailsLayer3[i].colorString.displayOneInTwo(
-//       layer3,
-//       layer3Vars.rgbK,
-//       layer3Vars.baseColor,
-//       layer3Vars.rgbOffset,
-//       layer3Vars.omega + i
-//     );
-//   }
-//   layer3.endDraw();
+  layer3.beginDraw();
+  for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
+    if (colorTrailsLayer3[i].finished()) {
+      continue;
+    }
+    colorTrailsLayer3[i].update();
+    colorTrailsLayer3[i].colorString.displayStraight(
+      layer3,
+      layer3Vars.rgbK,
+      layer3Vars.baseColor,
+      layer3Vars.rgbOffset,
+      layer3Vars.omega + i
+    );
+    colorTrailsLayer3[i].colorString.displayOneInTwo(
+      layer3,
+      layer3Vars.rgbK,
+      layer3Vars.baseColor,
+      layer3Vars.rgbOffset,
+      layer3Vars.omega + i
+    );
+  }
+  layer3.endDraw();
 }
 
 // void mousePressed() {
