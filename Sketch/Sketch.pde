@@ -48,9 +48,10 @@ int realScale, realHeight, realWidth;
 
 boolean video = false;
 
-int SEED = 1;
-int NUM_COLOR_TRAILS = 15;
-int NUM_STEP_SEGMENTS = 50;
+int SEED = 6;
+int NUM_COLOR_TRAILS = 10;
+int NUM_STEP_SEGMENTS = 30;
+float CURVE_WIDTH_FACTOR = 1;
 Bezier5Path[] beziers = new Bezier5Path[NUM_COLOR_TRAILS];
 
 ToxiColorTrail[] colorTrailsLayer1 = new ToxiColorTrail[NUM_COLOR_TRAILS];
@@ -69,7 +70,7 @@ void setup() {
   smooth();
   randomSeed(SEED);
 
-  realScale = 4;
+  realScale = 1;
 
   realWidth = width * realScale;
   realHeight = height * realScale;
@@ -126,7 +127,7 @@ void setup() {
   Vec2D sidePointLayer3;
   Vec2D point2Layer3, point3Layer3, point4Layer3, point5Layer3;
 
-  int curveWidth = realWidth / 5;
+  int curveWidth = floor(CURVE_WIDTH_FACTOR * realWidth);
 
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
     startingPoint = new Vec2D(0, 0);
@@ -190,8 +191,8 @@ void setup() {
       beziers[i],
       anglesLayer2,
       2 * realScale, 5 * realScale,
-      100 * realScale, 150 * realScale,
-      10,
+      200 * realScale, 300 * realScale,
+      30,
       1,
       .1
     );
@@ -220,10 +221,10 @@ void setup() {
     );
   }
 
-  int iterations = 3000;
-  for (; iterations > 0; iterations--) {
-    newStep();
-  }
+  // int iterations = 1000;
+  // for (; iterations > 0; iterations--) {
+  //   newStep();
+  // }
 }
 
 void draw() {
@@ -232,19 +233,30 @@ void draw() {
   // image(layer3, 0, 0);
   image(layer2, 0, 0, width, height);
   image(layer1, 0, 0, width, height);
+  // textSize(30);
+  // fill(0);
+  // int seconds = floor(millis() / 1000);
+  // text(seconds + "s", 20, height - 120);
+  // if (seconds > 0) {
+  //   text(frameCount / seconds + "f/s", 20, height - 80);
+  // } else {
+  //   text("...f/s", 20, height - 80);
+  // }
+  // text(frameCount, 20, height - 40);
   // saveCurrentFrame();
 
-  // if (video) {
-  //   saveFrame("out/screen-####.tif");
-  //   push();
-  //   fill(255, 0, 0);
-  //   noStroke();
-  //   ellipse(30, height - 30, 10, 10);
-  //   pop();
-  // }
-  // newStep();
+  if (video) {
+    saveFrame("out/screen-####.tif");
+    push();
+    fill(255, 0, 0);
+    noStroke();
+    ellipse(30, height - 30, 10, 10);
+    pop();
+  }
 
-  noLoop();
+  newStep();
+
+  // noLoop();
   // exit();
 }
 
@@ -282,9 +294,11 @@ void newStep() {
   float scale = 1;
   layer1.translate(realWidth * (1 - scale) / 2, realHeight * (1 - scale) / 2);
   layer1.scale(scale);
+  // int layer1Skipped = 0;
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
     if (colorTrailsLayer1[i].finished()) {
-      // colorTrailsLayer1[i].backToOrigin();
+      colorTrailsLayer1[i].backToOrigin();
+      // layer1Skipped++;
       continue;
     }
     colorTrailsLayer1[i].update();
@@ -308,9 +322,11 @@ void newStep() {
   layer2.beginDraw();
   layer2.translate(realWidth * (1 - scale) / 2, realHeight * (1 - scale) / 2);
   layer2.scale(scale);
+  // int layer2Skipped = 0;
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
     if (colorTrailsLayer2[i].finished()) {
       // colorTrailsLayer2[i].backToOrigin();
+      // layer2Skipped++;
       continue;
     }
     colorTrailsLayer2[i].update();
@@ -330,6 +346,10 @@ void newStep() {
     );
   }
   layer2.endDraw();
+
+  // if (layer1Skipped == NUM_COLOR_TRAILS && layer2Skipped == NUM_COLOR_TRAILS) {
+
+  // }
 
   // layer3.beginDraw();
   // for(int i = 0; i < NUM_COLOR_TRAILS; i++) {

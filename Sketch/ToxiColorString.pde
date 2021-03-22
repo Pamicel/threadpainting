@@ -51,9 +51,13 @@ class ToxiColorString {
     float g = baseColor[1] * ((1 + cos((TWO_PI / rgbK[1]) * diam - omega + rgbOffset[1])) / 2);
     float b = baseColor[2] * ((1 + cos((TWO_PI / rgbK[2]) * diam - omega + rgbOffset[2])) / 2);
 
-    layer.noStroke();
-    layer.fill(r,g,b,alph);
-    layer.ellipse(position.x,position.y,diam,diam);
+    for(float d = diam; d > 1; d -= 2) {
+      layer.noFill();
+      layer.stroke(r,g,b,alph);
+      layer.strokeWeight(1);
+      float angle = random(-2, 1);
+      layer.arc(position.x, position.y, d, d, angle, angle + random(2, 3), OPEN);
+    }
   }
 
   public void display (PGraphics layer, float[] rgbK, int[] baseColor, float[] rgbOffset, float omega) {

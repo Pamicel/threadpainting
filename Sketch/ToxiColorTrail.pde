@@ -209,6 +209,13 @@ ToxiColorTrail ToxiColorTrailFromBezier(
     );
   }
 
+  // override last
+  targets[numSteps] = new ColorTrailTarget(
+    bezier.path[numSteps],
+    0,
+    angles[numSteps]
+  );
+
 
   return new ToxiColorTrail(
     physics,
