@@ -44,9 +44,11 @@ PGraphics layer1;
 PGraphics layer2;
 PGraphics layer3;
 
+int realScale, realHeight, realWidth;
+
 boolean video = false;
 
-int SEED = 2;
+int SEED = 1;
 int NUM_COLOR_TRAILS = 15;
 int NUM_STEP_SEGMENTS = 50;
 Bezier5Path[] beziers = new Bezier5Path[NUM_COLOR_TRAILS];
@@ -63,28 +65,56 @@ LayerVariables layer3Vars = new LayerVariables();
 
 
 void setup() {
-  size(4000, 4000);
+  size(1000, 1000);
   smooth();
   randomSeed(SEED);
 
-  layer1Vars.rgbK =           new float[] {     0.2    ,   0.2   ,   0.2  };
-  layer1Vars.rgbOffset =      new float[] {     0      ,   0     ,   0    };
-  layer1Vars.baseColor =      new int[]   {   232      , 232     , 228     };
-  layer1Vars.omega =          .5;
+  realScale = 4;
 
-  layer2Vars.rgbK =           new float[] {     0.02  ,   0.02  ,   0.02  };
-  layer2Vars.rgbOffset =      new float[] {     0     ,   0     ,   0     };
+  realWidth = width * realScale;
+  realHeight = height * realScale;
+
+  layer1Vars.rgbK = new float[] {
+    realScale * 80,
+    realScale * 80,
+    realScale * 80
+  };
+
+  layer1Vars.rgbOffset =      new float[] {
+    2.8,
+    2.8,
+    2.8
+  };
+  layer1Vars.baseColor = new int[] { 232, 232, 228 };
+  layer1Vars.omega = realScale * .5;
+
+  layer2Vars.rgbK = new float[] {
+    realScale * 175,
+    realScale * 175,
+    realScale * 175
+  };
+
+  layer2Vars.rgbOffset = new float[] {
+    5.5,
+    5.5,
+    5.5
+  };
   layer2Vars.baseColor =      new int[]   {   255     , 255     , 255     };
-  layer2Vars.omega =          .1;
+  layer2Vars.omega = realScale * .1;
 
-  layer3Vars.rgbK =           new float[] {     0     ,   0.06  ,   0.06  };
+  layer3Vars.rgbK = new float[] {
+    realScale * 0,
+    realScale * 50,
+    realScale * 50
+  };
+
   layer3Vars.rgbOffset =      new float[] {     0.1   ,  -3.2   ,   1.5   };
   layer3Vars.baseColor =      new int[]   {   255     , 255     , 255     };
-  layer3Vars.omega =          .1;
+  layer3Vars.omega = realScale * .1;
 
-  layer1 = createGraphics(width, height);
-  layer2 = createGraphics(width, height);
-  layer3 = createGraphics(width, height);
+  layer1 = createGraphics(realWidth, realHeight);
+  layer2 = createGraphics(realWidth, realHeight);
+  layer3 = createGraphics(realWidth, realHeight);
 
   physics = new VerletPhysics2D();
 
@@ -96,12 +126,10 @@ void setup() {
   Vec2D sidePointLayer3;
   Vec2D point2Layer3, point3Layer3, point4Layer3, point5Layer3;
 
-  int curveWidth = width / 2;
+  int curveWidth = realWidth / 5;
 
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
-    // startingPoint = randomPosition(new Rect(0, 0, width, height));
     startingPoint = new Vec2D(0, 0);
-    // sidePoint = randomPosition(new Rect(0, 0, randomInt(100, 400), 0));
     sidePoint = new Vec2D(randomInt(curveWidth / 10, curveWidth / 2), 0);
     point2 = startingPoint.copy().add(sidePoint);
     point5 = startingPoint.copy().sub(sidePoint);
@@ -114,7 +142,7 @@ void setup() {
     point5 = point5.rotate(angle);
     point3 = point3.rotate(angle);
     point4 = point4.rotate(angle);
-    Vec2D translation = new Vec2D(randomInt(width / 4, 3 * width / 4), randomInt(height / 4, 3 * height / 4));
+    Vec2D translation = new Vec2D(randomInt(realWidth / 4, 3 * realWidth / 4), randomInt(realHeight / 4, 3 * realHeight / 4));
     startingPoint = startingPoint.add(translation);
     point2 = point2.add(translation);
     point5 = point5.add(translation);
@@ -142,8 +170,8 @@ void setup() {
       physics,
       beziers[i],
       anglesLayer1,
-      2, 2,
-      10, 50,
+      2 * realScale, 2 * realScale,
+      10 * realScale, 50 * realScale,
       10,
       1,
       .001
@@ -161,14 +189,14 @@ void setup() {
       physics,
       beziers[i],
       anglesLayer2,
-      2, 5,
-      100, 150,
+      2 * realScale, 5 * realScale,
+      100 * realScale, 150 * realScale,
       10,
       1,
       .1
     );
 
-    startingPointLayer3 = randomPosition(new Rect(0, 0, width, height));
+    startingPointLayer3 = randomPosition(new Rect(0, 0, realWidth, realHeight));
     sidePointLayer3 = randomPosition(new Rect(0, 0, randomInt(100, 400), 0));
     point2Layer3 = startingPointLayer3.copy().add(sidePointLayer3);
     point5Layer3 = startingPointLayer3.copy().sub(sidePointLayer3);
@@ -182,10 +210,10 @@ void setup() {
     int paddingY = 200;
     colorTrailsLayer3[i] = randomToxiColorTrail(
       physics,
-      new Rect(paddingX, paddingY, width - (2 * paddingX), height - 2 * paddingY),
+      new Rect(paddingX, paddingY, realWidth - (2 * paddingX), realHeight - 2 * paddingY),
       anglesLayer3,
       2, 2,
-      80, 120,
+      80 * realScale, 120 * realScale,
       10,
       1,
       .001
@@ -202,9 +230,9 @@ void draw() {
   background(233, 232, 228);
 
   // image(layer3, 0, 0);
-  // image(layer2, 0, 0);
-  image(layer1, 0, 0);
-  saveCurrentFrame();
+  image(layer2, 0, 0, width, height);
+  image(layer1, 0, 0, width, height);
+  // saveCurrentFrame();
 
   // if (video) {
   //   saveFrame("out/screen-####.tif");
@@ -216,8 +244,8 @@ void draw() {
   // }
   // newStep();
 
-  // noLoop();
-  exit();
+  noLoop();
+  // exit();
 }
 
 void saveCurrentFrame() {
@@ -226,10 +254,21 @@ void saveCurrentFrame() {
   saveFrame("out/seed-"+SEED+"_date-"+ date + "_time-"+ time + ".tif");
 }
 
+void saveLayer(PGraphics layer, String layerName) {
+  int date = (year() % 100) * 10000 + month() * 100 + day();
+  int time = hour() * 10000 + minute() * 100 + second();
+  layer.save("out/layer-" + layerName + "_seed-"+SEED+"_date-"+ date + "_time-"+ time + ".tif");
+}
+
 void keyPressed() {
   int number = randomInt(0, 100);
   if (key == ' ') {
     saveCurrentFrame();
+  }
+  if (key == 'p') {
+    saveCurrentFrame();
+    saveLayer(layer1, "1");
+    saveLayer(layer2, "2");
   }
   if (key == 'v') {
     video = !video;
@@ -241,7 +280,7 @@ void newStep() {
   physics.update();
   layer1.beginDraw();
   float scale = 1;
-  layer1.translate(width * (1 - scale) / 2, height * (1 - scale) / 2);
+  layer1.translate(realWidth * (1 - scale) / 2, realHeight * (1 - scale) / 2);
   layer1.scale(scale);
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
     if (colorTrailsLayer1[i].finished()) {
@@ -266,54 +305,54 @@ void newStep() {
   }
   layer1.endDraw();
 
-  // layer2.beginDraw();
-  // layer2.translate(width * (1 - scale) / 2, height * (1 - scale) / 2);
-  // layer2.scale(scale);
-  // for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
-  //   if (colorTrailsLayer2[i].finished()) {
-  //     // colorTrailsLayer2[i].backToOrigin();
-  //     continue;
-  //   }
-  //   colorTrailsLayer2[i].update();
-  //   colorTrailsLayer2[i].colorString.displayStraight(
-  //     layer2,
-  //     layer2Vars.rgbK,
-  //     layer2Vars.baseColor,
-  //     layer2Vars.rgbOffset,
-  //     layer2Vars.omega
-  //   );
-  //   colorTrailsLayer2[i].colorString.displayOneInTwo(
-  //     layer2,
-  //     layer2Vars.rgbK,
-  //     layer2Vars.baseColor,
-  //     layer2Vars.rgbOffset,
-  //     layer2Vars.omega
-  //   );
-  // }
-  // layer2.endDraw();
-
-  layer3.beginDraw();
+  layer2.beginDraw();
+  layer2.translate(realWidth * (1 - scale) / 2, realHeight * (1 - scale) / 2);
+  layer2.scale(scale);
   for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
-    if (colorTrailsLayer3[i].finished()) {
+    if (colorTrailsLayer2[i].finished()) {
+      // colorTrailsLayer2[i].backToOrigin();
       continue;
     }
-    colorTrailsLayer3[i].update();
-    colorTrailsLayer3[i].colorString.displayStraight(
-      layer3,
-      layer3Vars.rgbK,
-      layer3Vars.baseColor,
-      layer3Vars.rgbOffset,
-      layer3Vars.omega + i
+    colorTrailsLayer2[i].update();
+    colorTrailsLayer2[i].colorString.displayStraight(
+      layer2,
+      layer2Vars.rgbK,
+      layer2Vars.baseColor,
+      layer2Vars.rgbOffset,
+      layer2Vars.omega
     );
-    colorTrailsLayer3[i].colorString.displayOneInTwo(
-      layer3,
-      layer3Vars.rgbK,
-      layer3Vars.baseColor,
-      layer3Vars.rgbOffset,
-      layer3Vars.omega + i
+    colorTrailsLayer2[i].colorString.displayOneInTwo(
+      layer2,
+      layer2Vars.rgbK,
+      layer2Vars.baseColor,
+      layer2Vars.rgbOffset,
+      layer2Vars.omega
     );
   }
-  layer3.endDraw();
+  layer2.endDraw();
+
+  // layer3.beginDraw();
+  // for(int i = 0; i < NUM_COLOR_TRAILS; i++) {
+  //   if (colorTrailsLayer3[i].finished()) {
+  //     continue;
+  //   }
+  //   colorTrailsLayer3[i].update();
+  //   colorTrailsLayer3[i].colorString.displayStraight(
+  //     layer3,
+  //     layer3Vars.rgbK,
+  //     layer3Vars.baseColor,
+  //     layer3Vars.rgbOffset,
+  //     layer3Vars.omega + i
+  //   );
+  //   colorTrailsLayer3[i].colorString.displayOneInTwo(
+  //     layer3,
+  //     layer3Vars.rgbK,
+  //     layer3Vars.baseColor,
+  //     layer3Vars.rgbOffset,
+  //     layer3Vars.omega + i
+  //   );
+  // }
+  // layer3.endDraw();
 }
 
 // void mousePressed() {

@@ -46,12 +46,11 @@ class ToxiColorString {
     float[] rgbOffset,
     float omega
   ) {
-    // float alph = (1 + cos(k * diam - omega)) * 50;
     float alph = 100.0;
-    float r = baseColor[0] * ((1 + cos(rgbK[0] * diam - omega + rgbOffset[0])) / 2);
-    float g = baseColor[1] * ((1 + cos(rgbK[1] * diam - omega + rgbOffset[1])) / 2);
-    float b = baseColor[2] * ((1 + cos(rgbK[2] * diam - omega + rgbOffset[2])) / 2);
-    // float alph = 100.0;
+    float r = baseColor[0] * ((1 + cos((TWO_PI / rgbK[0]) * diam - omega + rgbOffset[0])) / 2);
+    float g = baseColor[1] * ((1 + cos((TWO_PI / rgbK[1]) * diam - omega + rgbOffset[1])) / 2);
+    float b = baseColor[2] * ((1 + cos((TWO_PI / rgbK[2]) * diam - omega + rgbOffset[2])) / 2);
+
     layer.noStroke();
     layer.fill(r,g,b,alph);
     layer.ellipse(position.x,position.y,diam,diam);
