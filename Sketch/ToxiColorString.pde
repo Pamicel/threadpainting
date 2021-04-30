@@ -46,18 +46,24 @@ class ToxiColorString {
     float[] rgbOffset,
     float omega
   ) {
-    float alph = 100.0;
-    float r = baseColor[0] * ((1 + cos((TWO_PI / rgbK[0]) * diam - omega + rgbOffset[0])) / 2);
-    float g = baseColor[1] * ((1 + cos((TWO_PI / rgbK[1]) * diam - omega + rgbOffset[1])) / 2);
-    float b = baseColor[2] * ((1 + cos((TWO_PI / rgbK[2]) * diam - omega + rgbOffset[2])) / 2);
+    // float alph = 100.0;
+    // float r = baseColor[0] * ((1 + cos((TWO_PI / rgbK[0]) * diam - omega + rgbOffset[0])) / 2);
+    // float g = baseColor[1] * ((1 + cos((TWO_PI / rgbK[1]) * diam - omega + rgbOffset[1])) / 2);
+    // float b = baseColor[2] * ((1 + cos((TWO_PI / rgbK[2]) * diam - omega + rgbOffset[2])) / 2);
 
-    for(float d = diam; d > 1; d -= 2) {
-      layer.noFill();
-      layer.stroke(r,g,b,alph);
-      layer.strokeWeight(1);
-      float angle = random(-2, 1);
-      layer.arc(position.x, position.y, d, d, angle, angle + random(2, 3), OPEN);
-    }
+    layer.push();
+    // layer.stroke(r,g,b,alph);
+    layer.stroke(255);
+    layer.point(position.x, position.y);
+    layer.pop();
+
+    // for(float d = diam; d > 1; d -= 2) {
+    //   layer.noFill();
+    //   layer.stroke(r,g,b,alph);
+    //   layer.strokeWeight(1);
+    //   float angle = random(-2, 1);
+    //   layer.arc(position.x, position.y, d, d, angle, angle + random(2, 3), OPEN);
+    // }
   }
 
   public void display (PGraphics layer, float[] rgbK, int[] baseColor, float[] rgbOffset, float omega) {

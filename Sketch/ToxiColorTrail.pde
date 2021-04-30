@@ -113,7 +113,6 @@ class ToxiColorTrail {
 
   public void update () {
     if (this.finished()) {
-      println("finished");
       return;
     }
 
@@ -181,6 +180,38 @@ class ToxiColorTrail {
   }
 }
 
+ToxiColorTrail ToxiColorTrailFromPositions(
+  VerletPhysics2D physics,
+  Vec2D[] positions,
+  float[] angles,
+  float[] speeds,
+  int[] radii,
+  int nLinks,
+  float mass,
+  float strength
+) {
+  int numSteps = positions.length - 1;
+  ColorTrailTarget[] targets = new ColorTrailTarget[numSteps + 1];
+
+  for (int i = 0; i < numSteps + 1; i++) {
+    targets[i] = new ColorTrailTarget(
+      positions[i],
+      radii[i],
+      angles[i]
+    );
+  }
+
+
+  return new ToxiColorTrail(
+    physics,
+    speeds,
+    targets,
+    nLinks, // Links
+    mass, // Mass
+    strength // Strength
+  );
+}
+
 ToxiColorTrail ToxiColorTrailFromBezier(
   VerletPhysics2D physics,
   Bezier5Path bezier,
@@ -195,35 +226,26 @@ ToxiColorTrail ToxiColorTrailFromBezier(
 ) {
   int numSteps = bezier.path.length - 1;
   float[] speeds = new float[numSteps];
-  ColorTrailTarget[] targets = new ColorTrailTarget[numSteps + 1];
+  int[] radii = new int[numSteps];
 
-  for (int i = 0; i < numSteps + 1; i++) {
-    if (i < numSteps) {
-      speeds[i] = random(minSpeed, maxSpeed);
-    }
-
-    targets[i] = new ColorTrailTarget(
-      bezier.path[i],
-      randomInt(minRadius, maxRadius),
-      angles[i]
-    );
+  // create speeds
+  for (int i = 0; i < numSteps; i++) {
+    speeds[i] = random(minSpeed, maxSpeed);
+    radii[i] = randomInt(minRadius, maxRadius);
   }
 
-  // override last
-  targets[numSteps] = new ColorTrailTarget(
-    bezier.path[numSteps],
-    0,
-    angles[numSteps]
-  );
+  // Make it shrink at the end
+  radii[numSteps] = 0;
 
-
-  return new ToxiColorTrail(
+  return ToxiColorTrailFromPositions(
     physics,
+    bezier.path,
+    angles,
     speeds,
-    targets,
-    links, // Links
-    mass, // Mass
-    strength // Strength
+    radii,
+    links,
+    mass,
+    strength
   );
 }
 
