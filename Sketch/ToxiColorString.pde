@@ -47,17 +47,17 @@ class ToxiColorString {
     float omega
   ) {
     float alph = 100.0;
-    float r = baseColor[0] * ((1 + cos((TWO_PI / rgbK[0]) * diam - omega + rgbOffset[0])) / 2);
-    float g = baseColor[1] * ((1 + cos((TWO_PI / rgbK[1]) * diam - omega + rgbOffset[1])) / 2);
-    float b = baseColor[2] * ((1 + cos((TWO_PI / rgbK[2]) * diam - omega + rgbOffset[2])) / 2);
+    float r = 0;
+    float g = 0;
+    float b = 0;
 
-    for(float d = diam; d > 1; d -= 2) {
-      layer.noFill();
-      layer.stroke(r,g,b,alph);
-      layer.strokeWeight(1);
-      float angle = random(-2, 1);
-      layer.arc(position.x, position.y, d, d, angle, angle + random(2, 3), OPEN);
-    }
+    // for(float d = diam; d > 1; d -= 2) {
+      layer.fill(0);
+      // layer.stroke(0);
+      // layer.strokeWeight(diam / 10);
+      layer.ellipse(position.x, position.y, diam, diam);
+      // layer.line(position.x, position.y, position.x + diam, position.y + diam);
+    // }
   }
 
   public void display (PGraphics layer, float[] rgbK, int[] baseColor, float[] rgbOffset, float omega) {

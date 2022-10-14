@@ -1,0 +1,9 @@
+{
+  "nLinks": 20,
+  "displayFunction": "oneInTwo",
+  "baseDiameter": 4,
+  "color": 0,
+  "strengh": 0.001,
+  "nLoops": 1,
+  "animate": true
+}
