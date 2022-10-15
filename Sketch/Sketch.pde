@@ -46,14 +46,14 @@ int realScale, realHeight, realWidth;
 
 boolean video = false;
 
-int SEED = 1;
+int SEED = 5;
 float LAYER_SCALE = .1;
 int SCALE = 1;
-float MIN_SPEED_FACTOR = 30;
-float MAX_SPEED_FACTOR = 50;
-int MIN_RADIUS_FACTOR = 10;
-int MAX_RADIUS_FACTOR = 1000;
-int N_LINKS = 10;
+float MIN_SPEED_FACTOR = 5;
+float MAX_SPEED_FACTOR = 10;
+int MIN_RADIUS_FACTOR = 100;
+int MAX_RADIUS_FACTOR = 2000;
+int N_LINKS = 100;
 float MASS = 1;
 float STRENGTH = .01;
 int[] STARTING_POINT_COORD = new int[]{500, -300};
@@ -171,12 +171,26 @@ void newStep() {
   layer1.beginDraw();
   layer1.scale(LAYER_SCALE);
   colorTrail.update();
-  colorTrail.colorString.displayOneInTwo(
+  colorTrail.colorString.display(
     layer1,
     layer1Vars.rgbK,
     layer1Vars.baseColor,
     layer1Vars.rgbOffset,
     layer1Vars.omega
   );
+  // colorTrail.colorString.displayOneInTwo(
+  //   layer1,
+  //   layer1Vars.rgbK,
+  //   layer1Vars.baseColor,
+  //   layer1Vars.rgbOffset,
+  //   layer1Vars.omega
+  // );
+  // colorTrail.colorString.displayStraight(
+  //   layer1,
+  //   layer1Vars.rgbK,
+  //   layer1Vars.baseColor,
+  //   layer1Vars.rgbOffset,
+  //   layer1Vars.omega
+  // );
   layer1.endDraw();
 }

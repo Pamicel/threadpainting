@@ -82,10 +82,8 @@ class ToxiColorTrail {
       headPositions,
       tailPositions
     );
-    println("createColorTrail - steps created");
 
     this.colorString = new ToxiColorString(physics, headPositions[0], tailPositions[0], numLinks, mass, strength);
-    println("createColorTrail - ToxiColorString created");
     this.head = colorString.head;
     this.tail = colorString.tail;
   }
@@ -115,7 +113,6 @@ class ToxiColorTrail {
 
   public void update () {
     if (this.finished()) {
-      println("finished");
       return;
     }
 
@@ -246,16 +243,13 @@ ToxiColorTrail ToxiColorTrailFromCurve(
   ColorTrailTarget[] targets = new ColorTrailTarget[numTargetPoints];
 
   float[] angles = new float[numTargetPoints];
-  println(numTargetPoints);
   for (int pointIndex = 0; pointIndex < numTargetPoints; pointIndex++) {
-    println(pointIndex);
     if (pointIndex < (numTargetPoints - 1)) {
-      angles[pointIndex] = curve.get(pointIndex + 1).sub(curve.get(pointIndex)).angleBetween(new Vec2D(0, 1), true);
+      angles[pointIndex] = curve.get(pointIndex + 1).angleBetween(curve.get(pointIndex), true);
     } else {
-      angles[pointIndex] = curve.get(pointIndex).sub(curve.get(pointIndex - 1)).angleBetween(new Vec2D(0, 1), true);
+      angles[pointIndex] = curve.get(pointIndex).angleBetween(curve.get(pointIndex - 1), true);
     }
   }
-  println("angles created");
 
   for (int i = 0; i < numTargetPoints; i++) {
     if (i < numSegments) {
@@ -268,7 +262,6 @@ ToxiColorTrail ToxiColorTrailFromCurve(
       angles[i]
     );
   }
-  println("target points created");
 
   // override last
   targets[numTargetPoints - 1] = new ColorTrailTarget(
@@ -276,7 +269,6 @@ ToxiColorTrail ToxiColorTrailFromCurve(
     0,
     angles[numTargetPoints - 1]
   );
-  println("last target created");
 
   return new ToxiColorTrail(
     physics,
