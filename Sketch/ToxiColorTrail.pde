@@ -244,10 +244,11 @@ ToxiColorTrail ToxiColorTrailFromCurve(
 
   float[] angles = new float[numTargetPoints];
   for (int pointIndex = 0; pointIndex < numTargetPoints; pointIndex++) {
+    float randomAngle = random(-PI / 4, PI / 4);
     if (pointIndex < (numTargetPoints - 1)) {
-      angles[pointIndex] = curve.get(pointIndex + 1).angleBetween(curve.get(pointIndex), true);
+      angles[pointIndex] = curve.get(pointIndex + 1).angleBetween(curve.get(pointIndex), true) + randomAngle;
     } else {
-      angles[pointIndex] = curve.get(pointIndex).angleBetween(curve.get(pointIndex - 1), true);
+      angles[pointIndex] = curve.get(pointIndex).angleBetween(curve.get(pointIndex - 1), true) + randomAngle;
     }
   }
 
