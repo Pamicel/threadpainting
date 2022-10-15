@@ -46,6 +46,7 @@ int realScale, realHeight, realWidth;
 
 boolean video = false;
 
+// Default variables
 int SEED = 5;
 float LAYER_SCALE = .1;
 int SCALE = 1;
@@ -54,11 +55,9 @@ float MAX_SPEED_FACTOR = 10;
 int MIN_RADIUS_FACTOR = 100;
 int MAX_RADIUS_FACTOR = 2000;
 int N_LINKS = 100;
-float MASS = 1;
 float STRENGTH = .01;
-int[] STARTING_POINT_COORD = new int[]{500, -300};
-int[] SIDE_POINT_COORD = new int[]{1500, 300};
 
+float MASS = 1;
 boolean SECONDARY_MONITOR = false;
 int[] DISPLAY_WIN_XY = SECONDARY_MONITOR ? new int[]{600, -2000} : new int[]{50, 50};
 
@@ -79,7 +78,19 @@ ArrayList<Vec2D> loadCurve() {
   return curve;
 }
 
+void loadVariables() {
+  JSONObject variables = loadJSONObject("data/variables.json");
+  SEED = variables.getInt("seed");
+  MIN_SPEED_FACTOR = variables.getFloat("minSpeedFactor");
+  MAX_SPEED_FACTOR = variables.getFloat("maxSpeedFactor");
+  MIN_RADIUS_FACTOR = variables.getInt("minRadiusFactor");
+  MAX_RADIUS_FACTOR = variables.getInt("maxRadiusFactor");
+  N_LINKS = variables.getInt("nLinks");
+  STRENGTH = variables.getFloat("strength");
+}
+
 void init() {
+  loadVariables();
   randomSeed(SEED);
   colorTrail = ToxiColorTrailFromCurve(
     physics,

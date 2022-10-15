@@ -1,0 +1,9 @@
+{
+  "seed": 3,
+  "minSpeedFactor": 10,
+  "maxSpeedFactor": 20,
+  "minRadiusFactor": 10,
+  "maxRadiusFactor": 2000,
+  "nLinks": 5,
+  "strength": 0.01
+}
