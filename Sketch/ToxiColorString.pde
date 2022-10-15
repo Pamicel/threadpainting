@@ -57,7 +57,9 @@ class ToxiColorString {
     // for(float d = diam; d > 1; d -= 2) {
       layer.fill(0);
       // layer.stroke(0);
-      // layer.strokeWeight(diam / 10);
+      // layer.strokeWeight(diam / 5);
+      // layer.strokeWeight(1);
+      // layer.noFill();
       layer.ellipse(position.x, position.y, diam, diam);
       // layer.line(position.x, position.y, position.x + diam, position.y + diam);
     // }
