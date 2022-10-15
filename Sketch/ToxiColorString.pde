@@ -16,6 +16,7 @@ class ToxiColorString {
     numParticles = numLinks + 1;
 
     Vec2D stepVector = this.stepVec(headStartPos, tailStartPos, numLinks);
+    println("ToxiColorString - stepVector created");
 
     this.pString = new ParticleString2D(
       physics,
@@ -25,6 +26,8 @@ class ToxiColorString {
       mass,
       strength
     );
+
+    println("ToxiColorString - ParticleString2D created");
 
     this.head = pString.getHead();
     this.tail = pString.getTail();

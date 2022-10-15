@@ -82,8 +82,10 @@ class ToxiColorTrail {
       headPositions,
       tailPositions
     );
+    println("createColorTrail - steps created");
 
     this.colorString = new ToxiColorString(physics, headPositions[0], tailPositions[0], numLinks, mass, strength);
+    println("createColorTrail - ToxiColorString created");
     this.head = colorString.head;
     this.tail = colorString.tail;
   }
@@ -216,6 +218,65 @@ ToxiColorTrail ToxiColorTrailFromBezier(
     angles[numSteps]
   );
 
+
+  return new ToxiColorTrail(
+    physics,
+    speeds,
+    targets,
+    links, // Links
+    mass, // Mass
+    strength // Strength
+  );
+}
+
+ToxiColorTrail ToxiColorTrailFromCurve(
+  VerletPhysics2D physics,
+  ArrayList<Vec2D> curve,
+  float minSpeed,
+  float maxSpeed,
+  int minRadius,
+  int maxRadius,
+  int links,
+  float mass,
+  float strength
+) {
+  int numTargetPoints = curve.size();
+  int numSegments = numTargetPoints - 1;
+  float[] speeds = new float[numSegments];
+  ColorTrailTarget[] targets = new ColorTrailTarget[numTargetPoints];
+
+  float[] angles = new float[numTargetPoints];
+  println(numTargetPoints);
+  for (int pointIndex = 0; pointIndex < numTargetPoints; pointIndex++) {
+    println(pointIndex);
+    if (pointIndex < (numTargetPoints - 1)) {
+      angles[pointIndex] = curve.get(pointIndex + 1).sub(curve.get(pointIndex)).angleBetween(new Vec2D(0, 1), true);
+    } else {
+      angles[pointIndex] = curve.get(pointIndex).sub(curve.get(pointIndex - 1)).angleBetween(new Vec2D(0, 1), true);
+    }
+  }
+  println("angles created");
+
+  for (int i = 0; i < numTargetPoints; i++) {
+    if (i < numSegments) {
+      speeds[i] = random(minSpeed, maxSpeed);
+    }
+
+    targets[i] = new ColorTrailTarget(
+      curve.get(i),
+      randomInt(minRadius, maxRadius),
+      angles[i]
+    );
+  }
+  println("target points created");
+
+  // override last
+  targets[numTargetPoints - 1] = new ColorTrailTarget(
+    curve.get(numTargetPoints - 1),
+    0,
+    angles[numTargetPoints - 1]
+  );
+  println("last target created");
 
   return new ToxiColorTrail(
     physics,
