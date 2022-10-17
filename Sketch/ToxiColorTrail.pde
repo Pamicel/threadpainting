@@ -7,7 +7,7 @@ class ColorTrailTarget {
     int radius,
     float angle
   ) {
-    Vec2D radiusVector = new Vec2D(radius * cos(angle), radius * sin(angle));
+    Vec2D radiusVector = new Vec2D(radius * sin(angle), radius * cos(angle));
     this.headPosition = position.copy().add(radiusVector);
     this.tailPosition = position.copy().sub(radiusVector);
   }
@@ -228,27 +228,28 @@ ToxiColorTrail ToxiColorTrailFromBezier(
 
 ToxiColorTrail ToxiColorTrailFromCurve(
   VerletPhysics2D physics,
-  ArrayList<Vec2D> curve,
+  Vec2D[] curve,
   float minSpeed,
   float maxSpeed,
   int minRadius,
   int maxRadius,
   int links,
   float mass,
-  float strength
+  float strength,
+  float angleVariability
 ) {
-  int numTargetPoints = curve.size();
+  int numTargetPoints = curve.length;
   int numSegments = numTargetPoints - 1;
   float[] speeds = new float[numSegments];
   ColorTrailTarget[] targets = new ColorTrailTarget[numTargetPoints];
 
   float[] angles = new float[numTargetPoints];
   for (int pointIndex = 0; pointIndex < numTargetPoints; pointIndex++) {
-    float randomAngle = random(-PI / 4, PI / 4);
+    float randomAngle = random(-PI, PI) * angleVariability;
     if (pointIndex < (numTargetPoints - 1)) {
-      angles[pointIndex] = curve.get(pointIndex + 1).angleBetween(curve.get(pointIndex), true) + randomAngle;
+      angles[pointIndex] = curve[pointIndex + 1].sub(curve[pointIndex]).angleBetween(new Vec2D(1, 0), true) + randomAngle;
     } else {
-      angles[pointIndex] = curve.get(pointIndex).angleBetween(curve.get(pointIndex - 1), true) + randomAngle;
+      angles[pointIndex] = curve[pointIndex].sub(curve[pointIndex - 1]).angleBetween(new Vec2D(1, 0), true) + randomAngle;
     }
   }
 
@@ -258,7 +259,7 @@ ToxiColorTrail ToxiColorTrailFromCurve(
     }
 
     targets[i] = new ColorTrailTarget(
-      curve.get(i),
+      curve[i],
       randomInt(minRadius, maxRadius),
       angles[i]
     );
@@ -266,7 +267,7 @@ ToxiColorTrail ToxiColorTrailFromCurve(
 
   // override last
   targets[numTargetPoints - 1] = new ColorTrailTarget(
-    curve.get(numTargetPoints - 1),
+    curve[numTargetPoints - 1],
     0,
     angles[numTargetPoints - 1]
   );

@@ -1,9 +1,30 @@
 {
-  "seed": 3,
+  "seed": 4,
+
   "minSpeedFactor": 10,
   "maxSpeedFactor": 20,
-  "minRadiusFactor": 10,
+  "minRadiusFactor": 100,
   "maxRadiusFactor": 2000,
-  "nLinks": 5,
-  "strength": 0.01
+  "nLinks": 10,
+  "strength": 0.1,
+  "angleVariability": 0.1,
+
+  "resample": true,
+  "resampleRegular": false,
+  "resampleLen": 50,
+
+  "stepsPerDraw": 50,
+
+  "backgroundColor": [ 233, 232, 228 ],
+  "rgbK": [
+    0,
+    0,
+    0
+  ],
+  "baseColor": [
+    0,
+    0,
+    0
+  ],
+  "colorOmegaTwoPi": 0.5
 }

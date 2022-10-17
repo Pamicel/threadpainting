@@ -1,3 +1,13 @@
+float smoothstep (float edge0, float edge1, float x) {
+   if (x < edge0)
+      return 0;
+   if (x >= edge1)
+      return 1;
+   // Scale/bias into [0..1] range
+   x = (x - edge0) / (edge1 - edge0);
+   return x * x * (3 - 2 * x);
+}
+
 class ToxiColorString {
   public VerletParticle2D head, tail;
   public ParticleString2D pString;
@@ -50,22 +60,25 @@ class ToxiColorString {
     float omega
   ) {
     float alph = 100.0;
-    float r = 0;
-    float g = 0;
-    float b = 0;
-
-    // for(float d = diam; d > 1; d -= 2) {
-      layer.fill(0);
-      // layer.stroke(0);
-      // layer.strokeWeight(diam / 5);
-      // layer.strokeWeight(1);
-      // layer.noFill();
-      layer.ellipse(position.x, position.y, diam, diam);
-      // layer.line(position.x, position.y, position.x + diam, position.y + diam);
-    // }
+    float r = baseColor[0];
+    float g = baseColor[1];
+    float b = baseColor[2];
+    // float r = baseColor[0] + 255 * smoothstep(.04, .2, (diam * layerScale) / layer.width);
+    // float g = baseColor[1] + 255 * smoothstep(.04, .2, (diam * layerScale) / layer.width);
+    // float b = baseColor[2] + 255 * smoothstep(.04, .2, (diam * layerScale) / layer.width);
+    // float alph = 100.0;
+    layer.noStroke();
+    layer.fill(r,g,b,alph);
+    layer.ellipse(position.x,position.y,diam,diam);
   }
 
-  public void display (PGraphics layer, float[] rgbK, int[] baseColor, float[] rgbOffset, float omega) {
+  public void display (
+    PGraphics layer,
+    float[] rgbK,
+    int[] baseColor,
+    float[] rgbOffset,
+    float omega
+  ) {
     Iterator particleIterator = this.pString.particles.iterator();
 
     // Initialize
@@ -90,7 +103,13 @@ class ToxiColorString {
     }
   }
 
-  public void displayOneInTwo (PGraphics layer, float[] rgbK, int[] baseColor, float[] rgbOffset, float omega) {
+  public void displayOneInTwo (
+    PGraphics layer,
+    float[] rgbK,
+    int[] baseColor,
+    float[] rgbOffset,
+    float omega
+  ) {
     Iterator particleIterator = this.pString.particles.iterator();
 
     // Initialize
@@ -120,7 +139,13 @@ class ToxiColorString {
     }
   }
 
-  public void displayStraight (PGraphics layer, float[] rgbK, int[] baseColor, float[] rgbOffset, float omega) {
+  public void displayStraight (
+    PGraphics layer,
+    float[] rgbK,
+    int[] baseColor,
+    float[] rgbOffset,
+    float omega
+  ) {
     Vec2D step = stepVec(this.head, this.tail, this.numLinks);
     Vec2D centerPos = this.head.copy().add(step.copy().normalizeTo(step.magnitude() / 2));
 
@@ -149,15 +174,29 @@ class ToxiColorString {
     }
   }
 
-  public void displaySkeleton() {
-    stroke(255,100);
-    noFill();
-    beginShape();
+  public void displaySkeleton(
+    PGraphics layer
+  ) {
+    layer.stroke(0);
+    layer.strokeWeight(10);
+    layer.noFill();
+    layer.beginShape();
     for(Iterator i=this.pString.particles.iterator(); i.hasNext();) {
       VerletParticle2D p=(VerletParticle2D)i.next();
-      vertex(p.x,p.y);
+      layer.vertex(p.x,p.y);
     }
-    endShape();
+    layer.endShape();
+  }
+
+  public void displayPoints(
+    PGraphics layer
+  ) {
+    layer.fill(0);
+    layer.noStroke();
+    for(Iterator i=this.pString.particles.iterator(); i.hasNext();) {
+      VerletParticle2D p=(VerletParticle2D)i.next();
+      layer.ellipse(p.x,p.y, 10, 10);
+    }
   }
 
   public void debugHead() {

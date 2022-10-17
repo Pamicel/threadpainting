@@ -56,6 +56,15 @@ int MIN_RADIUS_FACTOR = 100;
 int MAX_RADIUS_FACTOR = 2000;
 int N_LINKS = 100;
 float STRENGTH = .01;
+int STEPS_PER_DRAW = 20;
+int[] BACKGROUND_COLOR = new int[] { 0, 0, 0 };
+int[] BASE_COLOR = new int[] { 0, 0, 0 };
+float[] RGB_K = new float[] { 1, 1, 1 };
+float COLOR_OMEGA_TWO_PI = -1;
+float ANGLE_VARIABILITY = 1.0;
+boolean RESAMPLE = false;
+boolean RESAMPLE_REGULAR = false;
+int RESAMPLE_LEN = 12;
 
 float MASS = 1;
 boolean SECONDARY_MONITOR = false;
@@ -66,14 +75,20 @@ LayerVariables layer1Vars = new LayerVariables();
 
 /* */
 
-ArrayList<Vec2D> loadCurve() {
-  ArrayList<Vec2D> curve = new ArrayList<Vec2D>();
+Vec2D[] loadCurve() {
   JSONArray objectCurve = loadJSONArray("data/curve.json");
+  Vec2D[] curve = new Vec2D[objectCurve.size()];
   for (int i = 0; i < objectCurve.size(); i++) {
     JSONObject point = objectCurve.getJSONObject(i);
     float x = point.getFloat("x") / LAYER_SCALE;
     float y = point.getFloat("y") / LAYER_SCALE;
-    curve.add(new Vec2D(x, y));
+    curve[i] = new Vec2D(x, y);
+  }
+  if (RESAMPLE && RESAMPLE_LEN != 0) {
+    if (RESAMPLE_REGULAR) {
+      return regularResample(curve, RESAMPLE_LEN);
+    }
+    return resample(curve, RESAMPLE_LEN);
   }
   return curve;
 }
@@ -87,11 +102,41 @@ void loadVariables() {
   MAX_RADIUS_FACTOR = variables.getInt("maxRadiusFactor");
   N_LINKS = variables.getInt("nLinks");
   STRENGTH = variables.getFloat("strength");
+  ANGLE_VARIABILITY = variables.getFloat("angleVariability");
+
+  RESAMPLE = variables.getBoolean("resample");
+  RESAMPLE_REGULAR = variables.getBoolean("resampleRegular");
+  RESAMPLE_LEN = variables.getInt("resampleLen");
+
+  // Rendering
+  STEPS_PER_DRAW = variables.getInt("stepsPerDraw");
+
+  // Colors
+  COLOR_OMEGA_TWO_PI = variables.getFloat("colorOmegaTwoPi");
+  JSONArray backgroundColor = variables.getJSONArray("backgroundColor");
+  for (int i = 0; i < BACKGROUND_COLOR.length; i++) {
+    BACKGROUND_COLOR[i] = backgroundColor.getInt(i);
+  }
+  JSONArray baseColor = variables.getJSONArray("baseColor");
+  for (int i = 0; i < BASE_COLOR.length; i++) {
+    BASE_COLOR[i] = baseColor.getInt(i);
+  }
+  JSONArray rgbK = variables.getJSONArray("rgbK");
+  for (int i = 0; i < BASE_COLOR.length; i++) {
+    RGB_K[i] = rgbK.getFloat(i);
+  }
 }
 
 void init() {
   loadVariables();
+
+  layer1Vars.rgbK = RGB_K;
+  layer1Vars.rgbOffset = new float[] { 0, 0, 0 };
+  layer1Vars.baseColor = BASE_COLOR;
+  layer1Vars.omega = COLOR_OMEGA_TWO_PI * TWO_PI;
+
   randomSeed(SEED);
+
   colorTrail = ToxiColorTrailFromCurve(
     physics,
     loadCurve(),
@@ -99,8 +144,10 @@ void init() {
     MIN_RADIUS_FACTOR * realScale, MAX_RADIUS_FACTOR * realScale,
     N_LINKS,
     MASS,
-    STRENGTH
+    STRENGTH,
+    ANGLE_VARIABILITY
   );
+
   layer1.beginDraw();
   layer1.clear();
   layer1.endDraw();
@@ -118,19 +165,6 @@ void setup() {
   realWidth = width * realScale;
   realHeight = height * realScale;
 
-  layer1Vars.rgbK = new float[] {
-    realScale * 175,
-    realScale * 175,
-    realScale * 175
-  };
-
-  layer1Vars.rgbOffset = new float[] {
-    5.5,
-    5.5,
-    5.5
-  };
-  layer1Vars.baseColor =      new int[]   {   255     , 255     , 255     };
-  layer1Vars.omega = realScale * .1;
 
   layer1 = createGraphics(realWidth, realHeight);
 
@@ -139,9 +173,11 @@ void setup() {
 }
 
 void draw() {
-  background(233, 232, 228);
+  background(BACKGROUND_COLOR[0], BACKGROUND_COLOR[1], BACKGROUND_COLOR[2]);
   image(layer1, 0, 0, width, height);
-  newStep();
+  for(int i = 0; i < STEPS_PER_DRAW; i++) {
+    newStep();
+  }
 }
 
 void saveCurrentFrame() {
@@ -182,19 +218,25 @@ void newStep() {
   layer1.beginDraw();
   layer1.scale(LAYER_SCALE);
   colorTrail.update();
-  colorTrail.colorString.display(
-    layer1,
-    layer1Vars.rgbK,
-    layer1Vars.baseColor,
-    layer1Vars.rgbOffset,
-    layer1Vars.omega
-  );
+  // colorTrail.colorString.display(
+  //   layer1,
+  //   layer1Vars.rgbK,
+  //   layer1Vars.baseColor,
+  //   layer1Vars.rgbOffset,
+  //   layer1Vars.omega
+  // );
   // colorTrail.colorString.displayOneInTwo(
   //   layer1,
   //   layer1Vars.rgbK,
   //   layer1Vars.baseColor,
   //   layer1Vars.rgbOffset,
   //   layer1Vars.omega
+  // );
+  colorTrail.colorString.displaySkeleton(
+    layer1
+  );
+  // colorTrail.colorString.displayPoints(
+  //   layer1
   // );
   // colorTrail.colorString.displayStraight(
   //   layer1,
