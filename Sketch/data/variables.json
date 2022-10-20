@@ -1,13 +1,13 @@
 {
-  "seed": 4,
+  "seed": 3,
 
-  "minSpeedFactor": 10,
-  "maxSpeedFactor": 20,
-  "minRadiusFactor": 100,
-  "maxRadiusFactor": 2000,
-  "nLinks": 10,
-  "strength": 0.1,
-  "angleVariability": 0.1,
+  "minSpeedFactor": 3,
+  "maxSpeedFactor": 5,
+  "minRadiusFactor": 200,
+  "maxRadiusFactor": 5000,
+  "nLinks": 100,
+  "strength": 0.01,
+  "angleVariability": 0,
 
   "resample": true,
   "resampleRegular": false,
@@ -15,7 +15,7 @@
 
   "stepsPerDraw": 50,
 
-  "backgroundColor": [ 233, 232, 228 ],
+  "backgroundColor": [ 255, 255, 255 ],
   "rgbK": [
     0,
     0,

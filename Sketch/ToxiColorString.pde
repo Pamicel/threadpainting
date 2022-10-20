@@ -57,12 +57,13 @@ class ToxiColorString {
     float[] rgbK,
     int[] baseColor,
     float[] rgbOffset,
-    float omega
+    float omega,
+    float cycleProgress
   ) {
-    float alph = 100.0;
-    float r = baseColor[0];
-    float g = baseColor[1];
-    float b = baseColor[2];
+    float alph = (1.0 - cycleProgress) * 100.0;
+    float r = (1.0 - cycleProgress) * 255;
+    float g = 0; // ((cycleProgress + .5) % 1.0) * 255;
+    float b = ((cycleProgress) % 1.0) * 255;
     // float r = baseColor[0] + 255 * smoothstep(.04, .2, (diam * layerScale) / layer.width);
     // float g = baseColor[1] + 255 * smoothstep(.04, .2, (diam * layerScale) / layer.width);
     // float b = baseColor[2] + 255 * smoothstep(.04, .2, (diam * layerScale) / layer.width);
@@ -72,12 +73,34 @@ class ToxiColorString {
     layer.ellipse(position.x,position.y,diam,diam);
   }
 
+  private void displayParticle (
+    PGraphics layer,
+    Vec2D position,
+    float diam,
+    float[] rgbK,
+    int[] baseColor,
+    float[] rgbOffset,
+    float omega
+  ) {
+    displayParticle(
+      layer,
+      position,
+      diam,
+      rgbK,
+      baseColor,
+      rgbOffset,
+      omega,
+      0.0
+    );
+  }
+
   public void display (
     PGraphics layer,
     float[] rgbK,
     int[] baseColor,
     float[] rgbOffset,
-    float omega
+    float omega,
+    float cycleProgress
   ) {
     Iterator particleIterator = this.pString.particles.iterator();
 
@@ -96,7 +119,8 @@ class ToxiColorString {
         rgbK,
         baseColor,
         rgbOffset,
-        omega
+        omega,
+        cycleProgress
       );
 
       p1 = p2;
@@ -175,7 +199,8 @@ class ToxiColorString {
   }
 
   public void displaySkeleton(
-    PGraphics layer
+    PGraphics layer,
+    float cycleProgress
   ) {
     layer.stroke(0);
     layer.strokeWeight(10);
@@ -183,7 +208,7 @@ class ToxiColorString {
     layer.beginShape();
     for(Iterator i=this.pString.particles.iterator(); i.hasNext();) {
       VerletParticle2D p=(VerletParticle2D)i.next();
-      layer.vertex(p.x,p.y);
+      layer.vertex(p.x + cycleProgress * 200,p.y);
     }
     layer.endShape();
   }

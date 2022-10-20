@@ -65,6 +65,8 @@ float ANGLE_VARIABILITY = 1.0;
 boolean RESAMPLE = false;
 boolean RESAMPLE_REGULAR = false;
 int RESAMPLE_LEN = 12;
+int CYCLE_LEN = 8500;
+int stepCount = 0;
 
 float MASS = 1;
 boolean SECONDARY_MONITOR = false;
@@ -128,6 +130,7 @@ void loadVariables() {
 }
 
 void init() {
+  stepCount = 0;
   loadVariables();
 
   layer1Vars.rgbK = RGB_K;
@@ -211,6 +214,8 @@ void keyPressed() {
 }
 
 void newStep() {
+  stepCount++;
+  float cycleProgress = (float(stepCount) / float(CYCLE_LEN)) % 1.0;
   if (colorTrail.finished()) {
     return;
   }
@@ -218,13 +223,14 @@ void newStep() {
   layer1.beginDraw();
   layer1.scale(LAYER_SCALE);
   colorTrail.update();
-  // colorTrail.colorString.display(
-  //   layer1,
-  //   layer1Vars.rgbK,
-  //   layer1Vars.baseColor,
-  //   layer1Vars.rgbOffset,
-  //   layer1Vars.omega
-  // );
+  colorTrail.colorString.display(
+    layer1,
+    layer1Vars.rgbK,
+    layer1Vars.baseColor,
+    layer1Vars.rgbOffset,
+    layer1Vars.omega,
+    cycleProgress
+  );
   // colorTrail.colorString.displayOneInTwo(
   //   layer1,
   //   layer1Vars.rgbK,
@@ -232,9 +238,10 @@ void newStep() {
   //   layer1Vars.rgbOffset,
   //   layer1Vars.omega
   // );
-  colorTrail.colorString.displaySkeleton(
-    layer1
-  );
+  // colorTrail.colorString.displaySkeleton(
+  //   layer1,
+  //   cycleProgress
+  // );
   // colorTrail.colorString.displayPoints(
   //   layer1
   // );
