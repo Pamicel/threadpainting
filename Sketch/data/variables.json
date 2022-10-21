@@ -3,14 +3,16 @@
 
   "minSpeedFactor": 3,
   "maxSpeedFactor": 5,
-  "minRadiusFactor": 200,
-  "maxRadiusFactor": 5000,
-  "nLinks": 100,
+  "minRadiusFactor": 1000,
+  "maxRadiusFactor": 1000,
+  "nLinks": 10,
   "strength": 0.01,
   "angleVariability": 0,
 
+  "typeOfOverallShape": "CONSTANT",
+
   "resample": true,
-  "resampleRegular": false,
+  "resampleRegular": true,
   "resampleLen": 50,
 
   "stepsPerDraw": 50,

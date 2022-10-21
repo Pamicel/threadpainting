@@ -1,15 +1,22 @@
 class ColorTrailTarget {
   public Vec2D headPosition;
   public Vec2D tailPosition;
+  public Vec2D position = null;
+  public float angle;
+  public int radius;
+  public Vec2D radiusVector;
 
   ColorTrailTarget(
     Vec2D position,
     int radius,
     float angle
   ) {
-    Vec2D radiusVector = new Vec2D(radius * sin(angle), radius * cos(angle));
-    this.headPosition = position.copy().add(radiusVector);
-    this.tailPosition = position.copy().sub(radiusVector);
+    this.radiusVector = new Vec2D(radius * cos(angle + HALF_PI), radius * sin(angle + HALF_PI));
+    this.headPosition = position.copy().add(this.radiusVector);
+    this.tailPosition = position.copy().sub(this.radiusVector);
+    this.radius = radius;
+    this.angle = angle;
+    this.position = position;
   }
 }
 
@@ -18,6 +25,7 @@ class ToxiColorTrail {
   private int headCurrentStep = 0;
   private int tailCurrentStep = 0;
 
+  ColorTrailTarget[] targets;
   ToxiColorString colorString;
   VerletParticle2D head, tail;
 
@@ -51,6 +59,7 @@ class ToxiColorTrail {
   ) {
     Vec2D[] headPositions = new Vec2D[targets.length];
     Vec2D[] tailPositions = new Vec2D[targets.length];
+    this.targets = targets;
 
     for (int i = 0; i < targets.length; i++) {
       headPositions[i] = targets[i].headPosition;
@@ -88,7 +97,28 @@ class ToxiColorTrail {
     this.tail = colorString.tail;
   }
 
-  public int getCurrentStep () {
+  public void displayTargets(PGraphics layer) {
+    for (int i = 0; i < this.targets.length; i++) {
+      layer.fill(0);
+      layer.stroke(0);
+      layer.strokeWeight(10);
+      layer.ellipse(this.targets[i].headPosition.x, this.targets[i].headPosition.y, 20, 20);
+      layer.ellipse(this.targets[i].tailPosition.x, this.targets[i].tailPosition.y, 20, 20);
+      if (targets[i].position == null) {
+        continue;
+      }
+      layer.pushMatrix();
+      layer.translate(this.targets[i].position.x, this.targets[i].position.y);
+      layer.line(0, 0, this.targets[i].radiusVector.x, this.targets[i].radiusVector.y);
+      layer.line(0, 0, -this.targets[i].radiusVector.x, -this.targets[i].radiusVector.y);
+      layer.rotate(this.targets[i].angle);
+      layer.ellipse(0, 0, 20, 20);
+      layer.line(0, 0, 200, 0);
+      layer.popMatrix();
+    }
+  }
+
+  public int getCurrentStep() {
     return min(this.headCurrentStep, this.tailCurrentStep);
   }
 
@@ -236,41 +266,57 @@ ToxiColorTrail ToxiColorTrailFromCurve(
   int links,
   float mass,
   float strength,
-  float angleVariability
+  float angleVariability,
+  OverallShape shape
 ) {
   int numTargetPoints = curve.length;
   int numSegments = numTargetPoints - 1;
-  float[] speeds = new float[numSegments];
-  ColorTrailTarget[] targets = new ColorTrailTarget[numTargetPoints];
+  // Default radius factor is 1.0
+  float radiusFactor = 1.0;
+  // By default the radius factor is constant
+  float radiusFactorIncrement = 0.0;
+  if (shape == OverallShape.SMALL_TO_BIG) {
+    // Set starting factor to 0.0
+    radiusFactor = 0.0;
+    // Increment every step
+    radiusFactorIncrement = + 1.0 / numTargetPoints;
+  } else if (shape == OverallShape.BIG_TO_SMALL) {
+    // Set starting factor to 1.0
+    radiusFactor = 1.0;
+    // Decrement every step
+    radiusFactorIncrement = - 1.0 / numTargetPoints;
+  }
 
+  ColorTrailTarget[] targets = new ColorTrailTarget[numTargetPoints];
+  float[] speeds = new float[numSegments];
+  int[] radii = new int[numTargetPoints];
   float[] angles = new float[numTargetPoints];
   for (int pointIndex = 0; pointIndex < numTargetPoints; pointIndex++) {
+    // Angles
     float randomAngle = random(-PI, PI) * angleVariability;
     if (pointIndex < (numTargetPoints - 1)) {
-      angles[pointIndex] = curve[pointIndex + 1].sub(curve[pointIndex]).angleBetween(new Vec2D(1, 0), true) + randomAngle;
+      angles[pointIndex] = signedAngleBetweenVectors(new Vec2D(1, 0), curve[pointIndex + 1].sub(curve[pointIndex])) + randomAngle;
     } else {
-      angles[pointIndex] = curve[pointIndex].sub(curve[pointIndex - 1]).angleBetween(new Vec2D(1, 0), true) + randomAngle;
-    }
-  }
-
-  for (int i = 0; i < numTargetPoints; i++) {
-    if (i < numSegments) {
-      speeds[i] = random(minSpeed, maxSpeed);
+      angles[pointIndex] = signedAngleBetweenVectors(new Vec2D(1, 0), curve[pointIndex].sub(curve[pointIndex - 1])) + randomAngle;
     }
 
-    targets[i] = new ColorTrailTarget(
-      curve[i],
-      randomInt(minRadius, maxRadius),
-      angles[i]
+    // Radii
+    radiusFactor += radiusFactorIncrement;
+    radii[pointIndex] = int(randomInt(minRadius, maxRadius) * radiusFactor);
+
+    // Speeds
+    if (pointIndex < numSegments) {
+      speeds[pointIndex] = random(minSpeed, maxSpeed);
+    }
+
+    // Targets
+    targets[pointIndex] = new ColorTrailTarget(
+      curve[pointIndex],
+      radii[pointIndex],
+      angles[pointIndex]
     );
   }
-
-  // override last
-  targets[numTargetPoints - 1] = new ColorTrailTarget(
-    curve[numTargetPoints - 1],
-    0,
-    angles[numTargetPoints - 1]
-  );
+  println(angles);
 
   return new ToxiColorTrail(
     physics,

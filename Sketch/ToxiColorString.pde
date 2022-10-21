@@ -199,8 +199,7 @@ class ToxiColorString {
   }
 
   public void displaySkeleton(
-    PGraphics layer,
-    float cycleProgress
+    PGraphics layer
   ) {
     layer.stroke(0);
     layer.strokeWeight(10);
@@ -208,7 +207,7 @@ class ToxiColorString {
     layer.beginShape();
     for(Iterator i=this.pString.particles.iterator(); i.hasNext();) {
       VerletParticle2D p=(VerletParticle2D)i.next();
-      layer.vertex(p.x + cycleProgress * 200,p.y);
+      layer.vertex(p.x ,p.y);
     }
     layer.endShape();
   }
@@ -224,19 +223,23 @@ class ToxiColorString {
     }
   }
 
-  public void debugHead() {
-    push();
-    noStroke();
-    fill(255, 0, 0);
-    ellipse(this.head.x, this.head.y, 5, 5);
-    pop();
+  public void debugHead(
+    PGraphics layer
+  ) {
+    layer.push();
+    layer.noStroke();
+    layer.fill(255, 0, 0);
+    layer.ellipse(this.head.x, this.head.y, 20, 20);
+    layer.pop();
   }
 
-  public void debugTail() {
-    push();
-    noStroke();
-    fill(255, 0, 0);
-    ellipse(this.tail.x, this.tail.y, 5, 5);
-    pop();
+  public void debugTail(
+    PGraphics layer
+  ) {
+    layer.push();
+    layer.noStroke();
+    layer.fill(255, 0, 0);
+    layer.ellipse(this.tail.x, this.tail.y, 20, 20);
+    layer.pop();
   }
 }

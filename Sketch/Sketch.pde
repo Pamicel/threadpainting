@@ -75,6 +75,9 @@ int[] DISPLAY_WIN_XY = SECONDARY_MONITOR ? new int[]{600, -2000} : new int[]{50,
 ToxiColorTrail colorTrail;
 LayerVariables layer1Vars = new LayerVariables();
 
+enum OverallShape {BIG_TO_SMALL, SMALL_TO_BIG, CONSTANT};
+OverallShape TYPE_OF_OVERALL_SHAPE = OverallShape.CONSTANT;
+
 /* */
 
 Vec2D[] loadCurve() {
@@ -110,6 +113,15 @@ void loadVariables() {
   RESAMPLE_REGULAR = variables.getBoolean("resampleRegular");
   RESAMPLE_LEN = variables.getInt("resampleLen");
 
+  String typeOfOverallShape = variables.getString("typeOfOverallShape");
+  if (typeOfOverallShape.equals("SMALL_TO_BIG")) {
+    TYPE_OF_OVERALL_SHAPE = OverallShape.SMALL_TO_BIG;
+  } else if (typeOfOverallShape.equals("BIG_TO_SMALL")) {
+    TYPE_OF_OVERALL_SHAPE = OverallShape.BIG_TO_SMALL;
+  } else {
+    TYPE_OF_OVERALL_SHAPE = OverallShape.CONSTANT;
+  }
+
   // Rendering
   STEPS_PER_DRAW = variables.getInt("stepsPerDraw");
 
@@ -140,15 +152,18 @@ void init() {
 
   randomSeed(SEED);
 
+  Vec2D[] curve = loadCurve();
+  println(curve);
   colorTrail = ToxiColorTrailFromCurve(
     physics,
-    loadCurve(),
+    curve,
     MIN_SPEED_FACTOR * realScale, MAX_SPEED_FACTOR * realScale,
     MIN_RADIUS_FACTOR * realScale, MAX_RADIUS_FACTOR * realScale,
     N_LINKS,
     MASS,
     STRENGTH,
-    ANGLE_VARIABILITY
+    ANGLE_VARIABILITY,
+    TYPE_OF_OVERALL_SHAPE
   );
 
   layer1.beginDraw();
@@ -181,6 +196,9 @@ void draw() {
   for(int i = 0; i < STEPS_PER_DRAW; i++) {
     newStep();
   }
+  // // DEBUG
+  // image(layer1, 0, 0, width, height);
+  // noLoop();
 }
 
 void saveCurrentFrame() {
@@ -239,9 +257,15 @@ void newStep() {
   //   layer1Vars.omega
   // );
   // colorTrail.colorString.displaySkeleton(
-  //   layer1,
-  //   cycleProgress
+  //   layer1
   // );
+  // colorTrail.colorString.debugHead(
+  //   layer1
+  // );
+  // colorTrail.colorString.debugTail(
+  //   layer1
+  // );
+  // colorTrail.displayTargets(layer1);
   // colorTrail.colorString.displayPoints(
   //   layer1
   // );
