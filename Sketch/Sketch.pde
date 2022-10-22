@@ -81,6 +81,12 @@ LayerVariables layer1Vars = new LayerVariables();
 enum OverallShape {BIG_TO_SMALL, SMALL_TO_BIG, CONSTANT};
 OverallShape TYPE_OF_OVERALL_SHAPE = OverallShape.CONSTANT;
 
+interface RenderingStep {
+  void render();
+};
+RenderingStep[] renderingPipeline;
+String[] renderingStepNames;
+
 /* */
 
 void loadCurve() {
@@ -151,11 +157,67 @@ void loadVariables() {
   for (int i = 0; i < BASE_COLOR.length; i++) {
     RGB_K[i] = rgbK.getFloat(i);
   }
+
+
+  JSONArray renderingPipelineArray = variables.getJSONArray("renderingPipeline");
+  renderingStepNames = new String[renderingPipelineArray.size()];
+  for (int stepIndex = 0; stepIndex < renderingPipelineArray.size(); stepIndex++) {
+    renderingStepNames[stepIndex] = renderingPipelineArray.getString(stepIndex);
+  }
 }
 
 void loadConfig() {
   loadVariables();
   loadCurve();
+}
+
+void instantiateRenderingPipeline() {
+  renderingPipeline = new RenderingStep[renderingStepNames.length];
+  for (int stepIndex = 0; stepIndex < renderingStepNames.length; stepIndex++) {
+    if (renderingStepNames[stepIndex].equals("display")) {
+      renderingPipeline[stepIndex] = new RenderingStep() {
+        void render() {
+          colorTrail.colorString.display(
+            layer1,
+            layer1Vars.rgbK,
+            layer1Vars.baseColor,
+            layer1Vars.rgbOffset,
+            layer1Vars.omega
+          );
+        }
+      };
+    } else if (renderingStepNames[stepIndex].equals("displayOneInTwo")) {
+      renderingPipeline[stepIndex] = new RenderingStep() {
+        void render() {
+          colorTrail.colorString.displayOneInTwo(
+            layer1,
+            layer1Vars.rgbK,
+            layer1Vars.baseColor,
+            layer1Vars.rgbOffset,
+            layer1Vars.omega
+          );
+        }
+      };
+    } else if (renderingStepNames[stepIndex].equals("displayStraight")) {
+      renderingPipeline[stepIndex] = new RenderingStep() {
+        void render() {
+          colorTrail.colorString.displayStraight(
+            layer1,
+            layer1Vars.rgbK,
+            layer1Vars.baseColor,
+            layer1Vars.rgbOffset,
+            layer1Vars.omega
+          );
+        }
+      };
+    } else if (renderingStepNames[stepIndex].equals("displaySkeleton")) {
+      renderingPipeline[stepIndex] = new RenderingStep() {
+        void render() {
+          colorTrail.colorString.displaySkeleton(layer1);
+        }
+      };
+    }
+  }
 }
 
 void init() {
@@ -201,6 +263,7 @@ void setup() {
   physics = new VerletPhysics2D();
   loadConfig();
   init();
+  instantiateRenderingPipeline();
 
   if (OUTPUT == Output.VIDEO) {
     noLoop();
@@ -255,6 +318,7 @@ void keyPressed() {
   if (key == 'l') {
     loadConfig();
     init();
+    instantiateRenderingPipeline();
   }
 }
 
@@ -268,24 +332,10 @@ void newStep() {
   layer1.beginDraw();
   layer1.scale(LAYER_SCALE);
   colorTrail.update();
-  colorTrail.colorString.display(
-    layer1,
-    layer1Vars.rgbK,
-    layer1Vars.baseColor,
-    layer1Vars.rgbOffset,
-    layer1Vars.omega,
-    cycleProgress
-  );
-  // colorTrail.colorString.displayOneInTwo(
-  //   layer1,
-  //   layer1Vars.rgbK,
-  //   layer1Vars.baseColor,
-  //   layer1Vars.rgbOffset,
-  //   layer1Vars.omega
-  // );
-  // colorTrail.colorString.displaySkeleton(
-  //   layer1
-  // );
+  // rendering steps
+  for (RenderingStep step : renderingPipeline) {
+    step.render();
+  }
   // colorTrail.colorString.debugHead(
   //   layer1
   // );
@@ -295,13 +345,6 @@ void newStep() {
   // colorTrail.displayTargets(layer1);
   // colorTrail.colorString.displayPoints(
   //   layer1
-  // );
-  // colorTrail.colorString.displayStraight(
-  //   layer1,
-  //   layer1Vars.rgbK,
-  //   layer1Vars.baseColor,
-  //   layer1Vars.rgbOffset,
-  //   layer1Vars.omega
   // );
   layer1.endDraw();
 }

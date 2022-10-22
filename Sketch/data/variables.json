@@ -16,7 +16,12 @@
   "resampleLen": 50,
 
   "stepsPerDraw": 50,
+
   "output": "DRAW",
+  "renderingPipeline": [
+    "displayStraight",
+    "displaySkeleton"
+  ],
 
   "backgroundColor": [ 233, 232, 228 ],
   "rgbK": [

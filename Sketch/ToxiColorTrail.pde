@@ -316,7 +316,6 @@ ToxiColorTrail ToxiColorTrailFromCurve(
       angles[pointIndex]
     );
   }
-  println(angles);
 
   return new ToxiColorTrail(
     physics,

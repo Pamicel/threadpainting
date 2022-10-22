@@ -62,10 +62,6 @@ Vec2D[] regularResample (Vec2D[] curve, int newLen) {
     try {
       curveRegular.add(upSample[0]);
     } catch (Exception e) {
-      println(curve);
-      println("currentLen: "+currentLen);
-      println("currentLen * variation: "+currentLen * variation);
-      println(upSample);
       throw e;
     }
     for (int i = 1; i < upSample.length - 1; i++) {
