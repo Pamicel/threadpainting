@@ -60,10 +60,10 @@ class ToxiColorString {
     float omega,
     float cycleProgress
   ) {
-    float alph = (1.0 - cycleProgress) * 100.0;
-    float r = (1.0 - cycleProgress) * 255;
+    float alph = 100.0;
+    float r = 0;
     float g = 0; // ((cycleProgress + .5) % 1.0) * 255;
-    float b = ((cycleProgress) % 1.0) * 255;
+    float b = 0;
     // float r = baseColor[0] + 255 * smoothstep(.04, .2, (diam * layerScale) / layer.width);
     // float g = baseColor[1] + 255 * smoothstep(.04, .2, (diam * layerScale) / layer.width);
     // float b = baseColor[2] + 255 * smoothstep(.04, .2, (diam * layerScale) / layer.width);

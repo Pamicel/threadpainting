@@ -44,8 +44,6 @@ PGraphics layer1;
 
 int realScale, realHeight, realWidth;
 
-boolean video = false;
-
 // Default variables
 int SEED = 5;
 float LAYER_SCALE = .1;
@@ -67,6 +65,11 @@ boolean RESAMPLE_REGULAR = false;
 int RESAMPLE_LEN = 12;
 int CYCLE_LEN = 8500;
 int stepCount = 0;
+Vec2D[] CURVE;
+enum Output { VIDEO, DRAW };
+Output OUTPUT = Output.VIDEO;
+int VIDEO_NUM_FRAMES = 10;
+int videoFrameCount = 0;
 
 float MASS = 1;
 boolean SECONDARY_MONITOR = false;
@@ -80,7 +83,7 @@ OverallShape TYPE_OF_OVERALL_SHAPE = OverallShape.CONSTANT;
 
 /* */
 
-Vec2D[] loadCurve() {
+void loadCurve() {
   JSONArray objectCurve = loadJSONArray("data/curve.json");
   Vec2D[] curve = new Vec2D[objectCurve.size()];
   for (int i = 0; i < objectCurve.size(); i++) {
@@ -91,11 +94,13 @@ Vec2D[] loadCurve() {
   }
   if (RESAMPLE && RESAMPLE_LEN != 0) {
     if (RESAMPLE_REGULAR) {
-      return regularResample(curve, RESAMPLE_LEN);
+      CURVE = regularResample(curve, RESAMPLE_LEN);
+      return;
     }
-    return resample(curve, RESAMPLE_LEN);
+    CURVE = resample(curve, RESAMPLE_LEN);
+    return;
   }
-  return curve;
+  CURVE = curve;
 }
 
 void loadVariables() {
@@ -122,6 +127,13 @@ void loadVariables() {
     TYPE_OF_OVERALL_SHAPE = OverallShape.CONSTANT;
   }
 
+  String outputType = variables.getString("output");
+  if (outputType.equals("VIDEO")) {
+    OUTPUT = Output.VIDEO;
+  } else {
+    OUTPUT = Output.DRAW;
+  }
+
   // Rendering
   STEPS_PER_DRAW = variables.getInt("stepsPerDraw");
 
@@ -141,9 +153,13 @@ void loadVariables() {
   }
 }
 
+void loadConfig() {
+  loadVariables();
+  loadCurve();
+}
+
 void init() {
   stepCount = 0;
-  loadVariables();
 
   layer1Vars.rgbK = RGB_K;
   layer1Vars.rgbOffset = new float[] { 0, 0, 0 };
@@ -151,12 +167,9 @@ void init() {
   layer1Vars.omega = COLOR_OMEGA_TWO_PI * TWO_PI;
 
   randomSeed(SEED);
-
-  Vec2D[] curve = loadCurve();
-  println(curve);
   colorTrail = ToxiColorTrailFromCurve(
     physics,
-    curve,
+    CURVE,
     MIN_SPEED_FACTOR * realScale, MAX_SPEED_FACTOR * realScale,
     MIN_RADIUS_FACTOR * realScale, MAX_RADIUS_FACTOR * realScale,
     N_LINKS,
@@ -183,11 +196,24 @@ void setup() {
   realWidth = width * realScale;
   realHeight = height * realScale;
 
-
   layer1 = createGraphics(realWidth, realHeight);
 
   physics = new VerletPhysics2D();
+  loadConfig();
   init();
+
+  if (OUTPUT == Output.VIDEO) {
+    noLoop();
+    while (videoFrameCount < VIDEO_NUM_FRAMES) {
+      init();
+      while (!colorTrail.finished()) {
+        newStep();
+      }
+      saveLayerAsVideoFrame(layer1);
+      ANGLE_VARIABILITY += 0.03;
+      videoFrameCount++;
+    }
+  }
 }
 
 void draw() {
@@ -213,6 +239,10 @@ void saveLayer(PGraphics layer, String layerName) {
   layer.save("out/layer-" + layerName + "_seed-"+SEED+"_date-"+ date + "_time-"+ time + ".tif");
 }
 
+void saveLayerAsVideoFrame(PGraphics layer) {
+  layer.save("video/frame" + String.format("%04d", videoFrameCount) + ".tif");
+}
+
 void keyPressed() {
   int number = randomInt(0, 100);
   if (key == ' ') {
@@ -220,23 +250,20 @@ void keyPressed() {
   }
   if (key == 'p') {
     saveCurrentFrame();
-    saveLayer(layer1, "1");
-  }
-  if (key == 'v') {
-    video = !video;
-    // layer1.save("out/screen-####.png");
+    // saveLayer(layer1, "1");
   }
   if (key == 'l') {
+    loadConfig();
     init();
   }
 }
 
 void newStep() {
-  stepCount++;
-  float cycleProgress = (float(stepCount) / float(CYCLE_LEN)) % 1.0;
   if (colorTrail.finished()) {
     return;
   }
+  stepCount++;
+  float cycleProgress = (float(stepCount) / float(CYCLE_LEN)) % 1.0;
   physics.update();
   layer1.beginDraw();
   layer1.scale(LAYER_SCALE);
