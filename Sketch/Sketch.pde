@@ -139,6 +139,7 @@ void loadVariables() {
   } else {
     OUTPUT = Output.DRAW;
   }
+  VIDEO_NUM_FRAMES = variables.getInt("videoNumFrames");
 
   // Rendering
   STEPS_PER_DRAW = variables.getInt("stepsPerDraw");
