@@ -60,18 +60,16 @@ class ToxiColorString {
     int[] baseColor,
     float[] rgbOffset,
     float omega,
+    int[] col,
     float cycleProgress
   ) {
     float alph = 100.0;
-    float r = 0;
-    float g = 0; // ((cycleProgress + .5) % 1.0) * 255;
-    float b = 0;
     // float r = baseColor[0] + 255 * smoothstep(.04, .2, (diam * layerScale) / layer.width);
     // float g = baseColor[1] + 255 * smoothstep(.04, .2, (diam * layerScale) / layer.width);
     // float b = baseColor[2] + 255 * smoothstep(.04, .2, (diam * layerScale) / layer.width);
     // float alph = 100.0;
     layer.noStroke();
-    layer.fill(r,g,b,alph);
+    layer.fill(col[0], col[1], col[2], alph);
     layer.ellipse(position.x,position.y,diam,diam);
   }
 
@@ -82,7 +80,8 @@ class ToxiColorString {
     float[] rgbK,
     int[] baseColor,
     float[] rgbOffset,
-    float omega
+    float omega,
+    int[] col
   ) {
     displayParticle(
       layer,
@@ -92,6 +91,7 @@ class ToxiColorString {
       baseColor,
       rgbOffset,
       omega,
+      col,
       0.0
     );
   }
@@ -102,6 +102,7 @@ class ToxiColorString {
     int[] baseColor,
     float[] rgbOffset,
     float omega,
+    int[] col,
     float cycleProgress
   ) {
     Iterator particleIterator = this.pString.particles.iterator();
@@ -122,6 +123,7 @@ class ToxiColorString {
         baseColor,
         rgbOffset,
         omega,
+        col,
         cycleProgress
       );
 
@@ -134,7 +136,8 @@ class ToxiColorString {
     float[] rgbK,
     int[] baseColor,
     float[] rgbOffset,
-    float omega
+    float omega,
+    int[] col
   ) {
     this.display(
       layer,
@@ -142,6 +145,7 @@ class ToxiColorString {
       baseColor,
       rgbOffset,
       omega,
+      col,
       0.0
     );
   }
@@ -151,7 +155,8 @@ class ToxiColorString {
     float[] rgbK,
     int[] baseColor,
     float[] rgbOffset,
-    float omega
+    float omega,
+    int[] col
   ) {
     Iterator particleIterator = this.pString.particles.iterator();
 
@@ -177,7 +182,8 @@ class ToxiColorString {
         rgbK,
         baseColor,
         rgbOffset,
-        omega
+        omega,
+        col
       );
     }
   }
@@ -187,7 +193,8 @@ class ToxiColorString {
     float[] rgbK,
     int[] baseColor,
     float[] rgbOffset,
-    float omega
+    float omega,
+    int[] col
   ) {
     Vec2D step = stepVec(this.head, this.tail, this.numLinks);
     Vec2D centerPos = this.head.copy().add(step.copy().normalizeTo(step.magnitude() / 2));
@@ -210,7 +217,8 @@ class ToxiColorString {
         rgbK,
         baseColor,
         rgbOffset,
-        omega
+        omega,
+        col
       );
 
       p1 = p2;
@@ -218,9 +226,10 @@ class ToxiColorString {
   }
 
   public void displaySkeleton(
-    PGraphics layer
+    PGraphics layer,
+    int[] col
   ) {
-    layer.stroke(0);
+    layer.stroke(col[0], col[1], col[2]);
     layer.strokeWeight(10);
     layer.noFill();
     layer.beginShape();

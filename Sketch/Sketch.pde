@@ -56,6 +56,7 @@ int N_LINKS = 100;
 float STRENGTH = .01;
 int STEPS_PER_DRAW = 20;
 int[] BACKGROUND_COLOR = new int[] { 0, 0, 0 };
+int[] TRAIL_COLOR = new int[] { 0, 0, 0 };
 int[] BASE_COLOR = new int[] { 0, 0, 0 };
 float[] RGB_K = new float[] { 1, 1, 1 };
 float COLOR_OMEGA_TWO_PI = -1;
@@ -150,6 +151,10 @@ void loadVariables() {
   for (int i = 0; i < BACKGROUND_COLOR.length; i++) {
     BACKGROUND_COLOR[i] = backgroundColor.getInt(i);
   }
+  JSONArray trailColor = variables.getJSONArray("trailColor");
+  for (int i = 0; i < TRAIL_COLOR.length; i++) {
+    TRAIL_COLOR[i] = trailColor.getInt(i);
+  }
   JSONArray baseColor = variables.getJSONArray("baseColor");
   for (int i = 0; i < BASE_COLOR.length; i++) {
     BASE_COLOR[i] = baseColor.getInt(i);
@@ -183,7 +188,8 @@ void instantiateRenderingPipeline() {
             layer1Vars.rgbK,
             layer1Vars.baseColor,
             layer1Vars.rgbOffset,
-            layer1Vars.omega
+            layer1Vars.omega,
+            TRAIL_COLOR
           );
         }
       };
@@ -195,7 +201,8 @@ void instantiateRenderingPipeline() {
             layer1Vars.rgbK,
             layer1Vars.baseColor,
             layer1Vars.rgbOffset,
-            layer1Vars.omega
+            layer1Vars.omega,
+            TRAIL_COLOR
           );
         }
       };
@@ -207,14 +214,18 @@ void instantiateRenderingPipeline() {
             layer1Vars.rgbK,
             layer1Vars.baseColor,
             layer1Vars.rgbOffset,
-            layer1Vars.omega
+            layer1Vars.omega,
+            TRAIL_COLOR
           );
         }
       };
     } else if (renderingStepNames[stepIndex].equals("displaySkeleton")) {
       renderingPipeline[stepIndex] = new RenderingStep() {
         void render() {
-          colorTrail.colorString.displaySkeleton(layer1);
+          colorTrail.colorString.displaySkeleton(
+            layer1,
+            TRAIL_COLOR
+          );
         }
       };
     }

@@ -97,10 +97,10 @@ class ToxiColorTrail {
     this.tail = colorString.tail;
   }
 
-  public void displayTargets(PGraphics layer) {
+  public void displayTargets(PGraphics layer, int[] col) {
     for (int i = 0; i < this.targets.length; i++) {
-      layer.fill(0);
-      layer.stroke(0);
+      layer.fill(col[0], col[1], col[2]);
+      layer.stroke(col[0], col[1], col[2]);
       layer.strokeWeight(10);
       layer.ellipse(this.targets[i].headPosition.x, this.targets[i].headPosition.y, 20, 20);
       layer.ellipse(this.targets[i].tailPosition.x, this.targets[i].tailPosition.y, 20, 20);
