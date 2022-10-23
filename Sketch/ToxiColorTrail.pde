@@ -134,6 +134,10 @@ class ToxiColorTrail {
     return this.getCurrentStep() == this.steps.length;
   }
 
+  public void clear() {
+    this.colorString.clear();
+  }
+
   public void backToOrigin() {
     this.head.set(this.steps[0].headPosTarget);
     this.tail.set(this.steps[0].tailPosTarget);

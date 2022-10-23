@@ -44,6 +44,10 @@ class ToxiColorString {
     tail.lock();
   }
 
+  void clear() {
+    this.pString.clear();
+  }
+
   private Vec2D stepVec(Vec2D headPos, Vec2D tailPos, int numLinks) {
     return tailPos.sub(headPos).normalizeTo(headPos.distanceTo(tailPos) / numLinks);
   }

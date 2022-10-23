@@ -222,6 +222,13 @@ void instantiateRenderingPipeline() {
 }
 
 void init() {
+  // Remove the color spring from the simulation
+  if (colorTrail != null) {
+    colorTrail.clear();
+  }
+  // Nudge the garbage collector
+  System.gc();
+
   stepCount = 0;
 
   layer1Vars.rgbK = RGB_K;
