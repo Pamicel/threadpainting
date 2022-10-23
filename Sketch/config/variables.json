@@ -1,26 +1,25 @@
 {
   "seed": 5,
 
-  "minSpeedFactor": 10,
-  "maxSpeedFactor": 20,
-  "minRadiusFactor": 100,
-  "maxRadiusFactor": 2500,
-  "nLinks": 21,
-  "strength": 0.1,
-  "angleVariability": 0.2,
+  "minSpeedFactor": 6,
+  "maxSpeedFactor": 6,
+  "minRadiusFactor": 1000,
+  "maxRadiusFactor": 2000,
+  "nLinks": 200,
+  "strength": 1.0,
+  "angleVariability": 0.0,
 
   "typeOfOverallShape": "CONSTANT",
 
   "resample": true,
   "resampleRegular": true,
-  "resampleLen": 40,
+  "resampleLen": 30,
 
   "stepsPerDraw": 50,
 
   "output": "DRAW",
   "videoNumFrames": 30,
   "renderingPipeline": [
-    "displaySkeleton",
     "displayOneInTwo"
   ],
 

@@ -90,7 +90,7 @@ String[] renderingStepNames;
 /* */
 
 void loadCurve() {
-  JSONArray objectCurve = loadJSONArray("data/curve.json");
+  JSONArray objectCurve = loadJSONArray("config/curve.json");
   Vec2D[] curve = new Vec2D[objectCurve.size()];
   for (int i = 0; i < objectCurve.size(); i++) {
     JSONObject point = objectCurve.getJSONObject(i);
@@ -110,7 +110,7 @@ void loadCurve() {
 }
 
 void loadVariables() {
-  JSONObject variables = loadJSONObject("data/variables.json");
+  JSONObject variables = loadJSONObject("config/variables.json");
   SEED = variables.getInt("seed");
   MIN_SPEED_FACTOR = variables.getFloat("minSpeedFactor");
   MAX_SPEED_FACTOR = variables.getFloat("maxSpeedFactor");
@@ -320,8 +320,7 @@ void keyPressed() {
     saveCurrentFrame();
   }
   if (key == 'p') {
-    saveCurrentFrame();
-    // saveLayer(layer1, "1");
+    saveLayer(layer1, "1");
   }
   if (key == 'l') {
     loadConfig();
