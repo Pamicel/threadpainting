@@ -237,8 +237,6 @@ void init() {
   if (colorTrail != null) {
     colorTrail.clear();
   }
-  // Nudge the garbage collector
-  System.gc();
 
   stepCount = 0;
 
