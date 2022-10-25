@@ -77,7 +77,7 @@ float MASS = 1;
 boolean SECONDARY_MONITOR = false;
 int[] DISPLAY_WIN_XY = SECONDARY_MONITOR ? new int[]{600, -2000} : new int[]{50, 50};
 
-ToxiColorTrail colorTrail;
+TrailRenderer[] TRAIL_RENDERERS;
 LayerVariables layer1Vars = new LayerVariables();
 
 enum OverallShape {BIG_TO_SMALL, SMALL_TO_BIG, CONSTANT};
@@ -114,27 +114,8 @@ void loadCurve() {
 void loadVariables() {
   JSONObject variables = loadJSONObject("config/variables.json");
   SEED = variables.getInt("seed");
-  MIN_SPEED_FACTOR = variables.getFloat("minSpeedFactor");
-  MAX_SPEED_FACTOR = variables.getFloat("maxSpeedFactor");
-  MIN_RADIUS_FACTOR = variables.getInt("minRadiusFactor");
-  MAX_RADIUS_FACTOR = variables.getInt("maxRadiusFactor");
-  N_LINKS = variables.getInt("nLinks");
-  STRENGTH = variables.getFloat("strength");
-  ANGLE_VARIABILITY = variables.getFloat("angleVariability");
-
-  RESAMPLE = variables.getBoolean("resample");
-  RESAMPLE_REGULAR = variables.getBoolean("resampleRegular");
-  RESAMPLE_LEN = variables.getInt("resampleLen");
-
-  String typeOfOverallShape = variables.getString("typeOfOverallShape");
-  if (typeOfOverallShape.equals("SMALL_TO_BIG")) {
-    TYPE_OF_OVERALL_SHAPE = OverallShape.SMALL_TO_BIG;
-  } else if (typeOfOverallShape.equals("BIG_TO_SMALL")) {
-    TYPE_OF_OVERALL_SHAPE = OverallShape.BIG_TO_SMALL;
-  } else {
-    TYPE_OF_OVERALL_SHAPE = OverallShape.CONSTANT;
-  }
-
+  // Rendering
+  STEPS_PER_DRAW = variables.getInt("stepsPerDraw");
   String outputType = variables.getString("output");
   if (outputType.equals("VIDEO")) {
     OUTPUT = Output.VIDEO;
@@ -143,18 +124,55 @@ void loadVariables() {
   }
   VIDEO_NUM_FRAMES = variables.getInt("videoNumFrames");
 
-  // Rendering
-  STEPS_PER_DRAW = variables.getInt("stepsPerDraw");
+  // Curve
+  RESAMPLE = variables.getBoolean("resample");
+  RESAMPLE_REGULAR = variables.getBoolean("resampleRegular");
+  RESAMPLE_LEN = variables.getInt("resampleLen");
+
+  // Trails
+  JSONArray trails = variables.getJSONArray("trails");
+  TRAIL_RENDERERS = new TrailRenderer[trails.size()];
+  for (int i = 0; i < trails.size(); i++) {
+    TRAIL_RENDERERS[i] = new TrailRenderer();
+    TrailRenderer renderer = TRAIL_RENDERERS[i];
+    JSONObject trailVariables = trails.getJSONObject(i);
+    renderer.minSpeedFactor = trailVariables.getFloat("minSpeedFactor");
+    renderer.maxSpeedFactor = trailVariables.getFloat("maxSpeedFactor");
+    renderer.minRadiusFactor = trailVariables.getInt("minRadiusFactor");
+    renderer.maxRadiusFactor = trailVariables.getInt("maxRadiusFactor");
+    renderer.nLinks = trailVariables.getInt("nLinks");
+    renderer.strength = trailVariables.getFloat("strength");
+    renderer.mass = MASS;
+    renderer.angleVariability = trailVariables.getFloat("angleVariability");
+
+    String typeOfOverallShape = trailVariables.getString("typeOfOverallShape");
+    if (typeOfOverallShape.equals("SMALL_TO_BIG")) {
+      renderer.typeOfOverallShape = OverallShape.SMALL_TO_BIG;
+    } else if (typeOfOverallShape.equals("BIG_TO_SMALL")) {
+      renderer.typeOfOverallShape = OverallShape.BIG_TO_SMALL;
+    } else {
+      renderer.typeOfOverallShape = OverallShape.CONSTANT;
+    }
+
+    JSONArray trailColor = trailVariables.getJSONArray("trailColor");
+    for (int colorIndex = 0; colorIndex < trailColor.size(); colorIndex++) {
+      renderer.trailColor[colorIndex] = trailColor.getInt(colorIndex);
+    }
+
+    renderer.particleDiameterFactor = trailVariables.getFloat("particleDiamFactor");
+
+    JSONArray renderingPipelineArray = trailVariables.getJSONArray("renderingPipeline");
+    renderer.renderingStepNames = new String[renderingPipelineArray.size()];
+    for (int stepIndex = 0; stepIndex < renderingPipelineArray.size(); stepIndex++) {
+      renderer.renderingStepNames[stepIndex] = renderingPipelineArray.getString(stepIndex);
+    }
+  }
 
   // Colors
   COLOR_OMEGA_TWO_PI = variables.getFloat("colorOmegaTwoPi");
   JSONArray backgroundColor = variables.getJSONArray("backgroundColor");
   for (int i = 0; i < BACKGROUND_COLOR.length; i++) {
     BACKGROUND_COLOR[i] = backgroundColor.getInt(i);
-  }
-  JSONArray trailColor = variables.getJSONArray("trailColor");
-  for (int i = 0; i < TRAIL_COLOR.length; i++) {
-    TRAIL_COLOR[i] = trailColor.getInt(i);
   }
   JSONArray baseColor = variables.getJSONArray("baseColor");
   for (int i = 0; i < BASE_COLOR.length; i++) {
@@ -164,96 +182,31 @@ void loadVariables() {
   for (int i = 0; i < BASE_COLOR.length; i++) {
     RGB_K[i] = rgbK.getFloat(i);
   }
-
-
-  JSONArray renderingPipelineArray = variables.getJSONArray("renderingPipeline");
-  renderingStepNames = new String[renderingPipelineArray.size()];
-  for (int stepIndex = 0; stepIndex < renderingPipelineArray.size(); stepIndex++) {
-    renderingStepNames[stepIndex] = renderingPipelineArray.getString(stepIndex);
-  }
-
-  PARTICLE_DIAMETER_FACTOR = variables.getFloat("renderingDiamFactor");
 }
 
 void loadConfig() {
+  clear();
   loadVariables();
   loadCurve();
 }
 
-void instantiateRenderingPipeline() {
-  renderingPipeline = new RenderingStep[renderingStepNames.length];
-  for (int stepIndex = 0; stepIndex < renderingStepNames.length; stepIndex++) {
-    if (renderingStepNames[stepIndex].equals("display")) {
-      renderingPipeline[stepIndex] = new RenderingStep() {
-        void render() {
-          colorTrail.colorString.display(
-            layer1,
-            layer1Vars.rgbK,
-            layer1Vars.baseColor,
-            layer1Vars.rgbOffset,
-            layer1Vars.omega,
-            PARTICLE_DIAMETER_FACTOR,
-            TRAIL_COLOR
-          );
-        }
-      };
-    } else if (renderingStepNames[stepIndex].equals("displayOneInTwo")) {
-      renderingPipeline[stepIndex] = new RenderingStep() {
-        void render() {
-          colorTrail.colorString.displayOneInTwo(
-            layer1,
-            layer1Vars.rgbK,
-            layer1Vars.baseColor,
-            layer1Vars.rgbOffset,
-            layer1Vars.omega,
-            PARTICLE_DIAMETER_FACTOR,
-            TRAIL_COLOR
-          );
-        }
-      };
-    } else if (renderingStepNames[stepIndex].equals("displayStraight")) {
-      renderingPipeline[stepIndex] = new RenderingStep() {
-        void render() {
-          colorTrail.colorString.displayStraight(
-            layer1,
-            layer1Vars.rgbK,
-            layer1Vars.baseColor,
-            layer1Vars.rgbOffset,
-            layer1Vars.omega,
-            PARTICLE_DIAMETER_FACTOR,
-            TRAIL_COLOR
-          );
-        }
-      };
-    } else if (renderingStepNames[stepIndex].equals("displaySkeleton")) {
-      renderingPipeline[stepIndex] = new RenderingStep() {
-        void render() {
-          colorTrail.colorString.displaySkeleton(
-            layer1,
-            PARTICLE_DIAMETER_FACTOR,
-            TRAIL_COLOR
-          );
-        }
-      };
-    } else if (renderingStepNames[stepIndex].equals("displayPoints")) {
-      renderingPipeline[stepIndex] = new RenderingStep() {
-        void render() {
-          colorTrail.colorString.displayPoints(
-            layer1,
-            PARTICLE_DIAMETER_FACTOR,
-            TRAIL_COLOR
-          );
-        }
-      };
+void clear() {
+  // Remove the color springs from the simulation
+  if (TRAIL_RENDERERS != null) {
+    for (TrailRenderer renderer: TRAIL_RENDERERS) {
+      renderer.clear();
     }
   }
 }
 
 void init() {
-  // Remove the color spring from the simulation
-  if (colorTrail != null) {
-    colorTrail.clear();
-  }
+  physics = new VerletPhysics2D();
+  realScale = SCALE;
+
+  realWidth = width * realScale;
+  realHeight = height * realScale;
+
+  layer1 = createGraphics(realWidth, realHeight);
 
   stepCount = 0;
 
@@ -263,20 +216,20 @@ void init() {
   layer1Vars.omega = COLOR_OMEGA_TWO_PI * TWO_PI;
 
   randomSeed(SEED);
-  colorTrail = ToxiColorTrailFromCurve(
-    physics,
-    CURVE,
-    MIN_SPEED_FACTOR * realScale, MAX_SPEED_FACTOR * realScale,
-    MIN_RADIUS_FACTOR * realScale, MAX_RADIUS_FACTOR * realScale,
-    N_LINKS,
-    MASS,
-    STRENGTH,
-    ANGLE_VARIABILITY,
-    TYPE_OF_OVERALL_SHAPE
-  );
+  for (TrailRenderer renderer: TRAIL_RENDERERS) {
+    randomSeed(SEED);
+    renderer.init(
+      physics,
+      CURVE,
+      realScale,
+      layer1,
+      layer1Vars
+    );
+  }
 
   layer1.beginDraw();
   layer1.clear();
+  // layer1.blendMode(BLEND);
   layer1.endDraw();
 }
 
@@ -284,33 +237,22 @@ void setup() {
   surface.setLocation(DISPLAY_WIN_XY[0], DISPLAY_WIN_XY[1]);
   size(1000, 1000);
   smooth();
-  randomSeed(SEED);
   frameRate(60);
-
-  realScale = SCALE;
-
-  realWidth = width * realScale;
-  realHeight = height * realScale;
-
-  layer1 = createGraphics(realWidth, realHeight);
-
-  physics = new VerletPhysics2D();
   loadConfig();
   init();
-  instantiateRenderingPipeline();
 
-  if (OUTPUT == Output.VIDEO) {
-    noLoop();
-    while (videoFrameCount < VIDEO_NUM_FRAMES) {
-      init();
-      while (!colorTrail.finished()) {
-        newStep();
-      }
-      saveLayerAsVideoFrame(layer1);
-      ANGLE_VARIABILITY += 0.03;
-      videoFrameCount++;
-    }
-  }
+  // if (OUTPUT == Output.VIDEO) {
+  //   noLoop();
+  //   while (videoFrameCount < VIDEO_NUM_FRAMES) {
+  //     init();
+  //     while (!colorTrail.finished()) {
+  //       newStep();
+  //     }
+  //     saveLayerAsVideoFrame(layer1);
+  //     ANGLE_VARIABILITY += 0.03;
+  //     videoFrameCount++;
+  //   }
+  // }
 }
 
 void draw() {
@@ -319,9 +261,6 @@ void draw() {
   for(int i = 0; i < STEPS_PER_DRAW; i++) {
     newStep();
   }
-  // // DEBUG
-  // image(layer1, 0, 0, width, height);
-  // noLoop();
 }
 
 void saveCurrentFrame() {
@@ -351,33 +290,16 @@ void keyPressed() {
   if (key == 'l') {
     loadConfig();
     init();
-    instantiateRenderingPipeline();
   }
 }
 
 void newStep() {
-  if (colorTrail.finished()) {
-    return;
-  }
-  stepCount++;
-  float cycleProgress = (float(stepCount) / float(CYCLE_LEN)) % 1.0;
   physics.update();
   layer1.beginDraw();
   layer1.scale(LAYER_SCALE);
-  colorTrail.update();
   // rendering steps
-  for (RenderingStep step : renderingPipeline) {
-    step.render();
+  for (TrailRenderer renderer: TRAIL_RENDERERS) {
+    renderer.render();
   }
-  // colorTrail.colorString.debugHead(
-  //   layer1
-  // );
-  // colorTrail.colorString.debugTail(
-  //   layer1
-  // );
-  // colorTrail.displayTargets(layer1);
-  // colorTrail.colorString.displayPoints(
-  //   layer1
-  // );
   layer1.endDraw();
 }

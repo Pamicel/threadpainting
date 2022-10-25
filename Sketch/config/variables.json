@@ -1,40 +1,53 @@
 {
-  "seed": 1,
-
-  "minSpeedFactor": 12,
-  "maxSpeedFactor": 12,
-  "minRadiusFactor": 200,
-  "maxRadiusFactor": 200,
-  "nLinks": 10,
-  "strength": 0.0001,
-  "angleVariability": 0.5,
-
-  "typeOfOverallShape": "CONSTANT",
-
-  "resample": true,
-  "resampleRegular": false,
-  "resampleLen": 10,
-
+  "seed": 2,
   "stepsPerDraw": 30,
 
   "output": "DRAW",
   "videoNumFrames": 30,
-  "renderingPipeline": [
-    "display"
-  ],
-  "renderingDiamFactor": 0.5,
 
-  "backgroundColor": [ 0, 0, 0 ],
-  "trailColor": [255, 255, 255],
-  "rgbK": [
-    0,
-    0,
-    0
-  ],
-  "baseColor": [
-    0,
-    0,
-    0
-  ],
-  "colorOmegaTwoPi": 0.5
+  "backgroundColor": [ 255, 0, 0 ],
+  "rgbK": [ 0, 0, 0 ],
+  "baseColor": [ 0, 0, 0 ],
+  "colorOmegaTwoPi": 0.5,
+
+  "resample": true,
+  "resampleRegular": false,
+  "resampleLen": 20,
+
+  "trails": [
+    {
+      "trailColor": [ 0, 255, 255 ],
+      "typeOfOverallShape": "BIG_TO_SMALL",
+
+      "nLinks": 5,
+      "strength": 0.1,
+      "minSpeedFactor": 20,
+      "maxSpeedFactor": 20,
+      "minRadiusFactor": 1000,
+      "maxRadiusFactor": 2000,
+      "angleVariability": 0.0,
+      "particleDiamFactor": 1.0,
+
+      "renderingPipeline": [
+        "displaySkeleton"
+      ]
+    },
+    {
+      "trailColor": [255, 0, 255],
+      "typeOfOverallShape": "BIG_TO_SMALL",
+
+      "nLinks": 5,
+      "strength": 0.1,
+      "minSpeedFactor": 20,
+      "maxSpeedFactor": 20,
+      "minRadiusFactor": 1000,
+      "maxRadiusFactor": 2000,
+      "angleVariability": 0.005,
+      "particleDiamFactor": 1.2,
+
+      "renderingPipeline": [
+        "displaySkeleton"
+      ]
+    }
+  ]
 }
