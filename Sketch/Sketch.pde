@@ -200,7 +200,6 @@ void clear() {
 }
 
 void init() {
-  physics = new VerletPhysics2D();
   realScale = SCALE;
 
   realWidth = width * realScale;
@@ -238,6 +237,7 @@ void setup() {
   size(1000, 1000);
   smooth();
   frameRate(60);
+  physics = new VerletPhysics2D();
   loadConfig();
   init();
 
