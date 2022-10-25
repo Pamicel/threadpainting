@@ -1,5 +1,5 @@
 {
-  "seed": 2,
+  "seed": 1,
   "stepsPerDraw": 30,
 
   "output": "DRAW",
@@ -12,38 +12,55 @@
 
   "resample": true,
   "resampleRegular": false,
-  "resampleLen": 10,
+  "resampleLen": 50,
 
   "trails": [
     {
-      "trailColor": [ 255, 255, 255 ],
+      "trailColor": [ 255, 255, 0 ],
       "typeOfOverallShape": "CONSTANT",
 
       "nLinks": 100,
       "strength": 0.1,
-      "minSpeedFactor": 5,
-      "maxSpeedFactor": 5,
-      "minRadiusFactor": 1000,
-      "maxRadiusFactor": 4000,
+      "minSpeedFactor": 2,
+      "maxSpeedFactor": 2,
+      "minRadiusFactor": 200,
+      "maxRadiusFactor": 2000,
+      "angleVariability": -0.005,
+      "particleDiamFactor": 0.5,
+
+      "renderingPipeline": [
+        "display"
+      ]
+    },
+    {
+      "trailColor": [ 255, 0, 255 ],
+      "typeOfOverallShape": "CONSTANT",
+
+      "nLinks": 100,
+      "strength": 0.1,
+      "minSpeedFactor": 2,
+      "maxSpeedFactor": 2,
+      "minRadiusFactor": 200,
+      "maxRadiusFactor": 2000,
       "angleVariability": 0.0,
       "particleDiamFactor": 0.5,
 
       "renderingPipeline": [
-        "displayOneInTwo"
+        "display"
       ]
     },
     {
-      "trailColor": [0, 0, 0],
+      "trailColor": [ 0, 255, 255 ],
       "typeOfOverallShape": "CONSTANT",
 
       "nLinks": 100,
       "strength": 0.1,
-      "minSpeedFactor": 10,
-      "maxSpeedFactor": 10,
-      "minRadiusFactor": 1000,
-      "maxRadiusFactor": 4000,
-      "angleVariability": 0.01,
-      "particleDiamFactor": 5.0,
+      "minSpeedFactor": 2,
+      "maxSpeedFactor": 2,
+      "minRadiusFactor": 200,
+      "maxRadiusFactor": 2000,
+      "angleVariability": 0.005,
+      "particleDiamFactor": 0.5,
 
       "renderingPipeline": [
         "display"
