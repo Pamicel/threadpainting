@@ -70,6 +70,7 @@ Vec2D[] CURVE;
 enum Output { VIDEO, DRAW };
 Output OUTPUT = Output.VIDEO;
 int VIDEO_NUM_FRAMES = 10;
+float PARTICLE_DIAMETER_FACTOR = 1.0;
 int videoFrameCount = 0;
 
 float MASS = 1;
@@ -170,6 +171,8 @@ void loadVariables() {
   for (int stepIndex = 0; stepIndex < renderingPipelineArray.size(); stepIndex++) {
     renderingStepNames[stepIndex] = renderingPipelineArray.getString(stepIndex);
   }
+
+  PARTICLE_DIAMETER_FACTOR = variables.getFloat("renderingDiamFactor");
 }
 
 void loadConfig() {
@@ -189,6 +192,7 @@ void instantiateRenderingPipeline() {
             layer1Vars.baseColor,
             layer1Vars.rgbOffset,
             layer1Vars.omega,
+            PARTICLE_DIAMETER_FACTOR,
             TRAIL_COLOR
           );
         }
@@ -202,6 +206,7 @@ void instantiateRenderingPipeline() {
             layer1Vars.baseColor,
             layer1Vars.rgbOffset,
             layer1Vars.omega,
+            PARTICLE_DIAMETER_FACTOR,
             TRAIL_COLOR
           );
         }
@@ -215,6 +220,7 @@ void instantiateRenderingPipeline() {
             layer1Vars.baseColor,
             layer1Vars.rgbOffset,
             layer1Vars.omega,
+            PARTICLE_DIAMETER_FACTOR,
             TRAIL_COLOR
           );
         }
@@ -224,6 +230,17 @@ void instantiateRenderingPipeline() {
         void render() {
           colorTrail.colorString.displaySkeleton(
             layer1,
+            PARTICLE_DIAMETER_FACTOR,
+            TRAIL_COLOR
+          );
+        }
+      };
+    } else if (renderingStepNames[stepIndex].equals("displayPoints")) {
+      renderingPipeline[stepIndex] = new RenderingStep() {
+        void render() {
+          colorTrail.colorString.displayPoints(
+            layer1,
+            PARTICLE_DIAMETER_FACTOR,
             TRAIL_COLOR
           );
         }

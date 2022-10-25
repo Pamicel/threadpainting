@@ -102,6 +102,7 @@ class ToxiColorString {
     int[] baseColor,
     float[] rgbOffset,
     float omega,
+    float diamFactor,
     int[] col,
     float cycleProgress
   ) {
@@ -113,7 +114,7 @@ class ToxiColorString {
     for(; particleIterator.hasNext();) {
       VerletParticle2D p2 = (VerletParticle2D)particleIterator.next();
       Vec2D p = p1.interpolateTo(p2, 0.5);
-      float diam = p1.distanceTo(p2);
+      float diam = p1.distanceTo(p2) * diamFactor;
 
       this.displayParticle(
         layer,
@@ -137,6 +138,7 @@ class ToxiColorString {
     int[] baseColor,
     float[] rgbOffset,
     float omega,
+    float diamFactor,
     int[] col
   ) {
     this.display(
@@ -145,6 +147,7 @@ class ToxiColorString {
       baseColor,
       rgbOffset,
       omega,
+      diamFactor,
       col,
       0.0
     );
@@ -156,6 +159,7 @@ class ToxiColorString {
     int[] baseColor,
     float[] rgbOffset,
     float omega,
+    float diamFactor,
     int[] col
   ) {
     Iterator particleIterator = this.pString.particles.iterator();
@@ -173,7 +177,7 @@ class ToxiColorString {
 
       Vec2D p = p1.interpolateTo(p2, 0.5);
 
-      float diam = p1.distanceTo(p2);
+      float diam = p1.distanceTo(p2) * diamFactor;
 
       this.displayParticle(
         layer,
@@ -194,6 +198,7 @@ class ToxiColorString {
     int[] baseColor,
     float[] rgbOffset,
     float omega,
+    float diamFactor,
     int[] col
   ) {
     Vec2D step = stepVec(this.head, this.tail, this.numLinks);
@@ -208,7 +213,7 @@ class ToxiColorString {
       Vec2D p = centerPos.copy();
       centerPos = centerPos.add(step);
 
-      float diam = p1.distanceTo(p2);
+      float diam = p1.distanceTo(p2) * diamFactor;
 
       this.displayParticle(
         layer,
@@ -227,10 +232,11 @@ class ToxiColorString {
 
   public void displaySkeleton(
     PGraphics layer,
+    float diamFactor,
     int[] col
   ) {
     layer.stroke(col[0], col[1], col[2]);
-    layer.strokeWeight(10);
+    layer.strokeWeight(diamFactor * 10);
     layer.noFill();
     layer.beginShape();
     for(Iterator i=this.pString.particles.iterator(); i.hasNext();) {
@@ -241,13 +247,15 @@ class ToxiColorString {
   }
 
   public void displayPoints(
-    PGraphics layer
+    PGraphics layer,
+    float diamFactor,
+    int[] col
   ) {
-    layer.fill(0);
+    layer.fill(col[0], col[1], col[2]);
     layer.noStroke();
     for(Iterator i=this.pString.particles.iterator(); i.hasNext();) {
       VerletParticle2D p=(VerletParticle2D)i.next();
-      layer.ellipse(p.x,p.y, 10, 10);
+      layer.ellipse(p.x,p.y, diamFactor * 20, diamFactor * 20);
     }
   }
 

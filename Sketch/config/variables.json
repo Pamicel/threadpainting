@@ -1,30 +1,30 @@
 {
   "seed": 1,
 
-  "minSpeedFactor": 6,
-  "maxSpeedFactor": 6,
-  "minRadiusFactor": 10,
-  "maxRadiusFactor": 3000,
-  "nLinks": 100,
-  "strength": 0.2,
-  "angleVariability": 0.2,
+  "minSpeedFactor": 12,
+  "maxSpeedFactor": 12,
+  "minRadiusFactor": 200,
+  "maxRadiusFactor": 200,
+  "nLinks": 10,
+  "strength": 0.0001,
+  "angleVariability": 0.5,
 
-  "typeOfOverallShape": "BIG_TO_SMALL",
+  "typeOfOverallShape": "CONSTANT",
 
   "resample": true,
-  "resampleRegular": true,
-  "resampleLen": 100,
+  "resampleRegular": false,
+  "resampleLen": 10,
 
-  "stepsPerDraw": 50,
+  "stepsPerDraw": 30,
 
   "output": "DRAW",
   "videoNumFrames": 30,
   "renderingPipeline": [
-    "displayOneInTwo",
-    "displayStraight"
+    "display"
   ],
+  "renderingDiamFactor": 0.5,
 
-  "backgroundColor": [ 233, 232, 228 ],
+  "backgroundColor": [ 0, 0, 0 ],
   "trailColor": [255, 255, 255],
   "rgbK": [
     0,
