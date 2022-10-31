@@ -35,12 +35,11 @@ Vec2D randomPosition(Rect rectangle) {
 
 /* */
 
-
 /* Global variables */
 
 VerletPhysics2D physics;
 
-PGraphics layer1;
+PGraphics layer1, printLayer;
 
 int realScale, realHeight, realWidth;
 
@@ -92,6 +91,8 @@ String[] renderingStepNames;
 /* */
 
 void loadCurve() {
+  JSONObject curveDescription = loadJSONObject("config/curve.json");
+
   JSONArray objectCurve = loadJSONArray("config/curve.json");
   Vec2D[] curve = new Vec2D[objectCurve.size()];
   for (int i = 0; i < objectCurve.size(); i++) {
@@ -206,6 +207,7 @@ void init() {
   realHeight = height * realScale;
 
   layer1 = createGraphics(realWidth, realHeight);
+  printLayer = createGraphics(realWidth, realHeight);
 
   stepCount = 0;
 
@@ -275,6 +277,17 @@ void saveLayer(PGraphics layer, String layerName) {
   layer.save("out/layer-" + layerName + "_seed-"+SEED+"_date-"+ date + "_time-"+ time + ".tif");
 }
 
+void printComposition() {
+  int date = (year() % 100) * 10000 + month() * 100 + day();
+  int time = hour() * 10000 + minute() * 100 + second();
+  printLayer.beginDraw();
+  printLayer.clear();
+  printLayer.background(BACKGROUND_COLOR[0], BACKGROUND_COLOR[1], BACKGROUND_COLOR[2]);
+  printLayer.image(layer1, 0, 0, printLayer.width, printLayer.height);
+  printLayer.endDraw();
+  printLayer.save("out/composition-seed-"+SEED+"_date-"+ date + "_time-"+ time + ".tif");
+}
+
 void saveLayerAsVideoFrame(PGraphics layer) {
   layer.save("video/frame" + String.format("%04d", videoFrameCount) + ".tif");
 }
@@ -285,6 +298,9 @@ void keyPressed() {
     saveCurrentFrame();
   }
   if (key == 'p') {
+    printComposition();
+  }
+  if (key == 's') {
     saveLayer(layer1, "1");
   }
   if (key == 'l') {

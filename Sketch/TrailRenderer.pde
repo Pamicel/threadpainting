@@ -68,7 +68,7 @@ class TrailRenderer {
     this.renderingPipeline = new RenderingStep[this.renderingStepNames.length];
     TrailRenderer renderer = this;
     for (int stepIndex = 0; stepIndex < renderingStepNames.length; stepIndex++) {
-      if (renderingStepNames[stepIndex].equals("display")) {
+      if (renderingStepNames[stepIndex].equals("beads")) {
         renderingPipeline[stepIndex] = new RenderingStep() {
           void render() {
             colorTrail.colorString.display(
@@ -82,7 +82,21 @@ class TrailRenderer {
             );
           }
         };
-      } else if (renderingStepNames[stepIndex].equals("displayOneInTwo")) {
+      } else if (renderingStepNames[stepIndex].equals("beadsWithoutExtremities")) {
+        renderingPipeline[stepIndex] = new RenderingStep() {
+          void render() {
+            colorTrail.colorString.displayWithoutExtremities(
+              layer,
+              layerVars.rgbK,
+              layerVars.baseColor,
+              layerVars.rgbOffset,
+              layerVars.omega,
+              renderer.particleDiameterFactor,
+              renderer.trailColor
+            );
+          }
+        };
+      } else if (renderingStepNames[stepIndex].equals("beadsOneInTwo")) {
         renderingPipeline[stepIndex] = new RenderingStep() {
           void render() {
             colorTrail.colorString.displayOneInTwo(
@@ -96,7 +110,7 @@ class TrailRenderer {
             );
           }
         };
-      } else if (renderingStepNames[stepIndex].equals("displayStraight")) {
+      } else if (renderingStepNames[stepIndex].equals("beadsStraight")) {
         renderingPipeline[stepIndex] = new RenderingStep() {
           void render() {
             colorTrail.colorString.displayStraight(
@@ -110,7 +124,7 @@ class TrailRenderer {
             );
           }
         };
-      } else if (renderingStepNames[stepIndex].equals("displaySkeleton")) {
+      } else if (renderingStepNames[stepIndex].equals("skeleton")) {
         renderingPipeline[stepIndex] = new RenderingStep() {
           void render() {
             colorTrail.colorString.displaySkeleton(

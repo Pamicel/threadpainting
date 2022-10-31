@@ -132,6 +132,45 @@ class ToxiColorString {
     }
   }
 
+  public void displayWithoutExtremities (
+    PGraphics layer,
+    float[] rgbK,
+    int[] baseColor,
+    float[] rgbOffset,
+    float omega,
+    float diamFactor,
+    int[] col
+  ) {
+    Iterator particleIterator = this.pString.particles.iterator();
+
+    // Initialize
+    VerletParticle2D p1 = (VerletParticle2D)particleIterator.next();
+    // Skip the first
+    p1 = (VerletParticle2D)particleIterator.next();
+    for(; particleIterator.hasNext();) {
+      VerletParticle2D p2 = (VerletParticle2D)particleIterator.next();
+      // Skip the last
+      if (!particleIterator.hasNext()) {
+        continue;
+      }
+      Vec2D p = p1.interpolateTo(p2, 0.5);
+      float diam = p1.distanceTo(p2) * diamFactor;
+
+      this.displayParticle(
+        layer,
+        p,
+        diam,
+        rgbK,
+        baseColor,
+        rgbOffset,
+        omega,
+        col
+      );
+
+      p1 = p2;
+    }
+  }
+
   public void display (
     PGraphics layer,
     float[] rgbK,

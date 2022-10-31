@@ -5,65 +5,65 @@
   "output": "DRAW",
   "videoNumFrames": 30,
 
-  "backgroundColor": [ 255, 255, 255 ],
+  "backgroundColor": [233, 232, 228],
   "rgbK": [ 0, 0, 0 ],
   "baseColor": [ 0, 0, 0 ],
   "colorOmegaTwoPi": 0.5,
 
   "resample": true,
   "resampleRegular": false,
-  "resampleLen": 50,
+  "resampleLen": 10,
 
   "trails": [
     {
-      "trailColor": [ 255, 255, 0 ],
+      "trailColor": [0, 0, 0],
       "typeOfOverallShape": "CONSTANT",
 
       "nLinks": 100,
-      "strength": 0.1,
+      "strength": 0.01,
       "minSpeedFactor": 2,
       "maxSpeedFactor": 2,
-      "minRadiusFactor": 200,
-      "maxRadiusFactor": 2000,
-      "angleVariability": -0.005,
-      "particleDiamFactor": 0.5,
+      "minRadiusFactor": 2500,
+      "maxRadiusFactor": 3000,
+      "angleVariability": 0,
+      "particleDiamFactor": 2.0,
 
       "renderingPipeline": [
-        "display"
+        "beads"
       ]
     },
     {
-      "trailColor": [ 255, 0, 255 ],
+      "trailColor": [233, 232, 228],
       "typeOfOverallShape": "CONSTANT",
 
       "nLinks": 100,
-      "strength": 0.1,
+      "strength": 0.02,
       "minSpeedFactor": 2,
       "maxSpeedFactor": 2,
-      "minRadiusFactor": 200,
-      "maxRadiusFactor": 2000,
-      "angleVariability": 0.0,
-      "particleDiamFactor": 0.5,
+      "minRadiusFactor": 2500,
+      "maxRadiusFactor": 3000,
+      "angleVariability": 0,
+      "particleDiamFactor": 2.0,
 
       "renderingPipeline": [
-        "display"
+        "beads"
       ]
     },
     {
-      "trailColor": [ 0, 255, 255 ],
+      "trailColor": [0, 0, 0],
       "typeOfOverallShape": "CONSTANT",
 
       "nLinks": 100,
-      "strength": 0.1,
+      "strength": 0.03,
       "minSpeedFactor": 2,
       "maxSpeedFactor": 2,
-      "minRadiusFactor": 200,
-      "maxRadiusFactor": 2000,
-      "angleVariability": 0.005,
-      "particleDiamFactor": 0.5,
+      "minRadiusFactor": 2500,
+      "maxRadiusFactor": 3000,
+      "angleVariability": 0,
+      "particleDiamFactor": 2.0,
 
       "renderingPipeline": [
-        "display"
+        "beads"
       ]
     }
   ]
