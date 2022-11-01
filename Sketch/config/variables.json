@@ -12,7 +12,12 @@
 
   "resample": true,
   "resampleRegular": false,
-  "resampleLen": 10,
+  "resampleLen": 100,
+
+  "curve": {
+    "type": "STROK_CURVE",
+    "pathName": "default"
+  },
 
   "trails": [
     {
@@ -21,8 +26,8 @@
 
       "nLinks": 100,
       "strength": 0.01,
-      "minSpeedFactor": 2,
-      "maxSpeedFactor": 2,
+      "minSpeedFactor": 5,
+      "maxSpeedFactor": 5,
       "minRadiusFactor": 2500,
       "maxRadiusFactor": 3000,
       "angleVariability": 0,
@@ -38,8 +43,8 @@
 
       "nLinks": 100,
       "strength": 0.02,
-      "minSpeedFactor": 2,
-      "maxSpeedFactor": 2,
+      "minSpeedFactor": 5,
+      "maxSpeedFactor": 5,
       "minRadiusFactor": 2500,
       "maxRadiusFactor": 3000,
       "angleVariability": 0,
@@ -55,8 +60,8 @@
 
       "nLinks": 100,
       "strength": 0.03,
-      "minSpeedFactor": 2,
-      "maxSpeedFactor": 2,
+      "minSpeedFactor": 5,
+      "maxSpeedFactor": 5,
       "minRadiusFactor": 2500,
       "maxRadiusFactor": 3000,
       "angleVariability": 0,

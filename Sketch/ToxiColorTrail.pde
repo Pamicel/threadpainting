@@ -1,3 +1,13 @@
+Vec2D rotatePointAbout(Vec2D point, Vec2D center, float angle) {
+  Vec2D translated = point.sub(center);
+
+  // rotate point
+  return new Vec2D(
+    translated.x * cos(angle) - translated.y * sin(angle),
+    translated.x * sin(angle) + translated.y * cos(angle)
+  ).add(center);
+}
+
 class ColorTrailTarget {
   public Vec2D headPosition;
   public Vec2D tailPosition;
@@ -17,6 +27,20 @@ class ColorTrailTarget {
     this.radius = radius;
     this.angle = angle;
     this.position = position;
+  }
+
+  ColorTrailTarget(
+    Vec2D headPosition,
+    Vec2D tailPosition,
+    float angleVariation
+  ) {
+    float radius = headPosition.distanceTo(tailPosition) / 2;
+    Vec2D center = tailPosition.sub(headPosition).normalizeTo(radius).add(headPosition);
+    this.headPosition = rotatePointAbout(headPosition, center, angleVariation);
+    this.tailPosition = rotatePointAbout(tailPosition, center, angleVariation);
+    this.angle = signedAngleBetweenVectors(new Vec2D(1, 0), this.tailPosition.sub(this.headPosition)) - HALF_PI;
+    this.position = center;
+    this.radius = int(radius);
   }
 }
 
@@ -326,6 +350,51 @@ ToxiColorTrail ToxiColorTrailFromCurve(
     speeds,
     targets,
     links, // Links
+    mass, // Mass
+    strength // Strength
+  );
+}
+
+ToxiColorTrail ToxiColorTrailFromStrok(
+  VerletPhysics2D physics,
+  Vec2D[] headCurve,
+  Vec2D[] tailCurve,
+  float minSpeed,
+  float maxSpeed,
+  int nLinks,
+  float mass,
+  float strength,
+  float angleVariability
+) {
+  int numTargetPoints = min(headCurve.length, tailCurve.length);
+  int numSegments = numTargetPoints - 1;
+
+  ColorTrailTarget[] targets = new ColorTrailTarget[numTargetPoints];
+  float[] speeds = new float[numSegments];
+  // int[] radii = new int[numTargetPoints];
+  float[] anglesVariations = new float[numTargetPoints];
+  for (int pointIndex = 0; pointIndex < numTargetPoints; pointIndex++) {
+    // Angles
+    anglesVariations[pointIndex] = random(-PI, PI) * angleVariability;
+
+    // Speeds
+    if (pointIndex < numSegments) {
+      speeds[pointIndex] = random(minSpeed, maxSpeed);
+    }
+
+    // Targets
+    targets[pointIndex] = new ColorTrailTarget(
+      headCurve[pointIndex],
+      tailCurve[pointIndex],
+      anglesVariations[pointIndex]
+    );
+  }
+
+  return new ToxiColorTrail(
+    physics,
+    speeds,
+    targets,
+    nLinks, // Links
     mass, // Mass
     strength // Strength
   );

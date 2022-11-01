@@ -34,7 +34,7 @@ class TrailRenderer {
     }
   }
 
-  void init(
+  void initFromCurve(
     VerletPhysics2D physics,
     Vec2D[] curve,
     int realScale,
@@ -51,6 +51,33 @@ class TrailRenderer {
       this.strength,
       this.angleVariability,
       this.typeOfOverallShape
+    );
+
+    this.instantiateRenderingPipeline(
+      this.renderingStepNames,
+      layer,
+      layerVars
+    );
+  }
+
+  void initFromStrok(
+    VerletPhysics2D physics,
+    Vec2D[] headPositions,
+    Vec2D[] tailPositions,
+    int realScale,
+    PGraphics layer,
+    LayerVariables layerVars
+  ) {
+    this.colorTrail = ToxiColorTrailFromStrok(
+      physics,
+      headPositions,
+      tailPositions,
+      this.minSpeedFactor * realScale,
+      this.maxSpeedFactor * realScale,
+      this.nLinks,
+      this.mass,
+      this.strength,
+      this.angleVariability
     );
 
     this.instantiateRenderingPipeline(

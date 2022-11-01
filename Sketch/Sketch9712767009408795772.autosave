@@ -326,15 +326,14 @@ void saveLayer(PGraphics layer, String layerName) {
 }
 
 void printComposition() {
-  String date = "" + year() + String.format("%02d", month()) + String.format("%02d", day());
-  String time = String.format("%02d", hour()) + ":" + String.format("%02d", minute()) + ":" + String.format("%02d", second());
-  String fileName = date + "T" + time + "-composition.tif";
+  int date = (year() % 100) * 10000 + month() * 100 + day();
+  int time = hour() * 10000 + minute() * 100 + second();
   printLayer.beginDraw();
   printLayer.clear();
   printLayer.background(BACKGROUND_COLOR[0], BACKGROUND_COLOR[1], BACKGROUND_COLOR[2]);
   printLayer.image(layer1, 0, 0, printLayer.width, printLayer.height);
   printLayer.endDraw();
-  printLayer.save("out/" + fileName);
+  printLayer.save("out/composition-seed-"+SEED+"_date-"+ date + "_time-"+ time + ".tif");
 }
 
 void saveLayerAsVideoFrame(PGraphics layer) {
