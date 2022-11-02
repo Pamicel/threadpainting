@@ -179,10 +179,10 @@ void loadVariables() {
     renderer.strength = trailVariables.getFloat("strength");
     renderer.mass = MASS;
     renderer.angleVariability = trailVariables.getFloat("angleVariability");
+    renderer.minRadiusFactor = trailVariables.getFloat("minRadiusFactor");
+    renderer.maxRadiusFactor = trailVariables.getFloat("maxRadiusFactor");
 
     if (CURVE_TYPE.equals("SIMPLE_CURVE")) {
-      renderer.minRadiusFactor = trailVariables.getInt("minRadiusFactor");
-      renderer.maxRadiusFactor = trailVariables.getInt("maxRadiusFactor");
       String typeOfOverallShape = trailVariables.getString("typeOfOverallShape");
       if (typeOfOverallShape.equals("SMALL_TO_BIG")) {
         renderer.typeOfOverallShape = OverallShape.SMALL_TO_BIG;

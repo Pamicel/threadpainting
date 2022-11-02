@@ -1,8 +1,8 @@
 class TrailRenderer {
   float minSpeedFactor;
   float maxSpeedFactor;
-  int minRadiusFactor;
-  int maxRadiusFactor;
+  float minRadiusFactor;
+  float maxRadiusFactor;
   int nLinks;
   float mass;
   float strength;
@@ -72,8 +72,8 @@ class TrailRenderer {
       physics,
       headPositions,
       tailPositions,
-      this.minSpeedFactor * realScale,
-      this.maxSpeedFactor * realScale,
+      this.minSpeedFactor * realScale, this.maxSpeedFactor * realScale,
+      this.minRadiusFactor * realScale, this.maxRadiusFactor * realScale,
       this.nLinks,
       this.mass,
       this.strength,

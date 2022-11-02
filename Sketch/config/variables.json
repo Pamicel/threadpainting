@@ -1,11 +1,11 @@
 {
-  "seed": 1,
-  "stepsPerDraw": 30,
+  "seed": 3,
+  "stepsPerDraw": 50,
 
   "output": "DRAW",
   "videoNumFrames": 30,
 
-  "backgroundColor": [233, 232, 228],
+  "backgroundColor": [255, 255, 255],
   "rgbK": [ 0, 0, 0 ],
   "baseColor": [ 0, 0, 0 ],
   "colorOmegaTwoPi": 0.5,
@@ -24,51 +24,85 @@
       "trailColor": [0, 0, 0],
       "typeOfOverallShape": "CONSTANT",
 
-      "nLinks": 100,
-      "strength": 0.01,
-      "minSpeedFactor": 5,
-      "maxSpeedFactor": 5,
-      "minRadiusFactor": 2500,
-      "maxRadiusFactor": 3000,
+      "nLinks": 10,
+      "strength": 0.001,
+      "minSpeedFactor": 10,
+      "maxSpeedFactor": 10,
+      "minRadiusFactor": 1.3,
+      "maxRadiusFactor": 1.3,
       "angleVariability": 0,
-      "particleDiamFactor": 2.0,
+      "particleDiamFactor": 4,
 
       "renderingPipeline": [
-        "beads"
+        "skeleton"
       ]
     },
     {
-      "trailColor": [233, 232, 228],
+      "trailColor": [255, 255, 255],
       "typeOfOverallShape": "CONSTANT",
 
-      "nLinks": 100,
-      "strength": 0.02,
-      "minSpeedFactor": 5,
-      "maxSpeedFactor": 5,
-      "minRadiusFactor": 2500,
-      "maxRadiusFactor": 3000,
-      "angleVariability": 0,
-      "particleDiamFactor": 2.0,
+      "nLinks": 10,
+      "strength": 0.001,
+      "minSpeedFactor": 3,
+      "maxSpeedFactor": 3,
+      "minRadiusFactor": 0.6,
+      "maxRadiusFactor": 0.7,
+      "angleVariability": 0.01,
+      "particleDiamFactor": 1,
 
       "renderingPipeline": [
-        "beads"
+        "skeleton"
       ]
     },
     {
       "trailColor": [0, 0, 0],
       "typeOfOverallShape": "CONSTANT",
 
-      "nLinks": 100,
-      "strength": 0.03,
-      "minSpeedFactor": 5,
-      "maxSpeedFactor": 5,
-      "minRadiusFactor": 2500,
-      "maxRadiusFactor": 3000,
-      "angleVariability": 0,
-      "particleDiamFactor": 2.0,
+      "nLinks": 10,
+      "strength": 0.001,
+      "minSpeedFactor": 1,
+      "maxSpeedFactor": 1,
+      "minRadiusFactor": 0.4,
+      "maxRadiusFactor": 0.5,
+      "angleVariability": 0.01,
+      "particleDiamFactor": 1,
 
       "renderingPipeline": [
-        "beads"
+        "skeleton"
+      ]
+    },
+    {
+      "trailColor": [255, 255, 255],
+      "typeOfOverallShape": "CONSTANT",
+
+      "nLinks": 10,
+      "strength": 0.001,
+      "minSpeedFactor": 0.8,
+      "maxSpeedFactor": 0.8,
+      "minRadiusFactor": 0.2,
+      "maxRadiusFactor": 0.3,
+      "angleVariability": 0.01,
+      "particleDiamFactor": 1,
+
+      "renderingPipeline": [
+        "skeleton"
+      ]
+    },
+    {
+      "trailColor": [0, 0, 0],
+      "typeOfOverallShape": "CONSTANT",
+
+      "nLinks": 10,
+      "strength": 0.001,
+      "minSpeedFactor": 0.5,
+      "maxSpeedFactor": 0.5,
+      "minRadiusFactor": 0.05,
+      "maxRadiusFactor": 0.1,
+      "angleVariability": 0.01,
+      "particleDiamFactor": 1,
+
+      "renderingPipeline": [
+        "skeleton"
       ]
     }
   ]

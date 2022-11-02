@@ -42,6 +42,12 @@ class ColorTrailTarget {
     this.position = center;
     this.radius = int(radius);
   }
+
+  void rescale(float scale) {
+    Vec2D center = tailPosition.sub(headPosition).normalizeTo(radius).add(headPosition);
+    this.headPosition = this.headPosition.sub(center).scale(scale).add(center);
+    this.tailPosition = this.tailPosition.sub(center).scale(scale).add(center);
+  }
 }
 
 class ToxiColorTrail {
@@ -289,8 +295,8 @@ ToxiColorTrail ToxiColorTrailFromCurve(
   Vec2D[] curve,
   float minSpeed,
   float maxSpeed,
-  int minRadius,
-  int maxRadius,
+  float minRadius,
+  float maxRadius,
   int links,
   float mass,
   float strength,
@@ -330,7 +336,7 @@ ToxiColorTrail ToxiColorTrailFromCurve(
 
     // Radii
     radiusFactor += radiusFactorIncrement;
-    radii[pointIndex] = int(randomInt(minRadius, maxRadius) * radiusFactor);
+    radii[pointIndex] = int(random(minRadius, maxRadius) * radiusFactor);
 
     // Speeds
     if (pointIndex < numSegments) {
@@ -361,6 +367,8 @@ ToxiColorTrail ToxiColorTrailFromStrok(
   Vec2D[] tailCurve,
   float minSpeed,
   float maxSpeed,
+  float minRadiusFactor,
+  float maxRadiusFactor,
   int nLinks,
   float mass,
   float strength,
@@ -388,6 +396,8 @@ ToxiColorTrail ToxiColorTrailFromStrok(
       tailCurve[pointIndex],
       anglesVariations[pointIndex]
     );
+
+    targets[pointIndex].rescale(random(minRadiusFactor, maxRadiusFactor));
   }
 
   return new ToxiColorTrail(
