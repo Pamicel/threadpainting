@@ -35,7 +35,7 @@ class TrailRenderer {
   }
 
   boolean finished() {
-    return this.colorTrail.finished()
+    return this.colorTrail.finished();
   }
 
   void initFromCurve(

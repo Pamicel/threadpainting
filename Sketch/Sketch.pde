@@ -236,6 +236,14 @@ void clear() {
   }
 }
 
+boolean allTrailRenderersFinished() {
+  boolean allFinished = true;
+  for (TrailRenderer renderer: TRAIL_RENDERERS) {
+    allFinished = allFinished && renderer.finished();
+  }
+  return allFinished;
+}
+
 void init() {
   realScale = SCALE;
 
@@ -288,18 +296,22 @@ void setup() {
   loadConfig();
   init();
 
-  // if (OUTPUT == Output.VIDEO) {
-  //   noLoop();
-  //   while (videoFrameCount < VIDEO_NUM_FRAMES) {
-  //     init();
-  //     while (!colorTrail.finished()) {
-  //       newStep();
-  //     }
-  //     saveLayerAsVideoFrame(layer1);
-  //     ANGLE_VARIABILITY += 0.03;
-  //     videoFrameCount++;
-  //   }
-  // }
+  if (OUTPUT == Output.VIDEO) {
+    noLoop();
+    while (videoFrameCount < VIDEO_NUM_FRAMES) {
+      float startTime = millis();
+      println("VIDEO: rendering frame " + videoFrameCount);
+      init();
+      while (!allTrailRenderersFinished()) {
+        newStep();
+      }
+      saveLayerAsVideoFrame(layer1);
+      float time = millis() - startTime;
+      println("VIDEO: frame " + videoFrameCount + " saved, time " + (time / 1000) + " sec");
+      println("VIDEO: est. time remaining " + ((time * (VIDEO_NUM_FRAMES - videoFrameCount)) / 1000 / 60) + " min");
+      videoFrameCount++;
+    }
+  }
 }
 
 void draw() {
