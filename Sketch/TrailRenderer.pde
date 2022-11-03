@@ -34,6 +34,10 @@ class TrailRenderer {
     }
   }
 
+  boolean finished() {
+    return this.colorTrail.finished()
+  }
+
   void initFromCurve(
     VerletPhysics2D physics,
     Vec2D[] curve,
@@ -77,7 +81,8 @@ class TrailRenderer {
       this.nLinks,
       this.mass,
       this.strength,
-      this.angleVariability
+      this.angleVariability,
+      this.typeOfOverallShape
     );
 
     this.instantiateRenderingPipeline(

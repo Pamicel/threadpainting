@@ -59,7 +59,7 @@ int[] TRAIL_COLOR = new int[] { 0, 0, 0 };
 int[] BASE_COLOR = new int[] { 0, 0, 0 };
 float[] RGB_K = new float[] { 1, 1, 1 };
 float COLOR_OMEGA_TWO_PI = -1;
-float ANGLE_VARIABILITY = 1.0;
+float ANGLE_VARIABILITY = 0;
 boolean RESAMPLE = false;
 boolean RESAMPLE_REGULAR = false;
 int RESAMPLE_LEN = 12;
@@ -182,15 +182,13 @@ void loadVariables() {
     renderer.minRadiusFactor = trailVariables.getFloat("minRadiusFactor");
     renderer.maxRadiusFactor = trailVariables.getFloat("maxRadiusFactor");
 
-    if (CURVE_TYPE.equals("SIMPLE_CURVE")) {
-      String typeOfOverallShape = trailVariables.getString("typeOfOverallShape");
-      if (typeOfOverallShape.equals("SMALL_TO_BIG")) {
-        renderer.typeOfOverallShape = OverallShape.SMALL_TO_BIG;
-      } else if (typeOfOverallShape.equals("BIG_TO_SMALL")) {
-        renderer.typeOfOverallShape = OverallShape.BIG_TO_SMALL;
-      } else {
-        renderer.typeOfOverallShape = OverallShape.CONSTANT;
-      }
+    String typeOfOverallShape = trailVariables.getString("typeOfOverallShape");
+    if (typeOfOverallShape.equals("SMALL_TO_BIG")) {
+      renderer.typeOfOverallShape = OverallShape.SMALL_TO_BIG;
+    } else if (typeOfOverallShape.equals("BIG_TO_SMALL")) {
+      renderer.typeOfOverallShape = OverallShape.BIG_TO_SMALL;
+    } else {
+      renderer.typeOfOverallShape = OverallShape.CONSTANT;
     }
 
     JSONArray trailColor = trailVariables.getJSONArray("trailColor");
@@ -255,25 +253,25 @@ void init() {
   layer1Vars.omega = COLOR_OMEGA_TWO_PI * TWO_PI;
 
   for (TrailRenderer renderer: TRAIL_RENDERERS) {
-      randomSeed(SEED);
-      if (CURVE_TYPE.equals("SIMPLE_CURVE")) {
-        renderer.initFromCurve(
-          physics,
-          SIMPLE_CURVE,
-          realScale,
-          layer1,
-          layer1Vars
-        );
-      } else if (CURVE_TYPE.equals("STROK_CURVE")) {
-        renderer.initFromStrok(
-          physics,
-          STROK_HEAD_CURVE,
-          STROK_TAIL_CURVE,
-          realScale,
-          layer1,
-          layer1Vars
-        );
-      }
+    randomSeed(SEED);
+    if (CURVE_TYPE.equals("SIMPLE_CURVE")) {
+      renderer.initFromCurve(
+        physics,
+        SIMPLE_CURVE,
+        realScale,
+        layer1,
+        layer1Vars
+      );
+    } else if (CURVE_TYPE.equals("STROK_CURVE")) {
+      renderer.initFromStrok(
+        physics,
+        STROK_HEAD_CURVE,
+        STROK_TAIL_CURVE,
+        realScale,
+        layer1,
+        layer1Vars
+      );
+    }
   }
 
   layer1.beginDraw();
@@ -286,7 +284,6 @@ void setup() {
   surface.setLocation(DISPLAY_WIN_XY[0], DISPLAY_WIN_XY[1]);
   size(1000, 1000);
   smooth();
-  frameRate(60);
   physics = new VerletPhysics2D();
   loadConfig();
   init();

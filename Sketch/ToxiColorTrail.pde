@@ -372,10 +372,27 @@ ToxiColorTrail ToxiColorTrailFromStrok(
   int nLinks,
   float mass,
   float strength,
-  float angleVariability
+  float angleVariability,
+  OverallShape shape
 ) {
   int numTargetPoints = min(headCurve.length, tailCurve.length);
   int numSegments = numTargetPoints - 1;
+
+    // Default radius factor is 1.0
+  float radiusFactor = 1.0;
+  // By default the radius factor is constant
+  float radiusFactorIncrement = 0.0;
+  if (shape == OverallShape.SMALL_TO_BIG) {
+    // Set starting factor to 0.0
+    radiusFactor = 0.0;
+    // Increment every step
+    radiusFactorIncrement = + 1.0 / numTargetPoints;
+  } else if (shape == OverallShape.BIG_TO_SMALL) {
+    // Set starting factor to 1.0
+    radiusFactor = 1.0;
+    // Decrement every step
+    radiusFactorIncrement = - 1.0 / numTargetPoints;
+  }
 
   ColorTrailTarget[] targets = new ColorTrailTarget[numTargetPoints];
   float[] speeds = new float[numSegments];
@@ -397,7 +414,8 @@ ToxiColorTrail ToxiColorTrailFromStrok(
       anglesVariations[pointIndex]
     );
 
-    targets[pointIndex].rescale(random(minRadiusFactor, maxRadiusFactor));
+    radiusFactor += radiusFactorIncrement;
+    targets[pointIndex].rescale(random(minRadiusFactor, maxRadiusFactor) * radiusFactor);
   }
 
   return new ToxiColorTrail(
