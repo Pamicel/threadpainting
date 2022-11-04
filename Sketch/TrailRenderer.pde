@@ -13,6 +13,9 @@ class TrailRenderer {
   RenderingStep[] renderingPipeline;
   String[] renderingStepNames;
   ToxiColorTrail colorTrail;
+  Vec2D[] headPositions;
+  Vec2D[] tailPositions;
+  Vec2D[] singleCurve;
 
   TrailRenderer() {
     this.trailColor = new int[3];
@@ -38,7 +41,33 @@ class TrailRenderer {
     return this.colorTrail.finished();
   }
 
-  void initFromCurve(
+  void init(
+    VerletPhysics2D physics,
+    int realScale,
+    PGraphics layer,
+    LayerVariables layerVars
+  ) {
+    if (this.headPositions != null && this.tailPositions != null) {
+      initFromStrok(
+        physics,
+        this.headPositions,
+        this.tailPositions,
+        realScale,
+        layer,
+        layerVars
+      );
+    } else if (this.singleCurve != null) {
+      initFromCurve(
+        physics,
+        this.singleCurve,
+        realScale,
+        layer,
+        layerVars
+      );
+    }
+  }
+
+  private void initFromCurve(
     VerletPhysics2D physics,
     Vec2D[] curve,
     int realScale,
@@ -64,7 +93,7 @@ class TrailRenderer {
     );
   }
 
-  void initFromStrok(
+  private void initFromStrok(
     VerletPhysics2D physics,
     Vec2D[] headPositions,
     Vec2D[] tailPositions,

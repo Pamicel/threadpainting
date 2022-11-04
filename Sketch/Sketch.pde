@@ -82,10 +82,10 @@ LayerVariables layer1Vars = new LayerVariables();
 enum OverallShape {BIG_TO_SMALL, SMALL_TO_BIG, CONSTANT};
 OverallShape TYPE_OF_OVERALL_SHAPE = OverallShape.CONSTANT;
 
-Vec2D[] SIMPLE_CURVE;
+Vec2D[] SINGLE_CURVE;
 Vec2D[] STROK_HEAD_CURVE;
 Vec2D[] STROK_TAIL_CURVE;
-String CURVE_TYPE = "SIMPLE_CURVE"; // Or STROK_CURVE
+String CURVE_TYPE = "SINGLE_CURVE"; // Or STROK_CURVE
 String CURVE_PATH = "config/curve.json";
 
 interface RenderingStep {
@@ -117,21 +117,23 @@ Vec2D[] applyResampleToCurve(Vec2D[] curve) {
   return curve;
 }
 
-void loadCurve() {
-  if (CURVE_TYPE.equals("STROK_CURVE")) {
-    JSONObject namedCurves = loadJSONObject(CURVE_PATH);
-    JSONObject curveDescriptions = namedCurves.getJSONObject("curves");
-    JSONArray rawHeadCurve = curveDescriptions.getJSONArray("headCurve");
-    JSONArray rawTailCurve = curveDescriptions.getJSONArray("tailCurve");
-    Vec2D[] headCurve = curveFromJSONArray(rawHeadCurve);
-    Vec2D[] tailCurve = curveFromJSONArray(rawTailCurve);
-    STROK_HEAD_CURVE = applyResampleToCurve(headCurve);
-    STROK_TAIL_CURVE = applyResampleToCurve(tailCurve);
-  } else {
-    JSONArray rawCurve = loadJSONArray(CURVE_PATH);
-    Vec2D[] curve = curveFromJSONArray(rawCurve);
-    SIMPLE_CURVE = applyResampleToCurve(curve);
-  }
+HashMap<String, Vec2D[]> loadStrokCurves(String curvePath) {
+  JSONObject namedCurves = loadJSONObject(curvePath);
+  JSONObject curveDescriptions = namedCurves.getJSONObject("curves");
+  JSONArray rawHeadCurve = curveDescriptions.getJSONArray("headCurve");
+  JSONArray rawTailCurve = curveDescriptions.getJSONArray("tailCurve");
+  Vec2D[] headCurve = curveFromJSONArray(rawHeadCurve);
+  Vec2D[] tailCurve = curveFromJSONArray(rawTailCurve);
+  HashMap<String, Vec2D[]> curves = new HashMap<String, Vec2D[]>();
+  curves.put("headCurve", applyResampleToCurve(headCurve));
+  curves.put("tailCurve", applyResampleToCurve(tailCurve));
+  return curves;
+}
+
+Vec2D[] loadSingleCurve(String curvePath) {
+  JSONArray rawCurve = loadJSONArray(curvePath);
+  Vec2D[] curve = curveFromJSONArray(rawCurve);
+  return applyResampleToCurve(curve);
 }
 
 void loadVariables() {
@@ -155,13 +157,12 @@ void loadVariables() {
   if (curve != null) {
     CURVE_TYPE = curve.getString("type");
     String pathName = curve.getString("pathName");
-    String curvePathsFile = "config/paths/simpleCurvePaths.json";
+    String curvePathsFile = "config/paths/singleCurvePaths.json";
     if (CURVE_TYPE.equals("STROK_CURVE")) {
       curvePathsFile = "config/paths/strokCurvePaths.json";
     }
     JSONObject curvePaths = loadJSONObject(curvePathsFile);
     CURVE_PATH = curvePaths.getString(pathName);
-    println(CURVE_PATH);
     if (CURVE_PATH == null) {
       throw new Error("Path name " + pathName + " is not defined in " + curvePathsFile);
     }
@@ -182,6 +183,13 @@ void loadVariables() {
     renderer.angleVariability = trailVariables.getFloat("angleVariability");
     renderer.minRadiusFactor = trailVariables.getFloat("minRadiusFactor");
     renderer.maxRadiusFactor = trailVariables.getFloat("maxRadiusFactor");
+    if (CURVE_TYPE.equals("STROK_CURVE")) {
+      HashMap<String, Vec2D[]> curves = loadStrokCurves(CURVE_PATH);
+      renderer.headPositions = curves.get("headCurve");
+      renderer.tailPositions = curves.get("tailCurve");
+    } else {
+      renderer.singleCurve = loadSingleCurve(CURVE_PATH);
+    }
 
     String typeOfOverallShape = trailVariables.getString("typeOfOverallShape");
     if (typeOfOverallShape.equals("SMALL_TO_BIG")) {
@@ -225,7 +233,6 @@ void loadVariables() {
 void loadConfig() {
   clear();
   loadVariables();
-  loadCurve();
 }
 
 void clear() {
@@ -263,24 +270,12 @@ void init() {
 
   for (TrailRenderer renderer: TRAIL_RENDERERS) {
     randomSeed(SEED);
-    if (CURVE_TYPE.equals("SIMPLE_CURVE")) {
-      renderer.initFromCurve(
-        physics,
-        SIMPLE_CURVE,
-        realScale,
-        layer1,
-        layer1Vars
-      );
-    } else if (CURVE_TYPE.equals("STROK_CURVE")) {
-      renderer.initFromStrok(
-        physics,
-        STROK_HEAD_CURVE,
-        STROK_TAIL_CURVE,
-        realScale,
-        layer1,
-        layer1Vars
-      );
-    }
+    renderer.init(
+      physics,
+      realScale,
+      layer1,
+      layer1Vars
+    );
   }
 
   layer1.beginDraw();
