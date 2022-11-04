@@ -70,6 +70,7 @@ Output OUTPUT = Output.VIDEO;
 int VIDEO_NUM_FRAMES = 10;
 float PARTICLE_DIAMETER_FACTOR = 1.0;
 int videoFrameCount = 0;
+String IMAGE_OUTPUT_FOLDER = "out/";
 
 float MASS = 1;
 boolean SECONDARY_MONITOR = false;
@@ -325,29 +326,33 @@ void draw() {
 void saveCurrentFrame() {
   int date = (year() % 100) * 10000 + month() * 100 + day();
   int time = hour() * 10000 + minute() * 100 + second();
-  saveFrame("out/seed-"+SEED+"_date-"+ date + "_time-"+ time + ".tif");
+  saveFrame(IMAGE_OUTPUT_FOLDER + "seed-"+SEED+"_date-"+ date + "_time-"+ time + ".tif");
 }
 
 void saveLayer(PGraphics layer, String layerName) {
   int date = (year() % 100) * 10000 + month() * 100 + day();
   int time = hour() * 10000 + minute() * 100 + second();
-  layer.save("out/layer-" + layerName + "_seed-"+SEED+"_date-"+ date + "_time-"+ time + ".tif");
+  layer.save(IMAGE_OUTPUT_FOLDER + "layer-" + layerName + "_seed-"+SEED+"_date-"+ date + "_time-"+ time + ".tif");
 }
 
-void printComposition() {
-  String date = "" + year() + String.format("%02d", month()) + String.format("%02d", day());
-  String time = String.format("%02d", hour()) + ":" + String.format("%02d", minute()) + ":" + String.format("%02d", second());
-  String fileName = date + "T" + time + "-composition.tif";
+void printComposition(String outputFolder, String dateTime) {
+  String fileName = dateTime + "-composition.tif";
   printLayer.beginDraw();
   printLayer.clear();
   printLayer.background(BACKGROUND_COLOR[0], BACKGROUND_COLOR[1], BACKGROUND_COLOR[2]);
   printLayer.image(layer1, 0, 0, printLayer.width, printLayer.height);
   printLayer.endDraw();
-  printLayer.save("out/" + fileName);
+  printLayer.save(outputFolder + fileName);
 }
 
 void saveLayerAsVideoFrame(PGraphics layer) {
   layer.save("video/frame" + String.format("%04d", videoFrameCount) + ".tif");
+}
+
+String getDateTime() {
+  String date = "" + year() + String.format("%02d", month()) + String.format("%02d", day());
+  String time = String.format("%02d", hour()) + String.format("%02d", minute()) + String.format("%02d", second());
+  return date + "_" + time;
 }
 
 void keyPressed() {
@@ -356,10 +361,26 @@ void keyPressed() {
     saveCurrentFrame();
   }
   if (key == 'p') {
-    printComposition();
+    printComposition(IMAGE_OUTPUT_FOLDER, getDateTime());
   }
   if (key == 's') {
-    saveLayer(layer1, "1");
+    String dateTime = getDateTime();
+    String outputFolder = IMAGE_OUTPUT_FOLDER + dateTime + "/";
+    // save composition
+    printComposition(outputFolder, dateTime);
+    // save commit hash
+    exec(sketchPath() + "/saveGitHash.sh", outputFolder);
+    // save variables
+    JSONObject variables = loadJSONObject("config/variables.json");
+    saveJSONObject(variables, outputFolder + "variables.json");
+    // save strok or curve
+    if (CURVE_TYPE.equals("STROK_CURVE")) {
+      JSONObject namedCurves = loadJSONObject(CURVE_PATH);
+      saveJSONObject(namedCurves, outputFolder + "namedCurves.json");
+    } else {
+      JSONArray rawCurve = loadJSONArray(CURVE_PATH);
+      saveJSONArray(rawCurve, outputFolder + "curve.json");
+    }
   }
   if (key == 'l') {
     loadConfig();
