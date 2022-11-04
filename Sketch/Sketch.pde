@@ -136,6 +136,30 @@ Vec2D[] loadSingleCurve(String curvePath) {
   return applyResampleToCurve(curve);
 }
 
+class CurveInfos {
+  String path;
+  String type;
+  CurveInfos() {};
+}
+
+CurveInfos extractCurveInfos(JSONObject rawInfos) {
+  CurveInfos curveInfos = new CurveInfos();
+  if (rawInfos != null) {
+    curveInfos.type = rawInfos.getString("type");
+    String pathName = rawInfos.getString("pathName");
+    String curvePathsFile = "config/paths/singleCurvePaths.json";
+    if (curveInfos.type.equals("STROK_CURVE")) {
+      curvePathsFile = "config/paths/strokCurvePaths.json";
+    }
+    JSONObject curvePaths = loadJSONObject(curvePathsFile);
+    curveInfos.path = curvePaths.getString(pathName);
+    if (curveInfos.path == null) {
+      throw new Error("Path name " + pathName + " is not defined in " + curvePathsFile);
+    }
+  }
+  return curveInfos;
+}
+
 void loadVariables() {
   JSONObject variables = loadJSONObject("config/variables.json");
   SEED = variables.getInt("seed");
@@ -154,19 +178,9 @@ void loadVariables() {
   RESAMPLE_REGULAR = variables.getBoolean("resampleRegular");
   RESAMPLE_LEN = variables.getInt("resampleLen");
   JSONObject curve = variables.getJSONObject("curve");
-  if (curve != null) {
-    CURVE_TYPE = curve.getString("type");
-    String pathName = curve.getString("pathName");
-    String curvePathsFile = "config/paths/singleCurvePaths.json";
-    if (CURVE_TYPE.equals("STROK_CURVE")) {
-      curvePathsFile = "config/paths/strokCurvePaths.json";
-    }
-    JSONObject curvePaths = loadJSONObject(curvePathsFile);
-    CURVE_PATH = curvePaths.getString(pathName);
-    if (CURVE_PATH == null) {
-      throw new Error("Path name " + pathName + " is not defined in " + curvePathsFile);
-    }
-  }
+  CurveInfos curveInfos = extractCurveInfos(curve);
+  CURVE_TYPE = curveInfos.type;
+  CURVE_PATH = curveInfos.path;
 
   // Trails
   JSONArray trails = variables.getJSONArray("trails");
