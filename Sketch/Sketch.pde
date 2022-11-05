@@ -369,10 +369,7 @@ void keyPressed() {
   if (key == ' ') {
     saveCurrentFrame();
   }
-  if (key == 'p') {
-    printComposition(IMAGE_OUTPUT_FOLDER, getDateTime());
-  }
-  if (key == 's') {
+  if (key == 's' || key == 'p') {
     String dateTime = getDateTime();
     String outputFolder = IMAGE_OUTPUT_FOLDER + dateTime + "/";
     // save composition

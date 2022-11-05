@@ -21,37 +21,37 @@
 
   "trails": [
     {
-      "trailColor": [0, 0, 0],
-      "typeOfOverallShape": "CONSTANT",
-
-      "nLinks": 100,
-      "strength": 0.1,
-      "minSpeedFactor": 10,
-      "maxSpeedFactor": 10,
-      "minRadiusFactor": 1.5,
-      "maxRadiusFactor": 1.55,
-      "angleVariability": 0.0000,
-      "particleDiamFactor": 2.0,
-
-      "renderingPipeline": [
-        "beadsWithoutExtremities"
-      ]
-    },
-    {
       "trailColor": [233, 232, 228],
       "typeOfOverallShape": "CONSTANT",
 
-      "nLinks": 100,
-      "strength": 0.11,
-      "minSpeedFactor": 10,
-      "maxSpeedFactor": 10,
-      "minRadiusFactor": 1.5,
-      "maxRadiusFactor": 1.55,
-      "angleVariability": 0.0002,
-      "particleDiamFactor": 2.0,
+      "nLinks": 500,
+      "strength": 0.3,
+      "minSpeedFactor": 3,
+      "maxSpeedFactor": 5,
+      "minRadiusFactor": 1,
+      "maxRadiusFactor": 1,
+      "angleVariability": 0.00000,
+      "particleDiamFactor": 0.1,
 
       "renderingPipeline": [
-        "beadsWithoutExtremities"
+        "skeleton"
+      ]
+    },
+    {
+      "trailColor": [0, 0, 0],
+      "typeOfOverallShape": "CONSTANT",
+
+      "nLinks": 500,
+      "strength": 0.3,
+      "minSpeedFactor": 3,
+      "maxSpeedFactor": 5,
+      "minRadiusFactor": 1,
+      "maxRadiusFactor": 1,
+      "angleVariability": 0.00002,
+      "particleDiamFactor": 0.1,
+
+      "renderingPipeline": [
+        "skeleton"
       ]
     }
   ]
