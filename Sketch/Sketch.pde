@@ -367,7 +367,7 @@ String getDateTime() {
 void keyPressed() {
   int number = randomInt(0, 100);
   if (key == ' ') {
-    saveCurrentFrame();
+    saveLayer(layer1, "1");
   }
   if (key == 's' || key == 'p') {
     String dateTime = getDateTime();

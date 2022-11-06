@@ -12,7 +12,7 @@
 
   "resample": true,
   "resampleRegular": true,
-  "resampleLen": 100,
+  "resampleLen": 300,
 
   "curve": {
     "type": "STROK_CURVE",
@@ -21,17 +21,34 @@
 
   "trails": [
     {
+      "trailColor": [255, 200, 200],
+      "typeOfOverallShape": "CONSTANT",
+
+      "nLinks": 100,
+      "strength": 0.2,
+      "minSpeedFactor": 10,
+      "maxSpeedFactor": 10,
+      "minRadiusFactor": 1.2,
+      "maxRadiusFactor": 1.2,
+      "angleVariability": 0.00002,
+      "particleDiamFactor": 1,
+
+      "renderingPipeline": [
+        "beads"
+      ]
+    },
+    {
       "trailColor": [233, 232, 228],
       "typeOfOverallShape": "CONSTANT",
 
-      "nLinks": 500,
-      "strength": 0.3,
+      "nLinks": 100,
+      "strength": 0.2,
       "minSpeedFactor": 3,
-      "maxSpeedFactor": 5,
+      "maxSpeedFactor": 3,
       "minRadiusFactor": 1,
       "maxRadiusFactor": 1,
       "angleVariability": 0.00000,
-      "particleDiamFactor": 0.1,
+      "particleDiamFactor": 1,
 
       "renderingPipeline": [
         "skeleton"
@@ -41,14 +58,14 @@
       "trailColor": [0, 0, 0],
       "typeOfOverallShape": "CONSTANT",
 
-      "nLinks": 500,
-      "strength": 0.3,
+      "nLinks": 100,
+      "strength": 0.2,
       "minSpeedFactor": 3,
-      "maxSpeedFactor": 5,
+      "maxSpeedFactor": 3,
       "minRadiusFactor": 1,
       "maxRadiusFactor": 1,
       "angleVariability": 0.00002,
-      "particleDiamFactor": 0.1,
+      "particleDiamFactor": 1,
 
       "renderingPipeline": [
         "skeleton"
