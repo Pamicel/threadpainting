@@ -300,6 +300,33 @@ void init() {
   layer1.endDraw();
 }
 
+void recordVideo() {
+  noLoop();
+  while (videoFrameCount < VIDEO_NUM_FRAMES) {
+    println("VIDEO: rendering frame " + videoFrameCount);
+    float editStartTime = millis();
+    for (TrailRenderer renderer: TRAIL_RENDERERS) {
+      renderer.angleVariability += VIDEO_ANGLE_INCREMENT;
+      renderer.minRadiusFactor += VIDEO_RADIUS_INCREMENT;
+      renderer.maxRadiusFactor += VIDEO_RADIUS_INCREMENT;
+    }
+    float editEndTime = millis();
+    println("VIDEO: renderer config duration " + ((editEndTime - editStartTime) / 1000) + " sec");
+    float renderStartTime = millis();
+    init();
+    while (!allTrailRenderersFinished()) {
+      newStep();
+    }
+    float renderDuration = millis() - renderStartTime;
+    println("VIDEO: frame " + videoFrameCount + " saved, duration " + (renderDuration / 1000) + " sec");
+    float saveStartTime = millis();
+    saveLayerAsVideoFrame(layer1);
+    float saveEndTime = millis();
+    println("VIDEO: image save duration " + ((saveEndTime - saveStartTime) / 1000) + " sec");
+    videoFrameCount++;
+  }
+}
+
 void setup() {
   surface.setLocation(DISPLAY_WIN_XY[0], DISPLAY_WIN_XY[1]);
   size(500, 1000);
@@ -309,30 +336,7 @@ void setup() {
   init();
 
   if (OUTPUT == Output.VIDEO) {
-    noLoop();
-    while (videoFrameCount < VIDEO_NUM_FRAMES) {
-      println("VIDEO: rendering frame " + videoFrameCount);
-      float editStartTime = millis();
-      for (TrailRenderer renderer: TRAIL_RENDERERS) {
-        renderer.angleVariability += VIDEO_ANGLE_INCREMENT;
-        renderer.minRadiusFactor += VIDEO_RADIUS_INCREMENT;
-        renderer.maxRadiusFactor += VIDEO_RADIUS_INCREMENT;
-      }
-      float editEndTime = millis();
-      println("VIDEO: renderer config duration " + ((editEndTime - editStartTime) / 1000) + " sec");
-      float renderStartTime = millis();
-      init();
-      while (!allTrailRenderersFinished()) {
-        newStep();
-      }
-      float renderDuration = millis() - renderStartTime;
-      println("VIDEO: frame " + videoFrameCount + " saved, duration " + (renderDuration / 1000) + " sec");
-      float saveStartTime = millis();
-      saveLayerAsVideoFrame(layer1);
-      float saveEndTime = millis();
-      println("VIDEO: image save duration " + ((saveEndTime - saveStartTime) / 1000) + " sec");
-      videoFrameCount++;
-    }
+    recordVideo();
   }
 }
 
