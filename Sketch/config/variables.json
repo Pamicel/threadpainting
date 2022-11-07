@@ -1,11 +1,11 @@
 {
-  "seed": 3,
-  "stepsPerDraw": 20,
+  "seed": 2,
+  "stepsPerDraw": 40,
 
   "output": "DRAW",
   "videoNumFrames": 60,
 
-  "backgroundColor": [233, 232, 228],
+  "backgroundColor": [0, 0, 0],
   "rgbK": [ 0, 0, 0 ],
   "baseColor": [ 0, 0, 0 ],
   "colorOmegaTwoPi": 0.5,
@@ -21,54 +21,54 @@
 
   "trails": [
     {
-      "trailColor": [255, 200, 200],
+      "trailColor": [0, 255, 255],
       "typeOfOverallShape": "CONSTANT",
 
-      "nLinks": 100,
-      "strength": 0.2,
+      "nLinks": 300,
+      "strength": 1.2,
       "minSpeedFactor": 10,
       "maxSpeedFactor": 10,
-      "minRadiusFactor": 1.2,
-      "maxRadiusFactor": 1.2,
-      "angleVariability": 0.00002,
-      "particleDiamFactor": 1,
+      "minRadiusFactor": 1.0,
+      "maxRadiusFactor": 1.0,
+      "angleVariability": 0.010,
+      "particleDiamFactor": 1.2,
 
       "renderingPipeline": [
         "beads"
       ]
     },
     {
-      "trailColor": [233, 232, 228],
+      "trailColor": [255, 0, 255],
       "typeOfOverallShape": "CONSTANT",
 
-      "nLinks": 100,
-      "strength": 0.2,
-      "minSpeedFactor": 3,
-      "maxSpeedFactor": 3,
-      "minRadiusFactor": 1,
-      "maxRadiusFactor": 1,
-      "angleVariability": 0.00000,
+      "nLinks": 300,
+      "strength": 1.2,
+      "minSpeedFactor": 10,
+      "maxSpeedFactor": 10,
+      "minRadiusFactor": 1.0,
+      "maxRadiusFactor": 1.0,
+      "angleVariability": 0.011,
       "particleDiamFactor": 1,
 
       "renderingPipeline": [
-        "skeleton"
+        "beadsOneInTwo"
       ]
     },
     {
-      "trailColor": [0, 0, 0],
+      "trailColor": [255, 255, 0],
       "typeOfOverallShape": "CONSTANT",
 
-      "nLinks": 100,
-      "strength": 0.2,
-      "minSpeedFactor": 3,
-      "maxSpeedFactor": 3,
-      "minRadiusFactor": 1,
-      "maxRadiusFactor": 1,
-      "angleVariability": 0.00002,
-      "particleDiamFactor": 1,
+      "nLinks": 300,
+      "strength": 1.2,
+      "minSpeedFactor": 10,
+      "maxSpeedFactor": 10,
+      "minRadiusFactor": 1.0,
+      "maxRadiusFactor": 1.0,
+      "angleVariability": 0.012,
+      "particleDiamFactor": .9,
 
       "renderingPipeline": [
-        "skeleton"
+        "beadsOneInTwo"
       ]
     }
   ]

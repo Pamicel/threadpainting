@@ -302,7 +302,7 @@ void init() {
 
 void setup() {
   surface.setLocation(DISPLAY_WIN_XY[0], DISPLAY_WIN_XY[1]);
-  size(1000, 1000);
+  size(500, 1000);
   smooth();
   physics = new VerletPhysics2D();
   loadConfig();
