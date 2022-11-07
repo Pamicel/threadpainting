@@ -5,67 +5,73 @@
   "output": "DRAW",
   "videoNumFrames": 60,
 
+  "backgroundImage": {
+    "use": false,
+    "pathName": "default",
+  },
   "backgroundColor": [0, 0, 0],
+
   "rgbK": [ 0, 0, 0 ],
   "baseColor": [ 0, 0, 0 ],
   "colorOmegaTwoPi": 0.5,
 
   "resample": true,
-  "resampleRegular": true,
+  "resampleRegular": false,
   "resampleLen": 300,
-
-  "curve": {
-    "type": "STROK_CURVE",
-    "pathName": "default"
-  },
 
   "trails": [
     {
+      "curveName": "defaultStrok",
+
       "trailColor": [0, 255, 255],
       "typeOfOverallShape": "CONSTANT",
 
-      "nLinks": 300,
-      "strength": 1.2,
+      "nLinks": 100,
+      "strength": 1.5,
       "minSpeedFactor": 10,
       "maxSpeedFactor": 10,
       "minRadiusFactor": 1.0,
       "maxRadiusFactor": 1.0,
       "angleVariability": 0.010,
-      "particleDiamFactor": 1.2,
+      "particleDiamFactor": 0.3,
 
       "renderingPipeline": [
         "beads"
       ]
     },
     {
+      "curveName": "defaultStrok",
+
       "trailColor": [255, 0, 255],
       "typeOfOverallShape": "CONSTANT",
 
-      "nLinks": 300,
-      "strength": 1.2,
+      "nLinks": 100,
+      "strength": 1.5,
       "minSpeedFactor": 10,
       "maxSpeedFactor": 10,
       "minRadiusFactor": 1.0,
       "maxRadiusFactor": 1.0,
       "angleVariability": 0.011,
-      "particleDiamFactor": 1,
+      "particleDiamFactor": 0.2,
 
       "renderingPipeline": [
         "beadsOneInTwo"
       ]
     },
     {
+      "curveName": "defaultStrok",
+
       "trailColor": [255, 255, 0],
       "typeOfOverallShape": "CONSTANT",
 
-      "nLinks": 300,
-      "strength": 1.2,
+      "nLinks": 100,
+      "strength": 1.5,
       "minSpeedFactor": 10,
       "maxSpeedFactor": 10,
       "minRadiusFactor": 1.0,
       "maxRadiusFactor": 1.0,
       "angleVariability": 0.012,
-      "particleDiamFactor": .9,
+      "particleDiamFactor": 0.1,
 
       "renderingPipeline": [
         "beadsOneInTwo"

@@ -76,7 +76,7 @@ float VIDEO_RADIUS_INCREMENT = 0;
 
 float MASS = 1;
 boolean SECONDARY_MONITOR = false;
-int[] DISPLAY_WIN_XY = SECONDARY_MONITOR ? new int[]{600, -2000} : new int[]{50, 50};
+int[] DISPLAY_WIN_XY = SECONDARY_MONITOR ? new int[]{600, -2000} : new int[]{0, 0};
 
 TrailRenderer[] TRAIL_RENDERERS;
 LayerVariables layer1Vars = new LayerVariables();
@@ -144,21 +144,16 @@ class CurveInfos {
   CurveInfos() {};
 }
 
-CurveInfos extractCurveInfos(JSONObject rawInfos) {
+CurveInfos loadCurveInfos(String pathName) {
   CurveInfos curveInfos = new CurveInfos();
-  if (rawInfos != null) {
-    curveInfos.type = rawInfos.getString("type");
-    String pathName = rawInfos.getString("pathName");
-    String curvePathsFile = "config/paths/singleCurvePaths.json";
-    if (curveInfos.type.equals("STROK_CURVE")) {
-      curvePathsFile = "config/paths/strokCurvePaths.json";
-    }
-    JSONObject curvePaths = loadJSONObject(curvePathsFile);
-    curveInfos.path = curvePaths.getString(pathName);
-    if (curveInfos.path == null) {
-      throw new Error("Path name " + pathName + " is not defined in " + curvePathsFile);
-    }
+  String curvePathsFile = "config/paths/curvePaths.json";
+  JSONObject allCurvePaths = loadJSONObject(curvePathsFile);
+  JSONObject rawCurveInfo = allCurvePaths.getJSONObject(pathName);
+  if (rawCurveInfo == null) {
+    throw new Error("Path name " + pathName + " is not defined in " + curvePathsFile);
   }
+  curveInfos.type = rawCurveInfo.getString("type");
+  curveInfos.path = rawCurveInfo.getString("path");
   return curveInfos;
 }
 
@@ -179,10 +174,6 @@ void loadVariables() {
   RESAMPLE = variables.getBoolean("resample");
   RESAMPLE_REGULAR = variables.getBoolean("resampleRegular");
   RESAMPLE_LEN = variables.getInt("resampleLen");
-  JSONObject curve = variables.getJSONObject("curve");
-  CurveInfos curveInfos = extractCurveInfos(curve);
-  CURVE_TYPE = curveInfos.type;
-  CURVE_PATH = curveInfos.path;
 
   // Trails
   JSONArray trails = variables.getJSONArray("trails");
@@ -191,6 +182,7 @@ void loadVariables() {
     TRAIL_RENDERERS[i] = new TrailRenderer();
     TrailRenderer renderer = TRAIL_RENDERERS[i];
     JSONObject trailVariables = trails.getJSONObject(i);
+
     renderer.minSpeedFactor = trailVariables.getFloat("minSpeedFactor");
     renderer.maxSpeedFactor = trailVariables.getFloat("maxSpeedFactor");
     renderer.nLinks = trailVariables.getInt("nLinks");
@@ -199,12 +191,19 @@ void loadVariables() {
     renderer.angleVariability = trailVariables.getFloat("angleVariability");
     renderer.minRadiusFactor = trailVariables.getFloat("minRadiusFactor");
     renderer.maxRadiusFactor = trailVariables.getFloat("maxRadiusFactor");
-    if (CURVE_TYPE.equals("STROK_CURVE")) {
-      HashMap<String, Vec2D[]> curves = loadStrokCurves(CURVE_PATH);
+
+    String curveName = trailVariables.getString("curveName");
+    CurveInfos curveInfos = loadCurveInfos(curveName);
+    String curveType = curveInfos.type;
+    String curvePath = curveInfos.path;
+
+    // TODO: optimise curve load (load once for trails with same curve)
+    if (curveType.equals("STROK_CURVE")) {
+      HashMap<String, Vec2D[]> curves = loadStrokCurves(curvePath);
       renderer.headPositions = curves.get("headCurve");
       renderer.tailPositions = curves.get("tailCurve");
     } else {
-      renderer.singleCurve = loadSingleCurve(CURVE_PATH);
+      renderer.singleCurve = loadSingleCurve(curvePath);
     }
 
     String typeOfOverallShape = trailVariables.getString("typeOfOverallShape");
@@ -395,13 +394,21 @@ void keyPressed() {
     // save variables
     JSONObject variables = loadJSONObject("config/variables.json");
     saveJSONObject(variables, outputFolder + "variables.json");
-    // save strok or curve
-    if (CURVE_TYPE.equals("STROK_CURVE")) {
-      JSONObject namedCurves = loadJSONObject(CURVE_PATH);
-      saveJSONObject(namedCurves, outputFolder + "namedCurves.json");
-    } else {
-      JSONArray rawCurve = loadJSONArray(CURVE_PATH);
-      saveJSONArray(rawCurve, outputFolder + "curve.json");
+    JSONArray trails = variables.getJSONArray("trails");
+    for (int i = 0; i < trails.size(); i++) {
+      JSONObject trailVariables = trails.getJSONObject(i);
+      String curveName = trailVariables.getString("curveName");
+      CurveInfos curveInfos = loadCurveInfos(curveName);
+      String curveType = curveInfos.type;
+      String curvePath = curveInfos.path;
+      // save strok or single
+      if (curveType.equals("STROK_CURVE")) {
+        JSONObject namedCurves = loadJSONObject(curvePath);
+        saveJSONObject(namedCurves, outputFolder + curveName + "_namedCurves.json");
+      } else {
+        JSONArray rawCurve = loadJSONArray(curvePath);
+        saveJSONArray(rawCurve, outputFolder + curveName + "_singleCurve.json");
+      }
     }
   }
   if (key == 'l') {
