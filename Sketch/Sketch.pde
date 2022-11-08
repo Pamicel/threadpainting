@@ -73,6 +73,7 @@ int videoFrameCount = 0;
 String IMAGE_OUTPUT_FOLDER = "out/";
 float VIDEO_ANGLE_INCREMENT = -0.01;
 float VIDEO_RADIUS_INCREMENT = 0;
+PImage BACKGROUND_IMAGE;
 
 float MASS = 1;
 boolean SECONDARY_MONITOR = false;
@@ -231,6 +232,15 @@ void loadVariables() {
 
   // Colors
   COLOR_OMEGA_TWO_PI = variables.getFloat("colorOmegaTwoPi");
+
+  JSONObject backgroundImageInfos = variables.getJSONObject("backgroundImage");
+  if (backgroundImageInfos != null && backgroundImageInfos.getBoolean("use") == true) {
+    String bgImagePathName = backgroundImageInfos.getString("pathName");
+    JSONObject imagePaths = loadJSONObject("config/paths/imagePaths.json");
+    String imagePath = imagePaths.getString(bgImagePathName);
+    BACKGROUND_IMAGE = loadImage(imagePath);
+  }
+
   JSONArray backgroundColor = variables.getJSONArray("backgroundColor");
   for (int i = 0; i < BACKGROUND_COLOR.length; i++) {
     BACKGROUND_COLOR[i] = backgroundColor.getInt(i);
@@ -295,6 +305,9 @@ void init() {
 
   layer1.beginDraw();
   layer1.clear();
+  if (BACKGROUND_IMAGE != null) {
+    layer1.image(BACKGROUND_IMAGE, 0, 0, layer1.width, layer1.height);
+  }
   // layer1.blendMode(BLEND);
   layer1.endDraw();
 }

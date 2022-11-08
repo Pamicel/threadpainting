@@ -6,7 +6,7 @@
   "videoNumFrames": 60,
 
   "backgroundImage": {
-    "use": false,
+    "use": true,
     "pathName": "default",
   },
   "backgroundColor": [0, 0, 0],
