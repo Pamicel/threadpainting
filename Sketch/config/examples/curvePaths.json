@@ -3,7 +3,7 @@
     "path": "/Path/to/file.json",
     "type": "STROK_CURVE"
   },
-  "customStrok": {
+  "strok2": {
     "path": "/Absolute/path/to/otherfile.json",
     "type": "STROK_CURVE"
   },

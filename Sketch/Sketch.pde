@@ -92,6 +92,10 @@ String CURVE_TYPE = "SINGLE_CURVE"; // Or STROK_CURVE
 String CURVE_PATH = "config/defaults/singleCurve.json";
 String VARIABLES_PATH;
 
+boolean USE_SEQUENCE = false;
+int SEQUENCE_LEN = 0;
+int sequenceIndex = 0;
+
 interface RenderingStep {
   void render();
 };
@@ -235,7 +239,11 @@ void loadVariables(String variablesPath) {
   COLOR_OMEGA_TWO_PI = variables.getFloat("colorOmegaTwoPi");
 
   JSONObject backgroundImageInfos = variables.getJSONObject("backgroundImage");
-  if (backgroundImageInfos != null && backgroundImageInfos.getBoolean("use") == true) {
+  if (
+    (!USE_SEQUENCE || sequenceIndex == 0) &&
+    backgroundImageInfos != null &&
+    backgroundImageInfos.getBoolean("use") == true
+  ) {
     String bgImagePathName = backgroundImageInfos.getString("pathName");
     JSONObject imagePaths = loadJSONObject("config/paths/imagePaths.json");
     String imagePath = imagePaths.getString(bgImagePathName);
@@ -258,12 +266,16 @@ void loadVariables(String variablesPath) {
 
 void loadConfig() {
   JSONObject config = loadJSONObject("config/config.json");
-  boolean useCustomVariableFile = config.getBoolean("useCustomVariables");
-  VARIABLES_PATH = "config/defaults/variables.json";
-  if (useCustomVariableFile) {
-    String variablesPathName = config.getString("customVariablesPathName");
-    JSONObject variablesPaths = loadJSONObject("config/paths/customVariablesPaths.json");
+
+  USE_SEQUENCE = config.getBoolean("useSequence");
+  if (USE_SEQUENCE) {
+    JSONArray sequence = config.getJSONArray("sequence");
+    SEQUENCE_LEN = sequence.size();
+    String variablesPathName = sequence.getString(sequenceIndex);
+    JSONObject variablesPaths = loadJSONObject("config/paths/variablesPaths.json");
     VARIABLES_PATH = variablesPaths.getString(variablesPathName);
+  } else {
+    VARIABLES_PATH = "config/defaults/variables.json";
   }
 }
 
@@ -433,6 +445,7 @@ void keyPressed() {
     }
   }
   if (key == 'l') {
+    sequenceIndex = 0;
     loadConfig();
     clear();
     loadVariables(VARIABLES_PATH);
@@ -449,4 +462,14 @@ void newStep() {
     renderer.render();
   }
   layer1.endDraw();
+  if (allTrailRenderersFinished() && USE_SEQUENCE) {
+    sequenceIndex++;
+    if (sequenceIndex < SEQUENCE_LEN) {
+      BACKGROUND_IMAGE = layer1;
+      loadConfig();
+      clear();
+      loadVariables(VARIABLES_PATH);
+      init();
+    }
+  }
 }

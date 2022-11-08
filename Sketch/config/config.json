@@ -1,4 +1,4 @@
 {
-  "useCustomVariables": true,
-  "customVariablesPathName": "path1"
+  "useSequence": true,
+  "sequence": [ "path3", "path4", "path5"]
 }
