@@ -7,7 +7,7 @@
 
   "backgroundImage": {
     "use": true,
-    "pathName": "default",
+    "pathName": "image2"
   },
   "backgroundColor": [0, 0, 0],
 

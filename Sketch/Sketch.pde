@@ -89,7 +89,8 @@ Vec2D[] SINGLE_CURVE;
 Vec2D[] STROK_HEAD_CURVE;
 Vec2D[] STROK_TAIL_CURVE;
 String CURVE_TYPE = "SINGLE_CURVE"; // Or STROK_CURVE
-String CURVE_PATH = "config/curve.json";
+String CURVE_PATH = "config/defaults/singleCurve.json";
+String VARIABLES_PATH;
 
 interface RenderingStep {
   void render();
@@ -158,8 +159,8 @@ CurveInfos loadCurveInfos(String pathName) {
   return curveInfos;
 }
 
-void loadVariables() {
-  JSONObject variables = loadJSONObject("config/variables.json");
+void loadVariables(String variablesPath) {
+  JSONObject variables = loadJSONObject(variablesPath);
   SEED = variables.getInt("seed");
   // Rendering
   STEPS_PER_DRAW = variables.getInt("stepsPerDraw");
@@ -256,8 +257,14 @@ void loadVariables() {
 }
 
 void loadConfig() {
-  clear();
-  loadVariables();
+  JSONObject config = loadJSONObject("config/config.json");
+  boolean useCustomVariableFile = config.getBoolean("useCustomVariables");
+  VARIABLES_PATH = "config/defaults/variables.json";
+  if (useCustomVariableFile) {
+    String variablesPathName = config.getString("customVariablesPathName");
+    JSONObject variablesPaths = loadJSONObject("config/paths/customVariablesPaths.json");
+    VARIABLES_PATH = variablesPaths.getString(variablesPathName);
+  }
 }
 
 void clear() {
@@ -345,6 +352,7 @@ void setup() {
   smooth();
   physics = new VerletPhysics2D();
   loadConfig();
+  loadVariables(VARIABLES_PATH);
   init();
 
   if (OUTPUT == Output.VIDEO) {
@@ -405,7 +413,7 @@ void keyPressed() {
     // save commit hash
     exec(sketchPath() + "/saveGitHash.sh", outputFolder);
     // save variables
-    JSONObject variables = loadJSONObject("config/variables.json");
+    JSONObject variables = loadJSONObject("config/defaults/variables.json");
     saveJSONObject(variables, outputFolder + "variables.json");
     JSONArray trails = variables.getJSONArray("trails");
     for (int i = 0; i < trails.size(); i++) {
@@ -426,6 +434,8 @@ void keyPressed() {
   }
   if (key == 'l') {
     loadConfig();
+    clear();
+    loadVariables(VARIABLES_PATH);
     init();
   }
 }

@@ -1,0 +1,14 @@
+{
+  "defaultStrok": {
+    "path": "/Path/to/file.json",
+    "type": "STROK_CURVE"
+  },
+  "customStrok": {
+    "path": "/Absolute/path/to/otherfile.json",
+    "type": "STROK_CURVE"
+  },
+  "defaultSingle": {
+    "path": "config/examples/singlCurve.json",
+    "type": "SINGLE_CURVE"
+  }
+}
