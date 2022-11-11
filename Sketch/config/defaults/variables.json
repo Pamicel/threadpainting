@@ -15,13 +15,13 @@
   "baseColor": [ 0, 0, 0 ],
   "colorOmegaTwoPi": 0.5,
 
-  "resample": true,
-  "resampleRegular": false,
-  "resampleLen": 100,
-
   "trails": [
     {
       "curveName": "single1",
+
+      "resample": true,
+      "resampleRegular": false,
+      "resampleLen": 100,
 
       "trailColor": [ 0, 255, 255 ],
       "typeOfOverallShape": "SMALL_TO_BIG",
@@ -42,6 +42,10 @@
     {
       "curveName": "single1",
 
+      "resample": true,
+      "resampleRegular": false,
+      "resampleLen": 100,
+
       "trailColor": [ 255, 0, 255 ],
       "typeOfOverallShape": "SMALL_TO_BIG",
 
@@ -60,6 +64,10 @@
     },
     {
       "curveName": "single1",
+
+      "resample": true,
+      "resampleRegular": false,
+      "resampleLen": 100,
 
       "trailColor": [ 255, 255, 0 ],
       "typeOfOverallShape": "SMALL_TO_BIG",

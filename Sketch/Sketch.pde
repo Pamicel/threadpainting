@@ -115,17 +115,31 @@ Vec2D[] curveFromJSONArray(JSONArray rawCurve) {
   return curve;
 }
 
-Vec2D[] applyResampleToCurve(Vec2D[] curve) {
-  if (RESAMPLE && RESAMPLE_LEN != 0) {
-    if (RESAMPLE_REGULAR) {
-      return regularResample(curve, RESAMPLE_LEN);
+class ResampleConfig {
+  ResampleConfig() {}
+  boolean resample;
+  boolean resampleRegular;
+  int resampleLen;
+}
+
+Vec2D[] applyResampleToCurve(Vec2D[] curve, ResampleConfig resampleConfig) {
+  int resampleLen = resampleConfig.resampleLen;
+  boolean resample = resampleConfig.resample;
+  boolean resampleRegular = resampleConfig.resampleRegular;
+
+  if (resample && resampleLen != 0) {
+    if (resampleRegular) {
+      return regularResample(curve, resampleLen);
     }
-    return resample(curve, RESAMPLE_LEN);
+    return resample(curve, resampleLen);
   }
   return curve;
 }
 
-HashMap<String, Vec2D[]> loadStrokCurves(String curvePath) {
+HashMap<String, Vec2D[]> loadStrokCurves(
+  String curvePath,
+  ResampleConfig resampleConfig
+) {
   JSONObject namedCurves = loadJSONObject(curvePath);
   JSONObject curveDescriptions = namedCurves.getJSONObject("curves");
   JSONArray rawHeadCurve = curveDescriptions.getJSONArray("headCurve");
@@ -133,15 +147,18 @@ HashMap<String, Vec2D[]> loadStrokCurves(String curvePath) {
   Vec2D[] headCurve = curveFromJSONArray(rawHeadCurve);
   Vec2D[] tailCurve = curveFromJSONArray(rawTailCurve);
   HashMap<String, Vec2D[]> curves = new HashMap<String, Vec2D[]>();
-  curves.put("headCurve", applyResampleToCurve(headCurve));
-  curves.put("tailCurve", applyResampleToCurve(tailCurve));
+  curves.put("headCurve", applyResampleToCurve(headCurve, resampleConfig));
+  curves.put("tailCurve", applyResampleToCurve(tailCurve, resampleConfig));
   return curves;
 }
 
-Vec2D[] loadSingleCurve(String curvePath) {
+Vec2D[] loadSingleCurve(
+  String curvePath,
+  ResampleConfig resampleConfig
+) {
   JSONArray rawCurve = loadJSONArray(curvePath);
   Vec2D[] curve = curveFromJSONArray(rawCurve);
-  return applyResampleToCurve(curve);
+  return applyResampleToCurve(curve, resampleConfig);
 }
 
 class CurveInfos {
@@ -176,11 +193,6 @@ void loadVariables(String variablesPath) {
   }
   VIDEO_NUM_FRAMES = variables.getInt("videoNumFrames");
 
-  // Curve
-  RESAMPLE = variables.getBoolean("resample");
-  RESAMPLE_REGULAR = variables.getBoolean("resampleRegular");
-  RESAMPLE_LEN = variables.getInt("resampleLen");
-
   // Trails
   JSONArray trails = variables.getJSONArray("trails");
   TRAIL_RENDERERS = new TrailRenderer[trails.size()];
@@ -204,12 +216,17 @@ void loadVariables(String variablesPath) {
     String curvePath = curveInfos.path;
 
     // TODO: optimise curve load (load once for trails with same curve)
+    ResampleConfig resampleConfig = new ResampleConfig();
+    resampleConfig.resample = trailVariables.getBoolean("resample");
+    resampleConfig.resampleRegular = trailVariables.getBoolean("resampleRegular");
+    resampleConfig.resampleLen = trailVariables.getInt("resampleLen");
+
     if (curveType.equals("STROK_CURVE")) {
-      HashMap<String, Vec2D[]> curves = loadStrokCurves(curvePath);
+      HashMap<String, Vec2D[]> curves = loadStrokCurves(curvePath, resampleConfig);
       renderer.headPositions = curves.get("headCurve");
       renderer.tailPositions = curves.get("tailCurve");
     } else {
-      renderer.singleCurve = loadSingleCurve(curvePath);
+      renderer.singleCurve = loadSingleCurve(curvePath, resampleConfig);
     }
 
     String typeOfOverallShape = trailVariables.getString("typeOfOverallShape");
