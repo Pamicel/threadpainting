@@ -17,6 +17,8 @@ class TrailRenderer {
   Vec2D[] tailPositions;
   Vec2D[] singleCurve;
 
+
+
   TrailRenderer() {
     this.trailColor = new int[3];
   }
@@ -44,8 +46,7 @@ class TrailRenderer {
   void init(
     VerletPhysics2D physics,
     int realScale,
-    PGraphics layer,
-    LayerVariables layerVars
+    PGraphics layer
   ) {
     if (this.headPositions != null && this.tailPositions != null) {
       initFromStrok(
@@ -53,16 +54,14 @@ class TrailRenderer {
         this.headPositions,
         this.tailPositions,
         realScale,
-        layer,
-        layerVars
+        layer
       );
     } else if (this.singleCurve != null) {
       initFromCurve(
         physics,
         this.singleCurve,
         realScale,
-        layer,
-        layerVars
+        layer
       );
     }
   }
@@ -71,8 +70,7 @@ class TrailRenderer {
     VerletPhysics2D physics,
     Vec2D[] curve,
     int realScale,
-    PGraphics layer,
-    LayerVariables layerVars
+    PGraphics layer
   ) {
     this.colorTrail = ToxiColorTrailFromCurve(
       physics,
@@ -88,8 +86,7 @@ class TrailRenderer {
 
     this.instantiateRenderingPipeline(
       this.renderingStepNames,
-      layer,
-      layerVars
+      layer
     );
   }
 
@@ -98,8 +95,7 @@ class TrailRenderer {
     Vec2D[] headPositions,
     Vec2D[] tailPositions,
     int realScale,
-    PGraphics layer,
-    LayerVariables layerVars
+    PGraphics layer
   ) {
     this.colorTrail = ToxiColorTrailFromStrok(
       physics,
@@ -116,15 +112,13 @@ class TrailRenderer {
 
     this.instantiateRenderingPipeline(
       this.renderingStepNames,
-      layer,
-      layerVars
+      layer
     );
   }
 
   void instantiateRenderingPipeline(
     String[] renderingStepNames,
-    PGraphics layer,
-    LayerVariables layerVars
+    PGraphics layer
   ) {
     this.renderingPipeline = new RenderingStep[this.renderingStepNames.length];
     TrailRenderer renderer = this;
@@ -134,10 +128,6 @@ class TrailRenderer {
           void render() {
             colorTrail.colorString.display(
               layer,
-              layerVars.rgbK,
-              layerVars.baseColor,
-              layerVars.rgbOffset,
-              layerVars.omega,
               renderer.particleDiameterFactor,
               renderer.trailColor
             );
@@ -148,10 +138,6 @@ class TrailRenderer {
           void render() {
             colorTrail.colorString.displayWithoutExtremities(
               layer,
-              layerVars.rgbK,
-              layerVars.baseColor,
-              layerVars.rgbOffset,
-              layerVars.omega,
               renderer.particleDiameterFactor,
               renderer.trailColor
             );
@@ -162,10 +148,6 @@ class TrailRenderer {
           void render() {
             colorTrail.colorString.displayOneInTwo(
               layer,
-              layerVars.rgbK,
-              layerVars.baseColor,
-              layerVars.rgbOffset,
-              layerVars.omega,
               renderer.particleDiameterFactor,
               renderer.trailColor
             );
@@ -176,10 +158,6 @@ class TrailRenderer {
           void render() {
             colorTrail.colorString.displayStraight(
               layer,
-              layerVars.rgbK,
-              layerVars.baseColor,
-              layerVars.rgbOffset,
-              layerVars.omega,
               renderer.particleDiameterFactor,
               renderer.trailColor
             );

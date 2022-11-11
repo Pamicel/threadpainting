@@ -16,14 +16,6 @@ int randomInt (int max) {
   return randomInt(0, max);
 }
 
-class LayerVariables {
-  LayerVariables() {}
-  public float[] rgbK;
-  public int[] baseColor;
-  public float[] rgbOffset;
-  public float omega;
-}
-
 Vec2D randomPosition(Rect rectangle) {
   int xmin = (int)rectangle.x;
   int xmax = (int)(rectangle.x + rectangle.width);
@@ -56,9 +48,6 @@ float STRENGTH = .01;
 int STEPS_PER_DRAW = 20;
 int[] BACKGROUND_COLOR = new int[] { 0, 0, 0 };
 int[] TRAIL_COLOR = new int[] { 0, 0, 0 };
-int[] BASE_COLOR = new int[] { 0, 0, 0 };
-float[] RGB_K = new float[] { 1, 1, 1 };
-float COLOR_OMEGA_TWO_PI = -1;
 float ANGLE_VARIABILITY = 0;
 boolean RESAMPLE = false;
 boolean RESAMPLE_REGULAR = false;
@@ -80,7 +69,6 @@ boolean SECONDARY_MONITOR = false;
 int[] DISPLAY_WIN_XY = SECONDARY_MONITOR ? new int[]{600, -2000} : new int[]{0, 0};
 
 TrailRenderer[] TRAIL_RENDERERS;
-LayerVariables layer1Vars = new LayerVariables();
 
 enum OverallShape {BIG_TO_SMALL, SMALL_TO_BIG, CONSTANT};
 OverallShape TYPE_OF_OVERALL_SHAPE = OverallShape.CONSTANT;
@@ -253,8 +241,6 @@ void loadVariables(String variablesPath) {
   }
 
   // Colors
-  COLOR_OMEGA_TWO_PI = variables.getFloat("colorOmegaTwoPi");
-
   JSONObject backgroundImageInfos = variables.getJSONObject("backgroundImage");
   if (
     (!USE_SEQUENCE || sequenceIndex == 0) &&
@@ -270,14 +256,6 @@ void loadVariables(String variablesPath) {
   JSONArray backgroundColor = variables.getJSONArray("backgroundColor");
   for (int i = 0; i < BACKGROUND_COLOR.length; i++) {
     BACKGROUND_COLOR[i] = backgroundColor.getInt(i);
-  }
-  JSONArray baseColor = variables.getJSONArray("baseColor");
-  for (int i = 0; i < BASE_COLOR.length; i++) {
-    BASE_COLOR[i] = baseColor.getInt(i);
-  }
-  JSONArray rgbK = variables.getJSONArray("rgbK");
-  for (int i = 0; i < BASE_COLOR.length; i++) {
-    RGB_K[i] = rgbK.getFloat(i);
   }
 }
 
@@ -324,18 +302,12 @@ void init() {
 
   stepCount = 0;
 
-  layer1Vars.rgbK = RGB_K;
-  layer1Vars.rgbOffset = new float[] { 0, 0, 0 };
-  layer1Vars.baseColor = BASE_COLOR;
-  layer1Vars.omega = COLOR_OMEGA_TWO_PI * TWO_PI;
-
   for (TrailRenderer renderer: TRAIL_RENDERERS) {
     randomSeed(SEED);
     renderer.init(
       physics,
       realScale,
-      layer1,
-      layer1Vars
+      layer1
     );
   }
 

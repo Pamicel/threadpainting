@@ -6,9 +6,6 @@
   "videoNumFrames": 30,
 
   "backgroundColor": [ 255, 255, 255 ],
-  "rgbK": [ 0, 0, 0 ],
-  "baseColor": [ 0, 0, 0 ],
-  "colorOmegaTwoPi": 0.5,
 
   "resample": true,
   "resampleRegular": false,

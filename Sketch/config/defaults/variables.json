@@ -11,10 +11,6 @@
   },
   "backgroundColor": [ 0, 0, 0 ],
 
-  "rgbK": [ 0, 0, 0 ],
-  "baseColor": [ 0, 0, 0 ],
-  "colorOmegaTwoPi": 0.5,
-
   "trails": [
     {
       "curveName": "single1",
