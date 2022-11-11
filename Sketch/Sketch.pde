@@ -389,7 +389,7 @@ void saveCurrentFrame() {
 void saveLayer(PGraphics layer, String layerName) {
   int date = (year() % 100) * 10000 + month() * 100 + day();
   int time = hour() * 10000 + minute() * 100 + second();
-  layer.save(IMAGE_OUTPUT_FOLDER + "layer-" + layerName + "_seed-"+SEED+"_date-"+ date + "_time-"+ time + ".tif");
+  layer.save(IMAGE_OUTPUT_FOLDER + "layer-" + layerName + "_seed-" + SEED + "_date-" + date + "_time-" + time + ".tif");
 }
 
 void printComposition(String outputFolder, String dateTime) {
@@ -446,6 +446,7 @@ void keyPressed() {
   }
   if (key == 'l') {
     sequenceIndex = 0;
+    BACKGROUND_IMAGE = null;
     loadConfig();
     clear();
     loadVariables(VARIABLES_PATH);
