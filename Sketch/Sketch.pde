@@ -5,33 +5,14 @@ import toxi.geom.*;
 import toxi.math.*;
 import java.util.Iterator;
 
-/* Utils */
-
-int randomInt (int min, int max) {
-  // Random int with evenly distributed probabilities
-  return floor(random(min, max + 1));
-}
-
-int randomInt (int max) {
-  return randomInt(0, max);
-}
-
-Vec2D randomPosition(Rect rectangle) {
-  int xmin = (int)rectangle.x;
-  int xmax = (int)(rectangle.x + rectangle.width);
-  int ymin = (int)rectangle.y;
-  int ymax = (int)(rectangle.y + rectangle.height);
-
-  return new Vec2D(randomInt(xmin, xmax), randomInt(ymin, ymax));
-}
-
-/* */
-
-/* Global variables */
 
 VerletPhysics2D physics;
 
-PGraphics layer1, printLayer;
+PGraphics canvaslayer, printLayer;
+PImage BACKGROUND_IMAGE;
+
+enum Output { VIDEO, DRAW };
+enum WidthFunction {TO_SMALL, FROM_SMALL, CONSTANT};
 
 int realScale, realHeight, realWidth;
 
@@ -39,88 +20,23 @@ int realScale, realHeight, realWidth;
 int SEED = 5;
 float LAYER_SCALE = .1;
 int SCALE = 1;
-float MIN_SPEED_FACTOR = 5;
-float MAX_SPEED_FACTOR = 10;
-int MIN_RADIUS_FACTOR = 100;
-int MAX_RADIUS_FACTOR = 2000;
-int N_LINKS = 100;
-float STRENGTH = .01;
-int STEPS_PER_DRAW = 20;
+int UPDATES_PER_FRAME = 20;
 int[] BACKGROUND_COLOR = new int[] { 0, 0, 0 };
-int[] TRAIL_COLOR = new int[] { 0, 0, 0 };
-float ANGLE_VARIABILITY = 0;
-boolean RESAMPLE = false;
-boolean RESAMPLE_REGULAR = false;
-int RESAMPLE_LEN = 12;
-int CYCLE_LEN = 8500;
-int stepCount = 0;
-enum Output { VIDEO, DRAW };
-Output OUTPUT = Output.VIDEO;
-int VIDEO_NUM_FRAMES = 10;
-float PARTICLE_DIAMETER_FACTOR = 1.0;
-int videoFrameCount = 0;
 String IMAGE_OUTPUT_FOLDER = "out/";
 float VIDEO_ANGLE_INCREMENT = -0.01;
 float VIDEO_RADIUS_INCREMENT = 0;
-PImage BACKGROUND_IMAGE;
+int VIDEO_NUM_FRAMES = 30;
+Output OUTPUT = Output.DRAW;
+int videoFrameCount = 0;
 
 float MASS = 1;
 boolean SECONDARY_MONITOR = false;
 int[] DISPLAY_WIN_XY = SECONDARY_MONITOR ? new int[]{600, -2000} : new int[]{0, 0};
 
+Sequence SEQUENCE;
 TrailRenderer[] TRAIL_RENDERERS;
 
-enum OverallShape {BIG_TO_SMALL, SMALL_TO_BIG, CONSTANT};
-OverallShape TYPE_OF_OVERALL_SHAPE = OverallShape.CONSTANT;
-
-Vec2D[] SINGLE_CURVE;
-Vec2D[] STROK_HEAD_CURVE;
-Vec2D[] STROK_TAIL_CURVE;
-String CURVE_TYPE = "SINGLE_CURVE"; // Or STROK_CURVE
-String CURVE_PATH = "config/defaults/singleCurve.json";
-String VARIABLES_PATH;
-
-Sequence SEQUENCE;
-
-interface RenderingStep {
-  void render();
-};
-RenderingStep[] renderingPipeline;
-String[] renderingStepNames;
-
 /* */
-
-Vec2D[] curveFromJSONArray(JSONArray rawCurve) {
-  Vec2D[] curve = new Vec2D[rawCurve.size()];
-  for (int i = 0; i < rawCurve.size(); i++) {
-    JSONObject point = rawCurve.getJSONObject(i);
-    float x = point.getFloat("x") / LAYER_SCALE;
-    float y = point.getFloat("y") / LAYER_SCALE;
-    curve[i] = new Vec2D(x, y);
-  }
-  return curve;
-}
-
-class ResampleConfig {
-  ResampleConfig() {}
-  boolean resample;
-  boolean resampleRegular;
-  int resampleLen;
-}
-
-Vec2D[] applyResampleToCurve(Vec2D[] curve, ResampleConfig resampleConfig) {
-  int resampleLen = resampleConfig.resampleLen;
-  boolean resample = resampleConfig.resample;
-  boolean resampleRegular = resampleConfig.resampleRegular;
-
-  if (resample && resampleLen != 0) {
-    if (resampleRegular) {
-      return regularResample(curve, resampleLen);
-    }
-    return resample(curve, resampleLen);
-  }
-  return curve;
-}
 
 HashMap<String, Vec2D[]> loadStrokCurves(
   String curvePath,
@@ -130,8 +46,8 @@ HashMap<String, Vec2D[]> loadStrokCurves(
   JSONObject curveDescriptions = namedCurves.getJSONObject("curves");
   JSONArray rawHeadCurve = curveDescriptions.getJSONArray("headCurve");
   JSONArray rawTailCurve = curveDescriptions.getJSONArray("tailCurve");
-  Vec2D[] headCurve = curveFromJSONArray(rawHeadCurve);
-  Vec2D[] tailCurve = curveFromJSONArray(rawTailCurve);
+  Vec2D[] headCurve = curveFromJSONArray(rawHeadCurve, LAYER_SCALE);
+  Vec2D[] tailCurve = curveFromJSONArray(rawTailCurve, LAYER_SCALE);
   HashMap<String, Vec2D[]> curves = new HashMap<String, Vec2D[]>();
   curves.put("headCurve", applyResampleToCurve(headCurve, resampleConfig));
   curves.put("tailCurve", applyResampleToCurve(tailCurve, resampleConfig));
@@ -143,7 +59,7 @@ Vec2D[] loadSingleCurve(
   ResampleConfig resampleConfig
 ) {
   JSONArray rawCurve = loadJSONArray(curvePath);
-  Vec2D[] curve = curveFromJSONArray(rawCurve);
+  Vec2D[] curve = curveFromJSONArray(rawCurve, LAYER_SCALE);
   return applyResampleToCurve(curve, resampleConfig);
 }
 
@@ -175,14 +91,7 @@ void loadVariables(Sequence sequence) {
   JSONObject variables = loadJSONObject(variablesPath);
   SEED = variables.getInt("seed");
   // Rendering
-  STEPS_PER_DRAW = variables.getInt("stepsPerDraw");
-  String outputType = variables.getString("output");
-  if (outputType.equals("VIDEO")) {
-    OUTPUT = Output.VIDEO;
-  } else {
-    OUTPUT = Output.DRAW;
-  }
-  VIDEO_NUM_FRAMES = variables.getInt("videoNumFrames");
+  UPDATES_PER_FRAME = variables.getInt("stepsPerDraw");
 
   // Trails
   JSONArray trails = variables.getJSONArray("trails");
@@ -220,13 +129,13 @@ void loadVariables(Sequence sequence) {
       renderer.singleCurve = loadSingleCurve(curvePath, resampleConfig);
     }
 
-    String typeOfOverallShape = trailVariables.getString("typeOfOverallShape");
-    if (typeOfOverallShape.equals("SMALL_TO_BIG")) {
-      renderer.typeOfOverallShape = OverallShape.SMALL_TO_BIG;
-    } else if (typeOfOverallShape.equals("BIG_TO_SMALL")) {
-      renderer.typeOfOverallShape = OverallShape.BIG_TO_SMALL;
+    String widthFunctionName = trailVariables.getString("typeOfOverallShape");
+    if (widthFunctionName.equals("FROM_SMALL")) {
+      renderer.widthFunction = WidthFunction.FROM_SMALL;
+    } else if (widthFunctionName.equals("TO_SMALL")) {
+      renderer.widthFunction = WidthFunction.TO_SMALL;
     } else {
-      renderer.typeOfOverallShape = OverallShape.CONSTANT;
+      renderer.widthFunction = WidthFunction.CONSTANT;
     }
 
     JSONArray trailColor = trailVariables.getJSONArray("trailColor");
@@ -265,6 +174,14 @@ void loadVariables(Sequence sequence) {
 Sequence loadSequence() {
   JSONObject config = loadJSONObject("config/config.json");
   JSONArray steps = config.getJSONArray("steps");
+
+  String outputType = config.getString("output");
+  Output OUTPUT = Output.DRAW;
+  if (outputType.equals("VIDEO")) {
+    OUTPUT = Output.VIDEO;
+  }
+
+  int videoNumFrames = config.getInt("videoNumFrames");
   int repeat = config.getInt("repeat");
   return new Sequence(steps, repeat == 0 ? 1 : repeat);
 }
@@ -292,27 +209,25 @@ void init() {
   realWidth = width * realScale;
   realHeight = height * realScale;
 
-  layer1 = createGraphics(realWidth, realHeight);
+  canvaslayer = createGraphics(realWidth, realHeight);
   printLayer = createGraphics(realWidth, realHeight);
-
-  stepCount = 0;
 
   for (TrailRenderer renderer: TRAIL_RENDERERS) {
     randomSeed(SEED);
     renderer.init(
       physics,
       realScale,
-      layer1
+      canvaslayer
     );
   }
 
-  layer1.beginDraw();
-  layer1.clear();
+  canvaslayer.beginDraw();
+  canvaslayer.clear();
   if (BACKGROUND_IMAGE != null) {
-    layer1.image(BACKGROUND_IMAGE, 0, 0, layer1.width, layer1.height);
+    canvaslayer.image(BACKGROUND_IMAGE, 0, 0, canvaslayer.width, canvaslayer.height);
   }
-  // layer1.blendMode(BLEND);
-  layer1.endDraw();
+  // canvaslayer.blendMode(BLEND);
+  canvaslayer.endDraw();
 }
 
 void recordVideo() {
@@ -335,7 +250,7 @@ void recordVideo() {
     float renderDuration = millis() - renderStartTime;
     println("VIDEO: frame " + videoFrameCount + " saved, duration " + (renderDuration / 1000) + " sec");
     float saveStartTime = millis();
-    saveLayerAsVideoFrame(layer1);
+    saveLayerAsVideoFrame(canvaslayer);
     float saveEndTime = millis();
     println("VIDEO: image save duration " + ((saveEndTime - saveStartTime) / 1000) + " sec");
     videoFrameCount++;
@@ -358,8 +273,8 @@ void setup() {
 
 void draw() {
   background(BACKGROUND_COLOR[0], BACKGROUND_COLOR[1], BACKGROUND_COLOR[2]);
-  image(layer1, 0, 0, width, height);
-  for(int i = 0; i < STEPS_PER_DRAW; i++) {
+  image(canvaslayer, 0, 0, width, height);
+  for(int i = 0; i < UPDATES_PER_FRAME; i++) {
     newStep();
   }
 }
@@ -381,7 +296,7 @@ void printComposition(String outputFolder, String dateTime) {
   printLayer.beginDraw();
   printLayer.clear();
   printLayer.background(BACKGROUND_COLOR[0], BACKGROUND_COLOR[1], BACKGROUND_COLOR[2]);
-  printLayer.image(layer1, 0, 0, printLayer.width, printLayer.height);
+  printLayer.image(canvaslayer, 0, 0, printLayer.width, printLayer.height);
   printLayer.endDraw();
   printLayer.save(outputFolder + fileName);
 }
@@ -399,7 +314,7 @@ String getDateTime() {
 void keyPressed() {
   int number = randomInt(0, 100);
   if (key == ' ') {
-    saveLayer(layer1, "1");
+    saveLayer(canvaslayer, "1");
   }
   if (key == 's' || key == 'p') {
     String dateTime = getDateTime();
@@ -442,17 +357,17 @@ void newStep() {
     return;
   }
   physics.update();
-  layer1.beginDraw();
-  layer1.scale(LAYER_SCALE);
+  canvaslayer.beginDraw();
+  canvaslayer.scale(LAYER_SCALE);
   // rendering steps
   for (TrailRenderer renderer: TRAIL_RENDERERS) {
     renderer.render();
   }
-  layer1.endDraw();
+  canvaslayer.endDraw();
   if (allTrailRenderersFinished()) {
     SEQUENCE.next();
     if (!SEQUENCE.finished()) {
-      BACKGROUND_IMAGE = layer1;
+      BACKGROUND_IMAGE = canvaslayer;
       clear();
       loadVariables(SEQUENCE);
       init();

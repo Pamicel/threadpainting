@@ -20,7 +20,7 @@
       "resampleLen": 100,
 
       "trailColor": [ 0, 255, 255 ],
-      "typeOfOverallShape": "SMALL_TO_BIG",
+      "typeOfOverallShape": "FROM_SMALL",
 
       "nLinks": 3,
       "strength": 0.0001,
@@ -43,7 +43,7 @@
       "resampleLen": 100,
 
       "trailColor": [ 255, 0, 255 ],
-      "typeOfOverallShape": "SMALL_TO_BIG",
+      "typeOfOverallShape": "FROM_SMALL",
 
       "nLinks": 3,
       "strength": 0.00001,
@@ -66,7 +66,7 @@
       "resampleLen": 100,
 
       "trailColor": [ 255, 255, 0 ],
-      "typeOfOverallShape": "SMALL_TO_BIG",
+      "typeOfOverallShape": "FROM_SMALL",
 
       "nLinks": 3,
       "strength": 0.00001,

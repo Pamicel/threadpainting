@@ -301,7 +301,7 @@ ToxiColorTrail ToxiColorTrailFromCurve(
   float mass,
   float strength,
   float angleVariability,
-  OverallShape shape
+  WidthFunction shape
 ) {
   int numTargetPoints = curve.length;
   int numSegments = numTargetPoints - 1;
@@ -309,12 +309,12 @@ ToxiColorTrail ToxiColorTrailFromCurve(
   float radiusFactor = 1.0;
   // By default the radius factor is constant
   float radiusFactorIncrement = 0.0;
-  if (shape == OverallShape.SMALL_TO_BIG) {
+  if (shape == WidthFunction.FROM_SMALL) {
     // Set starting factor to 0.0
     radiusFactor = 0.0;
     // Increment every step
     radiusFactorIncrement = + 1.0 / numTargetPoints;
-  } else if (shape == OverallShape.BIG_TO_SMALL) {
+  } else if (shape == WidthFunction.TO_SMALL) {
     // Set starting factor to 1.0
     radiusFactor = 1.0;
     // Decrement every step
@@ -373,7 +373,7 @@ ToxiColorTrail ToxiColorTrailFromStrok(
   float mass,
   float strength,
   float angleVariability,
-  OverallShape shape
+  WidthFunction shape
 ) {
   int numTargetPoints = min(headCurve.length, tailCurve.length);
   int numSegments = numTargetPoints - 1;
@@ -382,12 +382,12 @@ ToxiColorTrail ToxiColorTrailFromStrok(
   float radiusFactor = 1.0;
   // By default the radius factor is constant
   float radiusFactorIncrement = 0.0;
-  if (shape == OverallShape.SMALL_TO_BIG) {
+  if (shape == WidthFunction.FROM_SMALL) {
     // Set starting factor to 0.0
     radiusFactor = 0.0;
     // Increment every step
     radiusFactorIncrement = + 1.0 / numTargetPoints;
-  } else if (shape == OverallShape.BIG_TO_SMALL) {
+  } else if (shape == WidthFunction.TO_SMALL) {
     // Set starting factor to 1.0
     radiusFactor = 1.0;
     // Decrement every step

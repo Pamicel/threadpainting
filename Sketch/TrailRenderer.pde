@@ -1,3 +1,7 @@
+interface RenderingStep {
+  void render();
+};
+
 class TrailRenderer {
   float minSpeedFactor;
   float maxSpeedFactor;
@@ -7,7 +11,7 @@ class TrailRenderer {
   float mass;
   float strength;
   float angleVariability;
-  OverallShape typeOfOverallShape;
+  WidthFunction widthFunction;
   int[] trailColor;
   float particleDiameterFactor;
   RenderingStep[] renderingPipeline;
@@ -16,8 +20,6 @@ class TrailRenderer {
   Vec2D[] headPositions;
   Vec2D[] tailPositions;
   Vec2D[] singleCurve;
-
-
 
   TrailRenderer() {
     this.trailColor = new int[3];
@@ -81,7 +83,7 @@ class TrailRenderer {
       this.mass,
       this.strength,
       this.angleVariability,
-      this.typeOfOverallShape
+      this.widthFunction
     );
 
     this.instantiateRenderingPipeline(
@@ -107,7 +109,7 @@ class TrailRenderer {
       this.mass,
       this.strength,
       this.angleVariability,
-      this.typeOfOverallShape
+      this.widthFunction
     );
 
     this.instantiateRenderingPipeline(
