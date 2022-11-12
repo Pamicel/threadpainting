@@ -80,9 +80,7 @@ String CURVE_TYPE = "SINGLE_CURVE"; // Or STROK_CURVE
 String CURVE_PATH = "config/defaults/singleCurve.json";
 String VARIABLES_PATH;
 
-boolean USE_SEQUENCE = false;
-int SEQUENCE_LEN = 0;
-int sequenceIndex = 0;
+Sequence SEQUENCE;
 
 interface RenderingStep {
   void render();
@@ -108,6 +106,51 @@ class ResampleConfig {
   boolean resample;
   boolean resampleRegular;
   int resampleLen;
+}
+
+class Sequence {
+  int repeat;
+  int repeatCounter = 0;
+  JSONArray steps;
+  int stepCounter = 0;
+
+  Sequence(
+    JSONArray steps,
+    int repeat
+  ) {
+    this.steps = steps;
+    this.repeat = repeat;
+    this.repeatCounter = 0;
+    this.stepCounter = 0;
+  }
+
+  int len() {
+    return this.steps.size();
+  }
+
+  void next() {
+    this.stepCounter++;
+    if (this.stepCounter == this.len()) {
+      this.stepCounter = 0;
+      this.repeatCounter++;
+    }
+  }
+
+  boolean finished() {
+    return this.repeatCounter == this.repeat;
+  }
+
+  boolean isAtFirstStep() {
+    return this.stepCounter == 0;
+  }
+
+  boolean isAtFirstRepeat() {
+    return this.repeatCounter == 0;
+  }
+
+  String currentStep() {
+    return this.steps.getString(this.stepCounter);
+  }
 }
 
 Vec2D[] applyResampleToCurve(Vec2D[] curve, ResampleConfig resampleConfig) {
@@ -168,7 +211,12 @@ CurveInfos loadCurveInfos(String pathName) {
   return curveInfos;
 }
 
-void loadVariables(String variablesPath) {
+void loadVariables(Sequence sequence) {
+  boolean initialise = sequence.isAtFirstRepeat() && sequence.isAtFirstStep();
+  String variablesPathName = sequence.currentStep();
+  JSONObject variablesPaths = loadJSONObject("config/paths/variablesPaths.json");
+  String variablesPath = variablesPaths.getString(variablesPathName);
+
   JSONObject variables = loadJSONObject(variablesPath);
   SEED = variables.getInt("seed");
   // Rendering
@@ -243,7 +291,7 @@ void loadVariables(String variablesPath) {
   // Colors
   JSONObject backgroundImageInfos = variables.getJSONObject("backgroundImage");
   if (
-    (!USE_SEQUENCE || sequenceIndex == 0) &&
+    initialise &&
     backgroundImageInfos != null &&
     backgroundImageInfos.getBoolean("use") == true
   ) {
@@ -259,19 +307,11 @@ void loadVariables(String variablesPath) {
   }
 }
 
-void loadConfig() {
+Sequence loadSequence() {
   JSONObject config = loadJSONObject("config/config.json");
-
-  USE_SEQUENCE = config.getBoolean("useSequence");
-  if (USE_SEQUENCE) {
-    JSONArray sequence = config.getJSONArray("sequence");
-    SEQUENCE_LEN = sequence.size();
-    String variablesPathName = sequence.getString(sequenceIndex);
-    JSONObject variablesPaths = loadJSONObject("config/paths/variablesPaths.json");
-    VARIABLES_PATH = variablesPaths.getString(variablesPathName);
-  } else {
-    VARIABLES_PATH = "config/defaults/variables.json";
-  }
+  JSONArray steps = config.getJSONArray("steps");
+  int repeat = config.getInt("repeat");
+  return new Sequence(steps, repeat == 0 ? 1 : repeat);
 }
 
 void clear() {
@@ -352,8 +392,8 @@ void setup() {
   size(500, 1000);
   smooth();
   physics = new VerletPhysics2D();
-  loadConfig();
-  loadVariables(VARIABLES_PATH);
+  SEQUENCE = loadSequence();
+  loadVariables(SEQUENCE);
   init();
 
   if (OUTPUT == Output.VIDEO) {
@@ -434,16 +474,18 @@ void keyPressed() {
     }
   }
   if (key == 'l') {
-    sequenceIndex = 0;
     BACKGROUND_IMAGE = null;
-    loadConfig();
+    SEQUENCE = loadSequence();
     clear();
-    loadVariables(VARIABLES_PATH);
+    loadVariables(SEQUENCE);
     init();
   }
 }
 
 void newStep() {
+  if (SEQUENCE.finished()) {
+    return;
+  }
   physics.update();
   layer1.beginDraw();
   layer1.scale(LAYER_SCALE);
@@ -452,13 +494,12 @@ void newStep() {
     renderer.render();
   }
   layer1.endDraw();
-  if (allTrailRenderersFinished() && USE_SEQUENCE) {
-    sequenceIndex++;
-    if (sequenceIndex < SEQUENCE_LEN) {
+  if (allTrailRenderersFinished()) {
+    SEQUENCE.next();
+    if (!SEQUENCE.finished()) {
       BACKGROUND_IMAGE = layer1;
-      loadConfig();
       clear();
-      loadVariables(VARIABLES_PATH);
+      loadVariables(SEQUENCE);
       init();
     }
   }

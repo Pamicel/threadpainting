@@ -1,4 +1,4 @@
 {
-  "useSequence": true,
-  "sequence": ["default"]
+  "steps": ["path7", "path9", "path8"],
+  "repeat": 10
 }
