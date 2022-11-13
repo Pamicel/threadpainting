@@ -12,7 +12,7 @@ PGraphics canvaslayer, printLayer;
 PImage BACKGROUND_IMAGE;
 
 enum Output { VIDEO, DRAW };
-enum WidthFunction {TO_SMALL, FROM_SMALL, CONSTANT};
+enum WidthFunctionName {TO_SMALL, FROM_SMALL, CONSTANT};
 
 int realScale, realHeight, realWidth;
 
@@ -131,11 +131,11 @@ void loadVariables(Sequence sequence) {
 
     String widthFunctionName = trailVariables.getString("typeOfOverallShape");
     if (widthFunctionName.equals("FROM_SMALL")) {
-      renderer.widthFunction = WidthFunction.FROM_SMALL;
+      renderer.widthFunctionName = WidthFunctionName.FROM_SMALL;
     } else if (widthFunctionName.equals("TO_SMALL")) {
-      renderer.widthFunction = WidthFunction.TO_SMALL;
+      renderer.widthFunctionName = WidthFunctionName.TO_SMALL;
     } else {
-      renderer.widthFunction = WidthFunction.CONSTANT;
+      renderer.widthFunctionName = WidthFunctionName.CONSTANT;
     }
 
     JSONArray trailColor = trailVariables.getJSONArray("trailColor");

@@ -11,7 +11,7 @@ class TrailRenderer {
   float mass;
   float strength;
   float angleVariability;
-  WidthFunction widthFunction;
+  WidthFunctionName widthFunctionName;
   int[] trailColor;
   float particleDiameterFactor;
   RenderingStep[] renderingPipeline;
@@ -83,7 +83,7 @@ class TrailRenderer {
       this.mass,
       this.strength,
       this.angleVariability,
-      this.widthFunction
+      this.widthFunctionName
     );
 
     this.instantiateRenderingPipeline(
@@ -109,7 +109,7 @@ class TrailRenderer {
       this.mass,
       this.strength,
       this.angleVariability,
-      this.widthFunction
+      this.widthFunctionName
     );
 
     this.instantiateRenderingPipeline(
