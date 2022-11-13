@@ -1,5 +1,5 @@
 {
-  "steps": ["path7", "path9", "path8"],
+  "scenes": ["path7", "path9", "path8"],
   "repeat": 10,
   "output": "DRAW",
   "videoNumFrames": 60

@@ -1,21 +1,21 @@
 class Sequence {
   int repeat;
   int repeatCounter = 0;
-  JSONArray steps;
+  JSONArray scenes;
   int stepCounter = 0;
 
   Sequence(
-    JSONArray steps,
+    JSONArray scenes,
     int repeat
   ) {
-    this.steps = steps;
+    this.scenes = scenes;
     this.repeat = repeat;
     this.repeatCounter = 0;
     this.stepCounter = 0;
   }
 
   int len() {
-    return this.steps.size();
+    return this.scenes.size();
   }
 
   void next() {
@@ -39,6 +39,6 @@ class Sequence {
   }
 
   String currentStep() {
-    return this.steps.getString(this.stepCounter);
+    return this.scenes.getString(this.stepCounter);
   }
 }

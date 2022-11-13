@@ -173,7 +173,7 @@ void loadVariables(Sequence sequence) {
 
 Sequence loadSequence() {
   JSONObject config = loadJSONObject("config/config.json");
-  JSONArray steps = config.getJSONArray("steps");
+  JSONArray scenes = config.getJSONArray("scenes");
 
   String outputType = config.getString("output");
   Output OUTPUT = Output.DRAW;
@@ -183,7 +183,7 @@ Sequence loadSequence() {
 
   int videoNumFrames = config.getInt("videoNumFrames");
   int repeat = config.getInt("repeat");
-  return new Sequence(steps, repeat == 0 ? 1 : repeat);
+  return new Sequence(scenes, repeat == 0 ? 1 : repeat);
 }
 
 void clear() {
@@ -359,7 +359,7 @@ void newStep() {
   physics.update();
   canvaslayer.beginDraw();
   canvaslayer.scale(LAYER_SCALE);
-  // rendering steps
+  // rendering
   for (TrailRenderer renderer: TRAIL_RENDERERS) {
     renderer.render();
   }
