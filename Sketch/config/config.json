@@ -2,5 +2,8 @@
   "scenes": ["path7", "path9", "path8"],
   "repeat": 10,
   "output": "DRAW",
-  "videoNumFrames": 60
+  "videoNumFrames": 60,
+  "curvePathsFile": "config/paths/curvePaths.json",
+  "imagePathsFile": "config/paths/imagePaths.json",
+  "scenePathsFile": "config/paths/scenePaths.json"
 }

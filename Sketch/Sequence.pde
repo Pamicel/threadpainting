@@ -1,17 +1,20 @@
+class SequenceConfig {
+  SequenceConfig() {}
+  JSONArray scenes;
+  int repeat;
+}
+
 class Sequence {
   int repeat;
   int repeatCounter = 0;
   JSONArray scenes;
-  int stepCounter = 0;
+  int sceneIndexCounter = 0;
 
-  Sequence(
-    JSONArray scenes,
-    int repeat
-  ) {
-    this.scenes = scenes;
-    this.repeat = repeat;
+  Sequence(SequenceConfig config) {
+    this.scenes = config.scenes;
+    this.repeat = config.repeat;
     this.repeatCounter = 0;
-    this.stepCounter = 0;
+    this.sceneIndexCounter = 0;
   }
 
   int len() {
@@ -19,9 +22,9 @@ class Sequence {
   }
 
   void next() {
-    this.stepCounter++;
-    if (this.stepCounter == this.len()) {
-      this.stepCounter = 0;
+    this.sceneIndexCounter++;
+    if (this.sceneIndexCounter == this.len()) {
+      this.sceneIndexCounter = 0;
       this.repeatCounter++;
     }
   }
@@ -30,15 +33,15 @@ class Sequence {
     return this.repeatCounter == this.repeat;
   }
 
-  boolean isAtFirstStep() {
-    return this.stepCounter == 0;
+  boolean isAtFirstScene() {
+    return this.sceneIndexCounter == 0;
   }
 
   boolean isAtFirstRepeat() {
     return this.repeatCounter == 0;
   }
 
-  String currentStep() {
-    return this.scenes.getString(this.stepCounter);
+  String currentScene() {
+    return this.scenes.getString(this.sceneIndexCounter);
   }
 }

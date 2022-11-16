@@ -1,6 +1,6 @@
 {
   "seed": 2,
-  "stepsPerDraw": 30,
+  "updatesPerFrame": 30,
 
   "output": "DRAW",
   "videoNumFrames": 30,

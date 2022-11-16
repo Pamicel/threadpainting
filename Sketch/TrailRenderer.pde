@@ -2,27 +2,41 @@ interface RenderingStep {
   void render();
 };
 
-class TrailRenderer {
-  float minSpeedFactor;
-  float maxSpeedFactor;
+class TrailRendererConfig {
+  // Trajectory
+  // Trajectory shape
+  WidthFunctionName widthFunctionName;
   float minRadiusFactor;
   float maxRadiusFactor;
-  int nLinks;
-  float mass;
-  float strength;
   float angleVariability;
-  WidthFunctionName widthFunctionName;
-  int[] trailColor;
-  float particleDiameterFactor;
-  RenderingStep[] renderingPipeline;
-  String[] renderingStepNames;
-  ToxiColorTrail colorTrail;
   Vec2D[] headPositions;
   Vec2D[] tailPositions;
   Vec2D[] singleCurve;
+  // Trajectory behaviour
+  float minSpeedFactor;
+  float maxSpeedFactor;
+  // Brush
+  int nLinks;
+  float mass;
+  float strength;
+  int[] trailColor;
+  float particleDiameterFactor;
+  String[] renderingStepNames;
+  // RandomSeed
+  int seed;
 
-  TrailRenderer() {
+  TrailRendererConfig() {
     this.trailColor = new int[3];
+  }
+}
+
+class TrailRenderer {
+  RenderingStep[] renderingPipeline;
+  TrailRendererConfig config;
+  ToxiColorTrail colorTrail;
+
+  TrailRenderer(TrailRendererConfig config) {
+    this.config = config;
   }
 
   void clear() {
@@ -45,23 +59,31 @@ class TrailRenderer {
     return this.colorTrail.finished();
   }
 
+  private boolean isStrok() {
+    return (
+      this.config.headPositions != null &&
+      this.config.tailPositions != null
+    );
+  }
+
+  private boolean isSingleCurve() {
+    return this.config.singleCurve != null;
+  }
+
   void init(
     VerletPhysics2D physics,
     int realScale,
     PGraphics layer
   ) {
-    if (this.headPositions != null && this.tailPositions != null) {
+    if (this.isStrok()) {
       initFromStrok(
         physics,
-        this.headPositions,
-        this.tailPositions,
         realScale,
         layer
       );
-    } else if (this.singleCurve != null) {
+    } else if (this.isSingleCurve()) {
       initFromCurve(
         physics,
-        this.singleCurve,
         realScale,
         layer
       );
@@ -70,118 +92,110 @@ class TrailRenderer {
 
   private void initFromCurve(
     VerletPhysics2D physics,
-    Vec2D[] curve,
     int realScale,
     PGraphics layer
   ) {
+    TrailRendererConfig config = this.config;
     this.colorTrail = ToxiColorTrailFromCurve(
       physics,
-      curve,
-      this.minSpeedFactor * realScale, this.maxSpeedFactor * realScale,
-      this.minRadiusFactor * realScale, this.maxRadiusFactor * realScale,
-      this.nLinks,
-      this.mass,
-      this.strength,
-      this.angleVariability,
-      this.widthFunctionName
+      config.singleCurve,
+      config.minSpeedFactor * realScale, config.maxSpeedFactor * realScale,
+      config.minRadiusFactor * realScale, config.maxRadiusFactor * realScale,
+      config.nLinks,
+      config.mass,
+      config.strength,
+      config.angleVariability,
+      config.widthFunctionName
     );
 
-    this.instantiateRenderingPipeline(
-      this.renderingStepNames,
-      layer
-    );
+    this.instantiateRenderingPipeline(layer);
   }
 
   private void initFromStrok(
     VerletPhysics2D physics,
-    Vec2D[] headPositions,
-    Vec2D[] tailPositions,
     int realScale,
     PGraphics layer
   ) {
+    TrailRendererConfig config = this.config;
     this.colorTrail = ToxiColorTrailFromStrok(
       physics,
-      headPositions,
-      tailPositions,
-      this.minSpeedFactor * realScale, this.maxSpeedFactor * realScale,
-      this.minRadiusFactor * realScale, this.maxRadiusFactor * realScale,
-      this.nLinks,
-      this.mass,
-      this.strength,
-      this.angleVariability,
-      this.widthFunctionName
+      config.headPositions,
+      config.tailPositions,
+      config.minSpeedFactor * realScale, config.maxSpeedFactor * realScale,
+      config.minRadiusFactor * realScale, config.maxRadiusFactor * realScale,
+      config.nLinks,
+      config.mass,
+      config.strength,
+      config.angleVariability,
+      config.widthFunctionName
     );
 
-    this.instantiateRenderingPipeline(
-      this.renderingStepNames,
-      layer
-    );
+    this.instantiateRenderingPipeline(layer);
   }
 
-  void instantiateRenderingPipeline(
-    String[] renderingStepNames,
-    PGraphics layer
-  ) {
-    this.renderingPipeline = new RenderingStep[this.renderingStepNames.length];
-    TrailRenderer renderer = this;
-    for (int stepIndex = 0; stepIndex < renderingStepNames.length; stepIndex++) {
-      if (renderingStepNames[stepIndex].equals("beads")) {
+  void instantiateRenderingPipeline(PGraphics layer) {
+    TrailRendererConfig config = this.config;
+    int numRenderingSteps = config.renderingStepNames.length;
+    this.renderingPipeline = new RenderingStep[numRenderingSteps];
+
+    for (int stepIndex = 0; stepIndex < numRenderingSteps; stepIndex++) {
+      if (config.renderingStepNames[stepIndex].equals("beads")) {
         renderingPipeline[stepIndex] = new RenderingStep() {
           void render() {
             colorTrail.colorString.display(
               layer,
-              renderer.particleDiameterFactor,
-              renderer.trailColor
+              config.particleDiameterFactor,
+              config.trailColor
             );
           }
         };
-      } else if (renderingStepNames[stepIndex].equals("beadsWithoutExtremities")) {
+      } else if (config.renderingStepNames[stepIndex].equals("beadsWithoutExtremities")) {
         renderingPipeline[stepIndex] = new RenderingStep() {
           void render() {
             colorTrail.colorString.displayWithoutExtremities(
               layer,
-              renderer.particleDiameterFactor,
-              renderer.trailColor
+              config.particleDiameterFactor,
+              config.trailColor
             );
           }
         };
-      } else if (renderingStepNames[stepIndex].equals("beadsOneInTwo")) {
+      } else if (config.renderingStepNames[stepIndex].equals("beadsOneInTwo")) {
         renderingPipeline[stepIndex] = new RenderingStep() {
           void render() {
             colorTrail.colorString.displayOneInTwo(
               layer,
-              renderer.particleDiameterFactor,
-              renderer.trailColor
+              config.particleDiameterFactor,
+              config.trailColor
             );
           }
         };
-      } else if (renderingStepNames[stepIndex].equals("beadsStraight")) {
+      } else if (config.renderingStepNames[stepIndex].equals("beadsStraight")) {
         renderingPipeline[stepIndex] = new RenderingStep() {
           void render() {
             colorTrail.colorString.displayStraight(
               layer,
-              renderer.particleDiameterFactor,
-              renderer.trailColor
+              config.particleDiameterFactor,
+              config.trailColor
             );
           }
         };
-      } else if (renderingStepNames[stepIndex].equals("skeleton")) {
+      } else if (config.renderingStepNames[stepIndex].equals("skeleton")) {
         renderingPipeline[stepIndex] = new RenderingStep() {
           void render() {
             colorTrail.colorString.displaySkeleton(
               layer,
-              renderer.particleDiameterFactor,
-              renderer.trailColor
+              config.particleDiameterFactor,
+              config.trailColor
             );
           }
         };
-      } else if (renderingStepNames[stepIndex].equals("displayPoints")) {
+      } else if (config.renderingStepNames[stepIndex].equals("displayPoints")) {
         renderingPipeline[stepIndex] = new RenderingStep() {
           void render() {
             colorTrail.colorString.displayPoints(
               layer,
-              renderer.particleDiameterFactor,
-              renderer.trailColor
+              config.particleDiameterFactor,
+              config.trailColor
             );
           }
         };
